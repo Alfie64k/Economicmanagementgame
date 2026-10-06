@@ -59,6 +59,7 @@ public sealed class LogEntry
     public string Country = "";
     public string Kind = "";    // news | policy | event | crisis | advisor
     public string Text = "";
+    public int Sev;             // advisers only: 0 info, 1 warning, 2 alert
 }
 
 public sealed class LoggedCommand
