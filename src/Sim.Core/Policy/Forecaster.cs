@@ -1,3 +1,4 @@
+using System.Threading;
 using Sim.Core.Engine;
 using Sim.Core.Model;
 using Sim.Core.Util;
@@ -15,6 +16,22 @@ public sealed class PreviewSeries
     public string Metric = "";
     public double[] Baseline = Array.Empty<double>(), WithPolicy = Array.Empty<double>();
     public double Final => WithPolicy.Length > 0 ? WithPolicy[^1] - Baseline[^1] : 0;
+    /// <summary>Value <paramref name="month"/> months ahead (1-based) with the change / under carry-on, and the difference between them.</summary>
+    public double At(int month) => WithPolicy[month - 1];
+    public double BaselineAt(int month) => Baseline[month - 1];
+    public double DeltaAt(int month) => WithPolicy[month - 1] - Baseline[month - 1];
+}
+
+/// <summary>Result of <see cref="Forecaster.PreviewRate"/>: expected paths with the policy rate pinned at <see cref="Target"/> versus carrying on.</summary>
+public sealed class RatePreview
+{
+    public double Target;
+    public bool Applied, Pegged, Cancelled;
+    public string Note = "";
+    public List<PreviewSeries> Series = new();
+    public PreviewSeries S(string metric) => Series.First(x => x.Metric == metric);
+    /// <summary>First month in which inflation is within 0.25pp of its target under the pinned rate (null if not within the horizon), and the same under carry-on.</summary>
+    public int? MonthsToTarget, BaselineMonthsToTarget;
 }
 
 /// <summary>Monte-Carlo fan charts and deterministic what-if previews, run on throw-away clones of the world.</summary>
@@ -26,8 +43,12 @@ public static class Forecaster
     {
         "growth" => c.GdpGrowth, "inflation" => c.Inflation, "unemployment" => c.Unemp, "debt" => c.DebtToGdp,
         "deficit" => c.DeficitToGdp, "approval" => c.Approval, "policyRate" => c.PolicyRate, "yield" => c.Yield10,
-        "gdp" => c.Gdp, _ => throw new ArgumentException("metric " + metric),
+        "gdp" => c.Gdp, "gap" => c.Gap, "fx" => c.Fx, "realRate" => c.RealRate, "inflExp" => c.InflExp,
+        _ => throw new ArgumentException("metric " + metric),
     };
+
+    public static readonly int[] Horizons = { 3, 6, 12 };
+    public static readonly string[] RateMetrics = { "inflation", "unemployment", "gap", "fx", "policyRate", "realRate", "inflExp" };
 
     /// <summary>Compact JSON copy of the world (history and logs omitted). Take it on the main thread, then hand it to a worker.</summary>
     public static string Snapshot(Simulation sim)
@@ -108,6 +129,37 @@ public static class Forecaster
                 res.Series[k].Baseline[t] = Read(a.World.Player, metrics[k]);
                 res.Series[k].WithPolicy[t] = Read(b.World.Player, metrics[k]);
             }
+        }
+        return res;
+    }
+
+    /// <summary>
+    /// Expected path of the player's economy over the next <paramref name="months"/> if the central bank pins its rate at <paramref name="target"/>,
+    /// against carrying on (the rule when it is in charge, the current pin otherwise). Deterministic: no noise and no random events, so it shows the
+    /// policy's own effect and is not a forecast of what will actually happen. Any staged plan is left out of both paths.
+    /// </summary>
+    public static RatePreview PreviewRate(string snapshot, double target, int months = 12, string[]? metrics = null, CancellationToken ct = default)
+    {
+        metrics ??= RateMetrics;
+        var a = FromSnapshot(snapshot); var b = FromSnapshot(snapshot);
+        foreach (var s in new[] { a, b }) { s.World.Stochastic = false; s.World.Events = false; }
+        var res = new RatePreview { Target = target, Pegged = b.World.Player.Regime == FxRegime.Peg };
+        b.World.Player.PoliticalCapital = 100;                                    // price is shown separately; here only the effect matters
+        res.Applied = b.Execute(Command.SetRate(b.World.PlayerId, true, target)).Ok;
+        res.Note = res.Pegged ? "Under a peg the policy rate follows the anchor currency, so pinning it has little effect." : "";
+        res.Series = metrics.Select(m => new PreviewSeries { Metric = m, Baseline = new double[months], WithPolicy = new double[months] }).ToList();
+        double tgt = a.World.Player.InflTarget;
+        for (int t = 0; t < months; t++)
+        {
+            if (ct.IsCancellationRequested) { res.Cancelled = true; return res; }
+            a.Tick(); b.Tick();
+            for (int k = 0; k < metrics.Length; k++)
+            {
+                res.Series[k].Baseline[t] = Read(a.World.Player, metrics[k]);
+                res.Series[k].WithPolicy[t] = Read(b.World.Player, metrics[k]);
+            }
+            if (res.MonthsToTarget == null && Math.Abs(b.World.Player.Inflation - tgt) < 0.0025) res.MonthsToTarget = t + 1;
+            if (res.BaselineMonthsToTarget == null && Math.Abs(a.World.Player.Inflation - tgt) < 0.0025) res.BaselineMonthsToTarget = t + 1;
         }
         return res;
     }

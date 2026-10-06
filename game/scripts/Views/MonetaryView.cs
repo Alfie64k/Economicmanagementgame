@@ -21,7 +21,8 @@ public partial class MonetaryView : View
     readonly Label _staged = UI.Lbl("", 13, Pal.Warn, true, HorizontalAlignment.Left, true);
     readonly AppSlider _rate = new();
     readonly OptionButton _regime = new();
-    bool _init;
+    readonly RatePreviewPanel _rp = new();
+    bool _init, _touched; int _sig = -1;
 
     public MonetaryView()
     {
@@ -34,6 +35,7 @@ public partial class MonetaryView : View
         ctl.AddChild(UI.H2("Interest-rate stance"));
         ctl.AddChild(_status);
         _rate.Setup(-0.01, 0.4, 0.0025, 0.03, v => UI.Pct(v, 2)); _rate.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        _rate.Changed += v => { _touched = true; _rp.Request(v, Game.Player.PolicyRate); };
         ctl.AddChild(UI.HBox(10, UI.Lbl("Target rate", 14, Pal.Dim), _rate));
         ctl.AddChild(UI.HBox(10,
             UI.Btn("Add rate pin to plan", () => Do(Command.SetRate(Game.Player.Id, true, _rate.Value)), true),
@@ -41,6 +43,7 @@ public partial class MonetaryView : View
         ctl.AddChild(_staged);
         ctl.AddChild(UI.Dim("The rate moves at most 0.5pp a month toward your target. Real rates drive investment, saving and the exchange rate with a lag.", 13, true));
         page.AddChild(UI.Card(ctl));
+        page.AddChild(UI.Card(_rp));
 
         var fx = UI.VBox(8);
         fx.AddChild(UI.H2("Exchange-rate regime"));
@@ -51,6 +54,10 @@ public partial class MonetaryView : View
         fx.AddChild(_result);
         page.AddChild(UI.Card(fx));
     }
+
+    /// <summary>Self-test hook: move the slider as the player would.</summary>
+    public void MoveRateForTest(double delta) => _rate.SetValue(_rate.Value + delta, true);
+    public RatePreview? PreviewResult => _rp.Last;
 
     void Do(Command cmd) { PlanUi.Stage(cmd, t => _result.Text = t); Refresh(); }
 
@@ -63,7 +70,20 @@ public partial class MonetaryView : View
         if (!Game.Running) return;
         var c = Game.Player; var w = Game.World; var h = Game.History(c.Id);
         double rule = c.NaturalRate + c.Inflation + MacroEngine.InflationResponse(c.Inflation - c.InflTarget) + Math.Clamp(c.Gap, -0.15, 0.10);
-        if (!_init) { _init = true; _rate.Setup(-0.01, 0.4, 0.0025, Math.Round(c.PolicyRate / 0.0025) * 0.0025, v => UI.Pct(v, 2)); _regime.Selected = (int)c.Regime; }
+        double snapped = Math.Round(c.PolicyRate / 0.0025) * 0.0025;
+        if (!_init)
+        {
+            _init = true; double max = Math.Max(0.4, Math.Ceiling(Math.Max(c.PolicyRate, rule) * 1.5 / 0.05) * 0.05);   // high-rate countries need a longer scale
+            _rate.Setup(-0.01, max, 0.0025, Game.Staged("rate") is { Id: "Manual" } sr0 ? sr0.Value : snapped, v => UI.Pct(v, 2)); _regime.Selected = (int)c.Regime;
+        }
+        _rate.Baseline = c.PolicyRate;
+        int sig = w.Month * 8 + (int)c.RateMode * 4 + (int)c.Regime;
+        if (sig != _sig)
+        {
+            bool first = _sig < 0; _sig = sig;
+            if (!_touched && Game.Staged("rate") == null) _rate.SetValue(snapped);   // follow the live rate until the player takes hold of the slider
+            _rp.Request(_rate.Value, c.PolicyRate, first);
+        }
         foreach (var ch in _tiles.GetChildren().ToList()) ch.QueueFree();
         void T(string t, string v, string sub, Color? col = null) { var k = new KpiTile(t) { SizeFlagsHorizontal = SizeFlags.ExpandFill }; k.Set(v, sub, col, Array.Empty<double>()); _tiles.AddChild(k); }
         T("Policy rate", UI.Pct(c.PolicyRate, 2), c.RateMode == RateMode.Manual ? "pinned by you" : "rule-based");

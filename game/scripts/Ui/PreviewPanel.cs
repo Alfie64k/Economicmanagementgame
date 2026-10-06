@@ -15,7 +15,7 @@ public partial class PreviewPanel : VBoxContainer
     readonly Label _status = UI.Dim("Preview shows the effect of your plan and draft against carrying on unchanged.", 13, true);
     readonly GridContainer _grid = new() { Columns = 3 };
     public int Months = 60;
-    int _runId;
+    readonly AsyncRun<Forecaster.PlanPreview> _run = new();
 
     public PreviewPanel()
     {
@@ -29,9 +29,8 @@ public partial class PreviewPanel : VBoxContainer
     {
         if (!Game.Running || cmds.Count == 0) { _status.Text = "Nothing to preview: stage or draft a change first."; Clear(); return; }
         _status.Text = "Simulating…"; Clear();
-        int id = ++_runId; var snap = Forecaster.Snapshot(Game.Sim!); int months = Months; int start = Game.World.StartYear; int m0 = Game.World.Month;
-        Task.Run(() => Forecaster.PreviewPlan(snap, cmds, months)).ContinueWith(t =>
-            Callable.From(() => { if (id == _runId && IsInsideTree()) Show(t.Result, start, m0); }).CallDeferred());
+        var snap = Forecaster.Snapshot(Game.Sim!); int months = Months; int start = Game.World.StartYear; int m0 = Game.World.Month;
+        _run.Start(this, ct => Forecaster.PreviewPlan(snap, cmds, months), r => Show(r, start, m0), ex => { Clear(); _status.Text = "The preview could not be computed: " + ex.Message; });
     }
 
     void Clear() { foreach (var c in _grid.GetChildren()) c.QueueFree(); }

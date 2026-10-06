@@ -5,6 +5,7 @@
 * Consistent interaction states across the UI: hover, selected, selected-and-hovered, pressed and keyboard focus are distinct, so the current page, row, chip and tile are always marked and the item under the cursor gets a further cue (fixes highlights that never rendered on flat buttons).
 * Map: the hover tooltip now draws above the country polygons and the minimap; hovered countries get an outline and a pointer cursor.
 * Turn plan: actions are staged and applied only when the turn is played. New End turn button (Enter), a Plan tray with per-item cost, removal and a combined 5-year preview, and a political-capital bar that shows the pending spend and the level after regeneration. Political capital, the news feed and adviser notes now change only when the turn is played. Replace-by-key staging, no-op detection, cumulative affordability and plan-aware previews are covered by tests.
+* Monetary: the rate slider now previews its effect on inflation, unemployment, the output gap and the currency at 3 months, 6 months and 1 year against carrying on, with a chart, time-to-target and the political-capital price. Runs off the main thread with a 250 ms debounce. Also fixes the Monetary page overflowing the window at 1600×900 and the slider range for high-rate countries.
 * Keys: Tab / Shift+Tab move keyboard focus; Ctrl+Tab, PageDown and PageUp change page.
 
 ## 1.0.0-rc1

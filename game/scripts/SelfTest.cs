@@ -48,6 +48,15 @@ public partial class SelfTest : Node
                     EconGame.App.Draft.Set(Sim.Core.Model.BudgetLine.Infrastructure, c.Budget[(int)Sim.Core.Model.BudgetLine.Infrastructure] + 0.01, c.Budget[(int)Sim.Core.Model.BudgetLine.Infrastructure]);
                     ((EconGame.Views.BudgetView)shell.Current!).RunPreview(); await Frames(120);
                 }
+                if (page == "Monetary")
+                {
+                    var mo = (EconGame.Views.MonetaryView)shell.Current!; await Frames(60);
+                    mo.MoveRateForTest(0.02); await Frames(90);
+                    var rp = mo.PreviewResult ?? throw new Exception("the rate preview produced no result");
+                    if (!(Math.Abs(rp.Target - (Game.Player.PolicyRate + 0.02)) < 0.003)) throw new Exception("the rate preview is not for the slider value");
+                    if (!(rp.S("inflation").DeltaAt(12) < 0)) throw new Exception("a rate hike should lower inflation within a year in the preview");
+                    var msc = mo.GetChildren().OfType<ScrollContainer>().First(); msc.ScrollVertical = 700; await Frames(4); Shot(shots, "05b_monetary_forecast"); msc.ScrollVertical = 0; await Frames(2);
+                }
                 if (page == "Policies") { Game.Player.PoliticalCapital = 100; Game.Player.Coalition = 1; Game.Sim!.Execute(Sim.Core.Model.Command.Enact(Game.Player.Id, "rnd_tax_credits")); Game.Sim.Execute(Sim.Core.Model.Command.Enact(Game.Player.Id, "labour_flex")); await Frames(4); }
                 if (page == "Investment") { Game.Player.PoliticalCapital = 100; Game.Sim!.Execute(Sim.Core.Model.Command.StartProject(Game.Player.Id, "broadband")); Game.Sim.Execute(Sim.Core.Model.Command.StartProject(Game.Player.Id, "hsr")); Game.Sim.Execute(Sim.Core.Model.Command.SetSubsidy(Game.Player.Id, Sim.Core.Model.Sector.Manufacturing, 0.03)); for (int k = 0; k < 14; k++) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); } await Frames(5); }
                 if (page == "World map")

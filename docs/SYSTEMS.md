@@ -26,6 +26,7 @@ Plain-English companion to [MODEL.md](MODEL.md) (equations) and [PLAY.md](PLAY.m
 * **Policies:** 40 options (labour, welfare, industrial, trade, environment, regulation, ownership...). Each costs political capital, needs a vote that can fail, takes time, and has multi-channel lagged effects. Some are mutually exclusive.
 * **Investment:** 15 multi-year projects with cost overruns, plus sector subsidies. Returns are real but arrive years later.
 * **Advisers:** a rule-based cabinet (finance, central bank, trade, social policy, home affairs, chief whip, chief of staff) that deliberately pulls in different directions. They are heuristics, not oracles.
+* **Rate preview:** moving the interest-rate slider re-runs the model on a copy for twelve months, with noise and random events switched off, once with the rate pinned at the slider's value and once carrying on. The 3, 6 and 12-month table shows the policy's own effect. Activity and the currency respond first and inflation builds over the year, so the 3-month inflation effect is small by design. A peg overrides the pin and the panel says so.
 * **Forecast:** fan charts from re-running the simulation under noise; the preview panels use the same machinery on a copy of the state.
 
 ## The world

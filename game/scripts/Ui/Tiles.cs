@@ -45,6 +45,7 @@ public partial class KpiTile : PanelContainer
     public void Set(string value, string delta, Color? deltaColor, double[] history, Color? sparkColor = null)
     {
         _value.Text = value; _delta.Text = delta; _delta.AddThemeColorOverride("font_color", deltaColor ?? Pal.Dim);
+        _spark.Visible = history.Length > 1;          // tiles without a series should not reserve the sparkline's width
         _spark.Set(history, sparkColor ?? Pal.Accent);
     }
 }

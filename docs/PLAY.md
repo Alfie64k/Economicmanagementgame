@@ -61,7 +61,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 
 1. Main menu → **New game (sandbox)** → pick Germany (stable) or Brazil (more drama) → **Start as this country**. (For guided play use **Scenarios & campaign**, starting with "1. Your First Budget".)
 2. Dashboard: note GDP growth, inflation, unemployment, debt/GDP, approval. Press **Space**, speed 3, run two years.
-3. **Monetary**: switch from rule to manual, raise the policy rate 2pp; watch inflation, FX and the output gap respond with a lag.
+3. **Monetary**: drag the target-rate slider and watch the panel below it: expected inflation, unemployment, output gap and currency in 3 months, 6 months and a year, against carrying on. Add a pin to the plan, end the turn, and watch the real economy follow the same lag.
 4. **Budget**: drag a tax slider; the preview panel shows the projected effect before you commit. **Add** one cut and one spending rise **to the plan**, then open **Plan** in the top bar to review it. Nothing has happened yet: political capital, the news feed and adviser notes stay put.
 5. **Policies**: add one to the plan; it needs political capital and a legislative vote, both resolved when you end the turn.
 6. Press **End turn ▸** (Enter): the plan is applied first, then the economy moves a month, and the news feed and adviser notes update. Running the clock with Space or 1–4 applies whatever is staged on its first month.
