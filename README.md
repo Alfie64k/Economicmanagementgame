@@ -8,7 +8,7 @@ Pick a country and run its economy: tax, budget, interest-rate stance, trade and
 
 ```bash
 # simulation only (no engine needed)
-dotnet test EconGame.sln                                   # 122 unit/property/regression tests
+dotnet test EconGame.sln                                   # 138 unit/property/regression tests
 dotnet run --project src/Sim.Cli -- run --country GBR --years 30
 dotnet run --project src/Sim.Cli -- smoke --years 30       # 28 countries, stability check
 dotnet run --project src/Sim.Cli -- balance --years 15     # scripted-strategy self-play balance report

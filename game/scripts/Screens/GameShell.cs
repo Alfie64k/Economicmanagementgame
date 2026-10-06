@@ -25,6 +25,10 @@ public partial class GameShell : Control
     Label _date = new(), _country = new(), _pcLabel = new(), _score = new(), _alert = new();
     readonly PcBar _pcBar = new();
     Button _endTurn = new(), _planBtn = new();
+    MenuButton _runTo = new();
+    Label _auto = new();
+    string _pauseReason = "";
+    int _cabinetSig = -1; int _cabinetCount;
     VBoxContainer? _planBox;
     readonly Dictionary<int, Button> _speedBtns = new();
     VBoxContainer _feed = new();
@@ -50,6 +54,9 @@ public partial class GameShell : Control
         _pages.Add(("Society", () => new SocietyView()));
         _pages.Add(("Forecast", () => new ForecastView()));
         _pages.Add(("World map", () => new WorldMapView()));
+        _pages.Add(("Cabinet", () => new CabinetView()));
+        _pages.Add(("Rankings", () => new RankingsView()));
+        _pages.Add(("Journal", () => new JournalView()));
         _pages.Add(("Report", () => new ReportView()));
 
         var root = UI.VBox(0); root.SetAnchorsPreset(LayoutPreset.FullRect); AddChild(root);
@@ -65,6 +72,7 @@ public partial class GameShell : Control
         Game.DecisionPending += ShowDecision;
         Game.Ended += ShowEnd;
         Game.Ticked += MarkDirty; Game.Changed += MarkDirty; Game.PlanChanged += OnPlanChanged; Game.PlanApplied += OnPlanApplied;
+        Game.Paused += OnAutoPaused; Game.YearEnded += OnYearEnded;
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
         Navigate("Dashboard");
         UpdateTop(); UpdateFeed(true);
@@ -72,7 +80,7 @@ public partial class GameShell : Control
         if (Game.Scenario != null) ShowBriefing();
     }
 
-    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; }
+    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; Game.Paused -= OnAutoPaused; Game.YearEnded -= OnYearEnded; }
 
     // ---------------- layout ----------------
     Control BuildTopBar()
@@ -92,11 +100,18 @@ public partial class GameShell : Control
             b.TooltipText = i == 0 ? "Pause (Space)" : $"Speed {i} (key {i})";
         }
         h.AddChild(speeds);
+        _runTo = new MenuButton { Text = "Run to ▾", FocusMode = FocusModeEnum.All, MouseDefaultCursorShape = CursorShape.PointingHand, ThemeTypeVariation = StateStyles.Chip, Flat = false };
+        _runTo.TooltipText = "Let the clock run on by itself until a date, stopping early if something needs you.";
+        var pop = _runTo.GetPopup();
+        pop.AddItem("End of this quarter", 0); pop.AddItem("End of this year", 1); pop.AddItem("Next election", 2); pop.AddItem("One year from now", 3);
+        pop.IdPressed += id => RunTo((int)id);
+        h.AddChild(_runTo);
         _planBtn = UI.Btn("Plan · empty", ShowPlan, false, 0);
         _endTurn = UI.Btn("End turn ▸", EndTurn, true, 0);
         _endTurn.TooltipText = "Play one month (Enter). Your plan is applied first, then the economy moves.";
         h.AddChild(_planBtn); h.AddChild(_endTurn);
         _ticker = UI.Lbl("", 13, Pal.Dim); _ticker.ClipText = true; _ticker.CustomMinimumSize = new Vector2(120, 0); _ticker.SizeFlagsHorizontal = SizeFlags.ExpandFill; h.AddChild(_ticker);
+        _auto = Cards.Chip("AUTOPILOT", Pal.Series[2]); _auto.Visible = false; _auto.TooltipText = "The cabinet is running tax, spending and rates. Open the Cabinet page to take control back."; h.AddChild(_auto);
         _alert = UI.Lbl("", 14, Pal.Warn, true); h.AddChild(_alert);
         var pcBox = UI.VBox(2); _pcLabel = UI.Lbl("Political capital", 12, Pal.Dim);
         _pcBar.CustomMinimumSize = new Vector2(180, 10);
@@ -174,7 +189,44 @@ public partial class GameShell : Control
     void SetSpeed(int s)
     {
         if (Game.World.Decisions.Count > 0 || Game.World.GameOver) { UpdateTop(); return; }
+        if (s == 0) Game.StopRun();
+        if (s != 0) _pauseReason = "";
         Game.Speed = s; UpdateTop();
+    }
+
+    void RunTo(int what)
+    {
+        if (!Game.Running || _modal != null || Game.World.Decisions.Count > 0 || Game.World.GameOver) return;
+        var w = Game.World; int target;
+        switch (what)
+        {
+            case 0: target = RunTargets.QuarterEnd(w.Month); break;
+            case 1: target = RunTargets.YearEnd(w.Month); break;
+            case 2:
+                if (RunTargets.NextElection(w) is not int el) { Toast("There is no election to run to.", Pal.Warn); return; }
+                target = el; break;
+            default: target = w.Month + 12; break;
+        }
+        _pauseReason = ""; Game.StartRunTo(target); UpdateTop();
+    }
+
+    void OnAutoPaused(string why)
+    {
+        _pauseReason = why; UpdateTop();
+        Toast("Paused: " + why, Pal.Warn);
+    }
+
+    void OnYearEnded(int month)
+    {
+        if (!Settings.AnnualReview || Game.SuppressModals || _modal != null || Game.World.Decisions.Count > 0) return;
+        var r = Journal.Review(Game.World, month); if (r == null) return;
+        ShowYearReview(r);
+    }
+
+    public void ShowYearReview(YearReview r)
+    {
+        var box = YearReviewPanel.Build(r, Game.World, () => { Close(); Navigate("Journal"); }, Close);
+        Overlay(box, 760);
     }
 
     // ---------------- loop ----------------
@@ -216,10 +268,26 @@ public partial class GameShell : Control
         }
         UpdatePlanReadouts();
         var sc = Scorer.Compute(w, c); _score.Text = $"{sc.Grade} {sc.Total:0}";
-        _alert.Text = w.Decisions.Count > 0 ? "⚠ Decision required" : Game.Speed == 0 ? "Paused" : "";
+        _alert.Text = w.Decisions.Count > 0 ? "⚠ Decision required" : Game.Speed == 0 ? (_pauseReason != "" ? "⏸ " + Short(_pauseReason) : "Paused") : Game.RunTo > 0 ? $"▶ to {Game.World.StartYear + (Game.RunTo - 1) / 12}-{(Game.RunTo - 1) % 12 + 1:D2}" : "";
+        _alert.TooltipText = _pauseReason;
+        _auto.Visible = c.Autopilot;
+        UpdateCabinetBadge(w, c);
         var last = w.Log.LastOrDefault(l => (l.Country == w.PlayerId || l.Country == "WORLD") && l.Kind is "event" or "crisis" or "news");
         _ticker.Text = last == null ? "" : "▸ " + last.Text;
         CheckHints(w);
+    }
+
+    static string Short(string t) => t.Length <= 46 ? t : t[..45] + "…";
+
+    void UpdateCabinetBadge(World w, CountryState c)
+    {
+        int sig = w.Month * 1000 + Game.Snoozed.Count;
+        if (sig != _cabinetSig)
+        {
+            _cabinetSig = sig;
+            _cabinetCount = Advisors.Generate(w, c).Count(n => n.Severity >= Severity.Warning && !(Game.Snoozed.TryGetValue(c.Id + ":" + n.Key, out var until) && until > w.Month));
+        }
+        if (_navBtns.TryGetValue("Cabinet", out var b)) b.Text = _cabinetCount > 0 ? $"Cabinet  ·  {_cabinetCount}" : "Cabinet";
     }
 
     void UpdateFeed(bool force)
@@ -417,7 +485,7 @@ public partial class GameShell : Control
         }
         box.AddChild(UI.Lbl($"Final score {card.Total:0} — grade {card.Grade}", 20, Pal.Accent, true));
         box.AddChild(UI.Dim($"Prosperity {card.Prosperity:0} · Living standards {card.Living:0} · Stability {card.Stability:0} · Sustainability {card.Sustainability:0} · Resilience {card.Resilience:0}", 13, true));
-        box.AddChild(UI.HBox(10, UI.Btn("View report", () => { Close(); Navigate("Report"); }, true), UI.Btn("Main menu", () => { Game.Quit(); Main.Instance!.ShowMainMenu(); })));
+        box.AddChild(UI.HBox(10, UI.Btn("View report", () => { Close(); Navigate("Report"); }, true), UI.Btn("View journal", () => { Close(); Navigate("Journal"); }), UI.Btn("Main menu", () => { Game.Quit(); Main.Instance!.ShowMainMenu(); })));
         Overlay(box);
     }
 
@@ -427,7 +495,7 @@ public partial class GameShell : Control
         box.AddChild(UI.H1("How to play"));
         foreach (var line in new[]
         {
-            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help",
+            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Run to ▾ — let the clock run to a date · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help",
             "Dashboard: click a headline tile to see why it moved. Hover for a quick explanation.",
             "Budget: drag sliders to draft changes, preview five years ahead, then enact. Cuts cost more political capital than rises.",
             "Policies and Investment: reforms and projects take years; the legislature may refuse and projects can overrun.",

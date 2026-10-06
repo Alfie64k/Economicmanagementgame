@@ -12,6 +12,7 @@ public sealed class BarItem
     public Color Color = Colors.White;
     public string? Text;          // custom value text
     public string? Tooltip;
+    public bool Emphasis;         // drawn with an outline and bold label (the player's own row, a chosen rival)
 }
 
 /// <summary>Horizontal bars; with Diverging, bars extend left (negative) or right (positive) from a centre line.</summary>
@@ -24,6 +25,11 @@ public partial class BarList : Control
     public int RowHeight = 24;
     public int LabelWidth = 150;
 
+    /// <summary>Rows can be clicked (set by pages that use the list as a picker).</summary>
+    public bool Clickable;
+    public event Action<int>? Picked;
+    int _hover = -1;
+
     public BarList() { MouseFilter = MouseFilterEnum.Pass; }
 
     public void Set(IEnumerable<BarItem> items) { Items = items.ToList(); CustomMinimumSize = new Vector2(200, Items.Count * RowHeight + 4); QueueRedraw(); }
@@ -34,7 +40,19 @@ public partial class BarList : Control
         {
             int i = (int)(m.Position.Y / RowHeight);
             TooltipText = i >= 0 && i < Items.Count ? Items[i].Tooltip ?? "" : "";
+            int h = Clickable && i >= 0 && i < Items.Count ? i : -1;
+            if (h != _hover) { _hover = h; MouseDefaultCursorShape = h >= 0 ? CursorShape.PointingHand : CursorShape.Arrow; QueueRedraw(); }
         }
+        else if (Clickable && e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
+        {
+            int i = (int)(mb.Position.Y / RowHeight);
+            if (i >= 0 && i < Items.Count) Picked?.Invoke(i);
+        }
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationMouseExit && _hover != -1) { _hover = -1; QueueRedraw(); }
     }
 
     public override void _Draw()
@@ -46,7 +64,9 @@ public partial class BarList : Control
         for (int i = 0; i < Items.Count; i++)
         {
             var it = Items[i]; float y = i * RowHeight;
-            DrawString(font, new Vector2(0, y + RowHeight * 0.68f), it.Label, HorizontalAlignment.Left, LabelWidth - 8, fs, Pal.Dim);
+            if (i == _hover) DrawRect(new Rect2(0, y + 1, Size.X, RowHeight - 2), Pal.Hover);
+            if (it.Emphasis) DrawRect(new Rect2(0, y + 1, Size.X, RowHeight - 2), new Color(Pal.Accent, 0.14f));
+            DrawString(font, new Vector2(0, y + RowHeight * 0.68f), (it.Emphasis ? "▸ " : "") + it.Label, HorizontalAlignment.Left, LabelWidth - 8, fs, it.Emphasis ? Pal.Text : Pal.Dim);
             float bh = RowHeight - 9;
             DrawRect(new Rect2(x0, y + 4, w, bh), new Color(1, 1, 1, 0.04f));
             if (Diverging)

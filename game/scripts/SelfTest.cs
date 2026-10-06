@@ -22,6 +22,7 @@ public partial class SelfTest : Node
         string country = Arg("--country", "GBR");
         int months = int.Parse(Arg("--months", "30"));
         var main = Main.Instance!;
+        Game.SuppressModals = true;   // the year-in-review modal would block the scripted walk; it is exercised explicitly below
 
         try
         {
@@ -29,13 +30,14 @@ public partial class SelfTest : Node
             main.ShowMainMenu(); await Frames(3); Shot(shots, "00_menu");
             main.ShowCountrySelect(); await Frames(4); Shot(shots, "01_select");
             main.ShowScenarios(); await Frames(3); Shot(shots, "02_scenarios");
+            main.ShowSettings(() => { }); await Frames(4); Shot(shots, "02b_settings");
             Game.NewGame(country, Difficulty.Sandbox, 7);
             main.ShowGame(); await Frames(3);
             var shell = (GameShell)main.GetChildren().OfType<GameShell>().First();
             for (int i = 0; i < months; i++) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); }
             await Frames(3);
             int n = 3;
-            foreach (var page in new[] { "Dashboard", "Budget", "Monetary", "Policies", "Investment", "Sectors", "Trade", "Society", "Forecast", "World map", "Report" })
+            foreach (var page in new[] { "Dashboard", "Budget", "Monetary", "Policies", "Investment", "Sectors", "Trade", "Society", "Forecast", "World map", "Cabinet", "Rankings", "Journal", "Report" })
             {
                 foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);
                 shell.DismissModal();
@@ -108,10 +110,14 @@ public partial class SelfTest : Node
                 if (page == "Trade") { Game.Sim!.Execute(Sim.Core.Model.Command.Tariff(Game.Player.Id, "DEU", 0.1)); for (int k = 0; k < 12; k++) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); } await Frames(6); }
                 Shot(shots, $"{n++:00}_{page.Replace(' ', '_').ToLower()}");
             }
+            await Cabinet(shell, shots);
+            await RunControls(shell, shots);
             // real-time loop: speed 4 must advance the sim
             shell.DismissModal(); shell.Navigate("Dashboard");
+            int savedTriggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
             int m0 = Game.World.Month; Game.Speed = 4;
             for (int i = 0; i < 150 && Game.Speed > 0; i++) { await Frames(1); foreach (var d in Game.World.Decisions.ToList()) { Game.Sim!.Resolve(d.Id, d.DefaultChoice); shell.DismissModal(); Game.Speed = 4; } }
+            Settings.PauseTriggers = savedTriggers;
             if (Game.World.Month < m0 + 6) throw new Exception($"speed loop advanced only {Game.World.Month - m0} months");
             // save / load round-trip
             string hash = Game.Sim!.StateHash();
@@ -216,6 +222,79 @@ public partial class SelfTest : Node
         if (mv.SelectedId != "BRA") throw new Exception($"clicking Brazil on the map selected {mv.SelectedId}");
         GD.Print("UIFLOW OK");
         Game.Quit();
+    }
+
+    /// <summary>Cabinet cards: acting on a suggestion stages it, snoozing hides the note, the rival chosen on Rankings is remembered.</summary>
+    async System.Threading.Tasks.Task Cabinet(GameShell shell, string shots)
+    {
+        shell.DismissModal(); Game.ClearPlan(); Game.Snoozed.Clear();
+        shell.Navigate("Cabinet"); await Frames(6);
+        var cv = (EconGame.Views.CabinetView)shell.Current!;
+        var notes = EconGame.Views.CabinetView.Live();
+        GD.Print($"cabinet: {notes.Count} live notes, {notes.Count(n => n.Suggestion != null)} with a suggested move");
+        var withMove = notes.FirstOrDefault(n => n.Suggestion != null && Sim.Core.Policy.CommandProcessor.Apply(Game.World, n.Suggestion, dryRun: true).Ok);
+        if (withMove != null)
+        {
+            var add = FindButton(cv, b => b.Text.StartsWith("Add to plan") && !b.Disabled) ?? throw new Exception("a note with a suggestion has no Add to plan button");
+            await Click(add.GlobalPosition + add.Size / 2); await Frames(6);
+            if (Game.Sim!.Plan.Count == 0) throw new Exception("Add to plan did not stage the suggested move");
+            if (FindButton(cv, b => b.Text.Contains("in plan")) == null) throw new Exception("the card did not show the move as in the plan");
+            Game.ClearPlan(); await Frames(4);
+        }
+        if (notes.Count > 0)
+        {
+            Shot(shots, "22_cabinet");
+            var sn = FindButton(cv, b => b.Text.StartsWith("Snooze")) ?? throw new Exception("no Snooze button");
+            await Click(sn.GlobalPosition + sn.Size / 2); await Frames(6);
+            if (Game.Snoozed.Count != 1) throw new Exception("Snooze did not record the note");
+            if (EconGame.Views.CabinetView.Live().Count != notes.Count - 1) throw new Exception("the snoozed note is still live");
+            Shot(shots, "22b_cabinet_snoozed");
+            Game.Snoozed.Clear();
+        }
+        // a rival chosen on the Rankings page survives navigation
+        shell.Navigate("Rankings"); await Frames(6);
+        Game.Rival = Game.Player.Id == "DEU" ? "FRA" : "DEU"; shell.Navigate("Dashboard"); await Frames(3); shell.Navigate("Rankings"); await Frames(8);
+        if (Game.Rival == "") throw new Exception("the rival was lost on navigation");
+        Shot(shots, "23_rankings_rival");
+        Game.Rival = "";
+        shell.Navigate("Journal"); await Frames(8); Shot(shots, "24_journal");
+    }
+
+    /// <summary>Run to a date, auto-pause, and the year-in-review modal.</summary>
+    async System.Threading.Tasks.Task RunControls(GameShell shell, string shots)
+    {
+        shell.DismissModal(); shell.Navigate("Dashboard"); await Frames(3);
+        Game.ClearPlan(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);
+
+        // run to the end of the year: the clock must stop on the date, or earlier with a stated reason
+        string? why = null; void On(string s) => why = s; Game.Paused += On;
+        int target = Sim.Core.Policy.RunTargets.YearEnd(Game.World.Month);
+        Settings.PauseTriggers = (int)Sim.Core.Policy.PauseTrigger.Default;
+        Game.StartRunTo(target);
+        if (Game.Speed == 0) throw new Exception("Run to did not start the clock");
+        for (int i = 0; i < 400 && Game.Speed > 0; i++)
+        {
+            await Frames(1);
+            foreach (var d in Game.World.Decisions.ToList()) { Game.Sim!.Resolve(d.Id, d.DefaultChoice); shell.DismissModal(); }
+            if (Game.Speed == 0 && Game.World.Month < target && why == null) break;   // stopped by a decision: not under test here
+        }
+        Game.Paused -= On;
+        if (Game.Speed != 0) throw new Exception("the clock never stopped on the run-to date");
+        if (Game.World.Month > target) throw new Exception($"run to overshot: month {Game.World.Month}, target {target}");
+        if (Game.World.Month < target && string.IsNullOrEmpty(why)) throw new Exception("the clock stopped early without a reason");
+        GD.Print($"run to month {target}: stopped at {Game.World.Month}" + (why != null ? " — " + why : ""));
+        await Frames(4); Shot(shots, "25_run_to_stopped");
+
+        // the year-in-review panel, built from the journal, opens as a modal and offers the journal
+        while (Game.World.Month < 24 && !Game.World.GameOver) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); }
+        int end = Game.World.Month / 12 * 12;
+        var review = Sim.Core.Scoring.Journal.Review(Game.World, end) ?? throw new Exception("no year review for a completed year");
+        shell.DismissModal(); shell.ShowYearReview(review); await Frames(8); Shot(shots, "26_year_review");
+        var jb = FindButton(shell, b => b.Text == "Open the journal");
+        if (jb == null) throw new Exception("the year review offers no way into the journal");
+        await Click(jb.GlobalPosition + jb.Size / 2); await Frames(6);
+        if (shell.CurrentName != "Journal") throw new Exception("the journal button went to " + shell.CurrentName);
+        shell.Navigate("Dashboard"); await Frames(3);
     }
 
     async System.Threading.Tasks.Task Frames(int n) { for (int i = 0; i < n; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); }

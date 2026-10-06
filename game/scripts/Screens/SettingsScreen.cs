@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Sim.Core.Policy;
 using EconGame.App;
 using EconGame.Ui;
 
@@ -31,6 +32,23 @@ public partial class SettingsScreen : Control
         var speed = new OptionButton(); foreach (var s in new[] { "Paused", "1× (slow)", "2×", "4×", "8× (fast)" }) speed.AddItem(s);
         speed.Selected = Settings.DefaultSpeed; speed.ItemSelected += i => Settings.DefaultSpeed = (int)i;
         box.AddChild(Row("Default game speed", speed));
+        box.AddChild(UI.H2("When the clock is running, stop for…"));
+        box.AddChild(UI.Dim("Applies when you press play or use Run to. A manual End turn never stops anywhere.", 12, true));
+        var triggers = new GridContainer { Columns = 2 }; triggers.AddThemeConstantOverride("h_separation", 24); triggers.AddThemeConstantOverride("v_separation", 2);
+        foreach (var (flag, text) in new[]
+        {
+            (PauseTrigger.AdviserAlert, "Adviser alerts"), (PauseTrigger.Recession, "A recession starting"), (PauseTrigger.Election, "Elections three months away"),
+            (PauseTrigger.PolicyInForce, "A policy taking effect"), (PauseTrigger.Project, "A project completing"), (PauseTrigger.Imf, "IMF programmes and debt crises"),
+            (PauseTrigger.GradeDrop, "Your grade falling"), (PauseTrigger.Inflation, "Inflation far above target"), (PauseTrigger.Event, "Any event in your country"),
+        })
+        {
+            var f = flag; var t = new CheckBox { Text = text, ButtonPressed = ((PauseTrigger)Settings.PauseTriggers & f) != 0 };
+            t.Toggled += on => Settings.PauseTriggers = on ? Settings.PauseTriggers | (int)f : Settings.PauseTriggers & ~(int)f;
+            triggers.AddChild(t);
+        }
+        box.AddChild(triggers);
+        var review = new CheckBox { Text = "Show a year-in-review each January", ButtonPressed = Settings.AnnualReview };
+        review.Toggled += on => Settings.AnnualReview = on; box.AddChild(review);
         var crash = new CheckBox { Text = "Keep a local crash log (never sent anywhere)", ButtonPressed = Diagnostics.CrashLog };
         crash.Toggled += on => Diagnostics.CrashLog = on; box.AddChild(crash);
         box.AddChild(UI.HBox(10, UI.Btn("Copy feedback report to clipboard", Diagnostics.CopyReport), UI.Dim("Paste it into an issue or email; contains no personal data.", 12)));

@@ -224,6 +224,9 @@ public class JournalTests
         Assert.All(r.Actions, a => Assert.InRange(a.Month, r.StartMonth + 1, r.EndMonth));
         Assert.False(string.IsNullOrEmpty(r.Headline));
         Assert.NotNull(r.GdpPcRankEnd);
+        // US$ per head, not thousands: a rich country reads in tens of thousands of dollars
+        var pc = r.Metrics.First(m => m.Label.StartsWith("GDP per head"));
+        Assert.True(double.Parse(pc.End.TrimStart('$').Replace(",", "")) > 1000, pc.End);
     }
 
     [Fact]

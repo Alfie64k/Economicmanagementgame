@@ -28,7 +28,7 @@ Then either:
 ## Sanity checks without the engine
 
 ```bash
-dotnet test EconGame.sln                                # 122 tests
+dotnet test EconGame.sln                                # 138 tests
 dotnet run --project src/Sim.Cli -- smoke --years 30    # 28 countries, 30 years each, no NaNs/runaways
 dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 ```
@@ -48,6 +48,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 | Key / action | Effect |
 |---|---|
 | Enter | End turn (play one month) |
+| Run to ▾ (top bar) | Run the clock to the end of the quarter or year, the next election, or a year ahead; stops early for the reasons set in Settings |
 | Space | Pause / resume |
 | 1 – 4 | Speed (1 = slowest) |
 | Ctrl+Tab or PageDown / PageUp | Next / previous page |
@@ -65,9 +66,10 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 4. **Budget**: drag a tax slider on the Overview, or open a tab (Income tax, Payroll, Corporation tax, VAT, Pensions & welfare, Departments) to change the allowance, where it tapers, individual rate bands, VAT treatments or a single benefit. The footer shows an instant estimate of revenue, GDP, inequality and approval, and the preview panel shows the projected path before you commit. **Add** one cut and one spending rise **to the plan**, then open **Plan** in the top bar to review it. Nothing has happened yet: political capital, the news feed and adviser notes stay put.
 5. **Policies**: add one to the plan; it needs political capital and a legislative vote, both resolved when you end the turn.
 6. Press **End turn ▸** (Enter): the plan is applied first, then the economy moves a month, and the news feed and adviser notes update. Running the clock with Space or 1–4 applies whatever is staged on its first month.
-7. **Forecast**: fan chart of the next ten years; compare with and without your changes.
-8. **World map**: change the overlay, click a partner, try a trade deal.
-9. Let a crisis event pop up; choose between options. Open **Report** for the scorecard and the "why did this change?" attribution.
-10. Esc → **Save to slot 1** → Quit to main menu → **Load slot 1** (or **Continue autosave**).
+7. **Cabinet**: read the advisers' cards. If one carries a suggested move, try **Preview** and then **Add to plan**; snooze a note you disagree with. **Rankings**: pick a rival by clicking its bar. **Journal**: see what you did and how the measures moved afterwards. Use **Run to ▾ → End of year**: the clock stops on the date (or earlier, with the reason in the top bar) and a year in review appears.
+8. **Forecast**: fan chart of the next ten years; compare with and without your changes.
+9. **World map**: change the overlay, click a partner, try a trade deal.
+10. Let a crisis event pop up; choose between options. Open **Report** for the scorecard and the "why did this change?" attribution.
+11. Esc → **Save to slot 1** → Quit to main menu → **Load slot 1** (or **Continue autosave**).
 
 Please note anything that feels broken, unreadable or boring; this build has had automated testing only, no human playtest.

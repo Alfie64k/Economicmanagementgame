@@ -111,4 +111,54 @@ public static class StateStyles
     {
         var s = Make(Clear, Pal.FocusRing, 2, 0, radius, 0, 0, 0, 0); s.DrawCenter = false; return s;
     }
+    // ---- check boxes ----
+    // A CheckBox is a Button in Godot, so it would inherit the button's filled "pressed" pill; give it quiet styleboxes and drawn icons instead.
+
+    /// <summary>A rounded box, with a tick when <paramref name="on"/>. Drawn with a distance field so it stays crisp at any text scale.</summary>
+    static ImageTexture BoxIcon(int n, bool on, Color edge, Color fill, bool dim)
+    {
+        var img = Image.CreateEmpty(n, n, false, Image.Format.Rgba8);
+        float half = n / 2f - 0.5f, rad = n * 0.22f, bw = Mathf.Max(1.5f, n * 0.09f);
+        Vector2 a = new(n * 0.25f, n * 0.53f), b = new(n * 0.43f, n * 0.71f), c = new(n * 0.77f, n * 0.30f);
+        float thick = Mathf.Max(1.6f, n * 0.13f);
+        static float Seg(Vector2 p, Vector2 s, Vector2 e)
+        {
+            var d = e - s; float t = Mathf.Clamp((p - s).Dot(d) / d.LengthSquared(), 0, 1); return (p - (s + d * t)).Length();
+        }
+        for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+            {
+                var p = new Vector2(x + 0.5f, y + 0.5f); var q = (p - new Vector2(n / 2f, n / 2f)).Abs() - new Vector2(half - rad, half - rad);
+                float d = new Vector2(Mathf.Max(q.X, 0), Mathf.Max(q.Y, 0)).Length() + Mathf.Min(Mathf.Max(q.X, q.Y), 0) - rad;
+                float inside = Mathf.Clamp(0.5f - d, 0, 1), rim = Mathf.Clamp(d + bw + 0.5f, 0, 1);
+                var col = fill.Lerp(edge, rim);
+                if (on)
+                {
+                    float tick = Mathf.Clamp(thick / 2 + 0.5f - Mathf.Min(Seg(p, a, b), Seg(p, b, c)), 0, 1);
+                    col = col.Lerp(new Color(1, 1, 1), tick);
+                }
+                if (dim) col = col.Lerp(Pal.Panel, 0.5f);
+                col.A = inside; img.SetPixel(x, y, col);
+            }
+        return ImageTexture.CreateFromImage(img);
+    }
+
+    public static void CheckStyle(Theme t)
+    {
+        int n = Mathf.RoundToInt(20 * Pal.TextScale), pad = 6;
+        StyleBoxFlat Quiet(Color fill, bool ring)
+        {
+            var sb = ring ? Ring(6, pad, pad, 4, 4) : Make(fill, null, 0, 0, 6, pad, pad, 4, 4); return sb;
+        }
+        t.SetStylebox("normal", "CheckBox", Quiet(Clear, false)); t.SetStylebox("pressed", "CheckBox", Quiet(Clear, false));
+        t.SetStylebox("hover", "CheckBox", Quiet(Pal.Hover, false)); t.SetStylebox("hover_pressed", "CheckBox", Quiet(Pal.Hover, false));
+        t.SetStylebox("disabled", "CheckBox", Quiet(Clear, false)); t.SetStylebox("focus", "CheckBox", Quiet(Clear, true));
+        foreach (var c in new[] { "font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color" }) t.SetColor(c, "CheckBox", Pal.Text);
+        t.SetColor("font_disabled_color", "CheckBox", Pal.Faint);
+        t.SetConstant("h_separation", "CheckBox", 10);
+        t.SetIcon("unchecked", "CheckBox", BoxIcon(n, false, Pal.Faint, Pal.PanelAlt, false));
+        t.SetIcon("checked", "CheckBox", BoxIcon(n, true, Pal.Accent, Pal.Accent, false));
+        t.SetIcon("unchecked_disabled", "CheckBox", BoxIcon(n, false, Pal.Faint, Pal.PanelAlt, true));
+        t.SetIcon("checked_disabled", "CheckBox", BoxIcon(n, true, Pal.Accent, Pal.Accent, true));
+    }
 }

@@ -38,8 +38,7 @@ public static class AppTheme
         StateStyles.HeaderStyle(t, StateStyles.ColumnHeader);
         t.SetFontSize("font_size", StateStyles.NavItem, Mathf.RoundToInt(16 * Pal.TextScale));
 
-        t.SetStylebox("normal", "CheckBox", new StyleBoxEmpty());
-        t.SetColor("font_color", "CheckBox", Pal.Text);
+        StateStyles.CheckStyle(t);
 
         // labels / panels
         t.SetColor("font_color", "Label", Pal.Text);

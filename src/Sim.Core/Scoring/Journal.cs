@@ -85,10 +85,10 @@ public static class Journal
     }
 
     /// <summary>What happened after each thing you did, a year (and two) later. Only actions that change a setting are listed.</summary>
-    public static List<Impact> Impacts(World w, int months = 12)
+    public static List<Impact> Impacts(World w, int months = 12, IReadOnlyList<JournalEntry>? entries = null)
     {
         var res = new List<Impact>();
-        foreach (var e in Build(w).Where(e => e.Kind is "action" or "policy" or "project"))
+        foreach (var e in (entries ?? Build(w)).Where(e => e.Kind is "action" or "policy" or "project"))
         {
             var a = At(w, e.Month); var b = At(w, Math.Min(w.Month, e.Month + months));
             if (a == null || b == null) continue;
@@ -115,7 +115,7 @@ public static class Journal
             r.Metrics.Add(new YearMetric { Label = label, Start = s, End = e, Delta = delta, HigherIsBetter = higherBetter, Change = change, Verdict = v });
         }
         double growth = b.Gdp / Math.Max(1e-9, a.Gdp) - 1, avgInfl = hist.Count > 0 ? hist.Average(p => p.Inflation) : b.Inflation;
-        double pcA = a.GdpUsdBn / Math.Max(1e-9, a.Pop), pcB = b.GdpUsdBn / Math.Max(1e-9, b.Pop);
+        double pcA = a.GdpUsdBn * 1000 / Math.Max(1e-9, a.Pop), pcB = b.GdpUsdBn * 1000 / Math.Max(1e-9, b.Pop);   // US$ billions over millions of people
         M("Real GDP growth", Fmt.P(a.Growth, 1), Fmt.P(growth, 1), growth - a.Growth, true, $"{growth * 100:+0.0;-0.0}% over the year", 0.003);
         M("Inflation (average)", Fmt.P(a.Inflation, 1), Fmt.P(avgInfl, 1), -(Math.Abs(avgInfl - 0.02) - Math.Abs(a.Inflation - 0.02)), true, $"{avgInfl * 100:0.0}% against a 2% anchor", 0.002);
         M("Unemployment", Fmt.P(a.Unemployment, 1), Fmt.P(b.Unemployment, 1), b.Unemployment - a.Unemployment, false, $"{(b.Unemployment - a.Unemployment) * 100:+0.0;-0.0}pp", 0.002);
