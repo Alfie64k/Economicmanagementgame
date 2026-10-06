@@ -17,10 +17,11 @@ public partial class MainMenuScreen : Control
         var main = Main.Instance!;
         box.AddChild(UI.Btn("New game (sandbox)", () => main.ShowCountrySelect(), true, 420));
         box.AddChild(UI.Btn("Scenarios & campaign", () => main.ShowScenarios(), false, 420));
-        var cont = UI.Btn("Continue autosave", () => { if (Game.Load("auto")) main.ShowGame(); }, false, 420);
-        cont.Disabled = !Game.HasSave("auto"); box.AddChild(cont);
-        var load = UI.Btn("Load slot 1", () => { if (Game.Load("slot1")) main.ShowGame(); }, false, 420);
-        load.Disabled = !Game.HasSave("slot1"); box.AddChild(load);
+        var newest = SaveStore.Newest();
+        var cont = UI.Btn(newest == null ? "Continue" : $"Continue: {(newest.HasDetails ? newest.Country + ", " + newest.Date : newest.Label)}", () => { if (newest != null && Game.Load(newest.Slot)) main.ShowGame(); }, false, 420);
+        cont.Disabled = newest == null; box.AddChild(cont);
+        var load = UI.Btn("Saves…", () => main.ShowSaves(), false, 420);
+        load.Disabled = newest == null; box.AddChild(load);
         box.AddChild(UI.Btn("Settings", () => main.ShowSettings(() => main.ShowMainMenu()), false, 420));
         box.AddChild(UI.Btn("Quit", () => GetTree().Quit(), false, 420));
         box.AddChild(UI.Spacer(0, 10));

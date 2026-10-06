@@ -24,6 +24,8 @@ public partial class SelfTest : Node
         int months = int.Parse(Arg("--months", "30"));
         var main = Main.Instance!;
         Game.SuppressModals = true;   // the year-in-review modal would block the scripted walk; it is exercised explicitly below
+        Game.SaveDir = "user://selftest_saves";   // never touch a player's real saves
+        { var d = DirAccess.Open("user://"); if (d != null && d.DirExists("selftest_saves")) { var sd = DirAccess.Open(Game.SaveDir); foreach (var f in sd.GetFiles()) sd.Remove(f); } }
 
         try
         {
@@ -114,6 +116,7 @@ public partial class SelfTest : Node
             await Cabinet(shell, shots);
             await RunControls(shell, shots);
             shell = await Polish(main, shell, shots);
+            shell = await Saves(main, shell, shots);
             // real-time loop: speed 4 must advance the sim
             shell.DismissModal(); shell.Navigate("Dashboard");
             int savedTriggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
@@ -272,6 +275,52 @@ public partial class SelfTest : Node
     {
         if (root is T t) into.Add(t);
         foreach (var c in root.GetChildren()) FindAll(c, into);
+    }
+
+    /// <summary>Rolling autosaves, named slots, quick save and load, the saves list.</summary>
+    async System.Threading.Tasks.Task<GameShell> Saves(Main main, GameShell shell, string shots)
+    {
+        shell.DismissModal(); shell.Navigate("Dashboard"); await Frames(3);
+        for (int i = 0; i < 4; i++) { if (!Game.Autosave()) throw new Exception("autosave failed"); await Frames(1); }
+        var slots = SaveStore.List().Select(s => s.Slot).ToList();
+        foreach (var want in new[] { "auto", "auto1", "auto2" }) if (!slots.Contains(want)) throw new Exception("rolling autosave is missing " + want);
+        if (slots.Contains("auto3")) throw new Exception("more than three autosaves are kept");
+        if (SaveStore.Sanitise("my plan: 2030!") != "my_plan_2030") throw new Exception("slot names are not sanitised: " + SaveStore.Sanitise("my plan: 2030!"));
+        if (!Game.Save("my_plan")) throw new Exception("named save failed");
+        var named = SaveStore.Read("my_plan");
+        if (!named.HasDetails || named.Country != Game.Player.Name || named.Date.Length == 0) throw new Exception("save details were not written");
+
+        // F5 quick-saves; later progress is lost by F9 after confirming
+        string hash0 = Game.Sim!.StateHash(); int month0 = Game.World.Month;
+        await Key(Godot.Key.F5); await Frames(4);
+        if (!Game.HasSave("quick")) throw new Exception("F5 did not write a quick save");
+        for (int i = 0; i < 3; i++) Game.Step();
+        await Key(Godot.Key.F9); await Frames(6);
+        var yes = FindButton(shell, b => b.Text == "Load it") ?? throw new Exception("F9 did not offer to load the quick save");
+        await Click(yes.GlobalPosition + yes.Size / 2); await Frames(10);
+        shell = main.GetChildren().OfType<GameShell>().First();
+        if (Game.World.Month != month0 || Game.Sim!.StateHash() != hash0) throw new Exception("the quick load did not restore the saved state");
+
+        // the saves list: load and delete from the UI
+        shell.ShowSaves(); await Frames(8); Shot(shots, "31_saves");
+        var del = FindButton(shell, b => b.Text == "Delete") ?? throw new Exception("the saves list has no Delete button");
+        await Click(del.GlobalPosition + del.Size / 2); await Frames(4);
+        var sure = FindButton(shell, b => b.Text == "Yes, delete") ?? throw new Exception("deleting did not ask for confirmation");
+        int before = SaveStore.List().Count;
+        await Click(sure.GlobalPosition + sure.Size / 2); await Frames(4);
+        if (SaveStore.List().Count != before - 1) throw new Exception("the save was not deleted");
+        shell.DismissModal();
+
+        // main menu: Continue names the newest save, Saves… lists them
+        main.ShowMainMenu(); await Frames(6);
+        var cont = FindButton(main, b => b.Text.StartsWith("Continue")) ?? throw new Exception("no Continue button");
+        if (cont.Disabled || !cont.Text.Contains(Game.Player.Name)) throw new Exception("Continue does not name the newest save: " + cont.Text);
+        Shot(shots, "00b_menu_continue");
+        main.ShowSaves(); await Frames(6); Shot(shots, "31b_saves_menu");
+        var load = FindButton(main, b => b.Text == "Load") ?? throw new Exception("no Load button on the saves screen");
+        await Click(load.GlobalPosition + load.Size / 2); await Frames(10);
+        if (!Game.Running) throw new Exception("loading from the saves screen did not start a game");
+        return main.GetChildren().OfType<GameShell>().First();
     }
 
     /// <summary>Annotated charts, the glossary and the accessibility settings.</summary>

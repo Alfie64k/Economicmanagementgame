@@ -55,6 +55,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 | Tab / Shift+Tab | Move keyboard focus (Enter or Space activates) |
 | Esc | Menu (save, load, quit) |
 | F1 | Help |
+| F5 / F9 | Quick save / quick load (asks first) |
 | F2 | Glossary (search about 80 terms; each links to the page where it is changed) |
 | Map: drag / wheel / click | Pan / zoom / select country |
 | Globe: drag | Rotate |
@@ -71,6 +72,6 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 8. **Forecast**: fan chart of the next ten years; compare with and without your changes.
 9. **World map**: change the overlay, click a partner, try a trade deal.
 10. Let a crisis event pop up; choose between options. Open **Report** for the scorecard and the "why did this change?" attribution.
-11. Esc → **Save to slot 1** → Quit to main menu → **Load slot 1** (or **Continue autosave**).
+11. F5 quick-saves. Esc → **Saves…** to save under a name, then Quit to main menu → **Continue** (the newest save) or **Saves…** to pick any: three autosaves roll over each January, plus your named and quick saves.
 
 Please note anything that feels broken, unreadable or boring; this build has had automated testing only, no human playtest.

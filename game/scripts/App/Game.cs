@@ -64,7 +64,8 @@ public static class Game
     public static void StartRunTo(int month) { if (Sim == null || Sim.World.GameOver || Sim.World.Decisions.Count > 0) return; RunTo = month; Speed = Math.Max(Speed, 3); }
     public static void StopRun() { RunTo = -1; }
 
-    public static string SaveDir => "user://saves";
+    /// <summary>Where saves live. The self-test points it somewhere disposable so it never touches a player's saves.</summary>
+    public static string SaveDir { get; set; } = "user://saves";
 
     public static bool Save(string slot)
     {
@@ -80,8 +81,14 @@ public static class Game
         var dir = DirAccess.Open(SaveDir);                       // atomic-ish: a crash mid-write never corrupts the previous save
         if (dir == null) return false;
         if (dir.FileExists($"{slot}.json")) dir.Remove($"{slot}.json");
-        return dir.Rename($"{slot}.tmp", $"{slot}.json") == Error.Ok;
+        if (dir.Rename($"{slot}.tmp", $"{slot}.json") != Error.Ok) return false;
+        string[] mn = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        SaveStore.WriteMeta(slot, Player.Name, $"{mn[Sim.World.MonthOfYear - 1]} {Sim.World.Year}", Scorer.Compute(Sim.World, Player).Grade, Scenario?.Name ?? "");
+        return true;
     }
+
+    /// <summary>Write the rolling autosave: the latest in "auto", the two before it in "auto1" and "auto2".</summary>
+    public static bool Autosave() { SaveStore.RotateAutosaves(); return Save("auto"); }
 
     public static bool Load(string slot)
     {
@@ -112,7 +119,7 @@ public static class Game
             int failed = Sim.World.CommandLog.Skip(logged).Count(l => !l.Ok);
             PlanVersion++; PlanChanged?.Invoke(); PlanApplied?.Invoke(staged, failed);
         }
-        if (Settings.Autosave && Sim.World.Month % 12 == 0 && Sim.World.Month != _autosaveMonth) { _autosaveMonth = Sim.World.Month; Save("auto"); }
+        if (Settings.Autosave && Sim.World.Month % 12 == 0 && Sim.World.Month != _autosaveMonth) { _autosaveMonth = Sim.World.Month; Autosave(); }
         Ticked?.Invoke();
         string? why = null;
         if (Watcher != null) { Watcher.Enabled = (PauseTrigger)Settings.PauseTriggers; why = Watcher.Check(Sim.World); }   // always read the log, so a manual turn does not leave stale news for the next run

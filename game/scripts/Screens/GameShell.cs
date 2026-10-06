@@ -278,6 +278,8 @@ public partial class GameShell : Control
         else if (k.Keycode == Key.Escape) ShowMenu();
         else if (k.Keycode == Key.F1) ShowHelp();
         else if (k.Keycode == Key.F2) ShowGlossary();
+        else if (k.Keycode == Key.F5) QuickSave();
+        else if (k.Keycode == Key.F9) QuickLoad();
     }
 
     void UpdateTop()
@@ -515,6 +517,25 @@ public partial class GameShell : Control
         Overlay(box);
     }
 
+    public void ShowSaves()
+    {
+        _modal?.QueueFree(); _modal = null;
+        Overlay(new SavesPanel(true, () => { Close(); Main.Instance!.ShowGame(); }, Close), 780);
+    }
+
+    public void QuickSave() => Toast(Game.Save("quick") ? "Quick saved (F9 loads it)." : "The quick save failed.", Game.HasSave("quick") ? Pal.Good : Pal.Bad);
+
+    void QuickLoad()
+    {
+        if (!Game.HasSave("quick")) { Toast("There is no quick save yet. Press F5 first.", Pal.Warn); return; }
+        var info = SaveStore.Read("quick");
+        var box = UI.VBox(10);
+        box.AddChild(UI.H2("Load the quick save?"));
+        box.AddChild(UI.Dim($"{(info.HasDetails ? info.Country + ", " + info.Date : "quick save")}, saved {SaveStore.When(info.SavedAt)}. Anything you have done since your last save is lost.", 14, true));
+        box.AddChild(UI.HBox(10, UI.Btn("Load it", () => { if (Game.Load("quick")) { Close(); Main.Instance!.ShowGame(); } }, true, 130), UI.Btn("Cancel", Close, false, 110)));
+        Overlay(box, 520);
+    }
+
     public void ShowGlossary(string? term = null)
     {
         _modal?.QueueFree(); _modal = null;
@@ -527,7 +548,7 @@ public partial class GameShell : Control
         box.AddChild(UI.H1("How to play"));
         foreach (var line in new[]
         {
-            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Run to ▾ — let the clock run to a date · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help · F2 — glossary",
+            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Run to ▾ — let the clock run to a date · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help · F2 — glossary · F5 / F9 — quick save / load",
             "Dashboard: click a headline tile to see why it moved. Hover for a quick explanation.",
             "Budget: drag sliders to draft changes, preview five years ahead, then enact. Cuts cost more political capital than rises.",
             "Policies and Investment: reforms and projects take years; the legislature may refuse and projects can overrun.",
@@ -545,9 +566,10 @@ public partial class GameShell : Control
         box.AddChild(UI.H1("Game menu"));
         box.AddChild(UI.Btn("Resume", Close, true, 280));
         box.AddChild(UI.Btn("Glossary (F2)", () => ShowGlossary(), false, 280));
-        box.AddChild(UI.Btn("Save to slot 1", () => { Game.Save("slot1"); Close(); }, false, 280));
+        box.AddChild(UI.Btn("Quick save (F5)", () => { QuickSave(); Close(); }, false, 280));
+        box.AddChild(UI.Btn("Saves…", () => ShowSaves(), false, 280));
         box.AddChild(UI.Btn("Settings", () => { Close(); Main.Instance!.ShowSettings(() => Main.Instance!.ShowGame()); }, false, 280));
-        box.AddChild(UI.Btn("Quit to main menu", () => { Game.Save("auto"); Game.Quit(); Main.Instance!.ShowMainMenu(); }, false, 280));
+        box.AddChild(UI.Btn("Quit to main menu", () => { Game.Autosave(); Game.Quit(); Main.Instance!.ShowMainMenu(); }, false, 280));
         Overlay(box, 360);
     }
 }
