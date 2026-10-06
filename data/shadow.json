@@ -1,0 +1,163 @@
+{
+ "version": 1,
+ "note": "Approximate informal-economy shares of GDP (central values in the range of Schneider and Medina-Schneider MIMIC estimates), compiled for gameplay; methods disagree widely, see lo and hi. Not official statistics.",
+ "archetypes": {
+  "advanced": {
+   "share": 0.1
+  },
+  "hub": {
+   "share": 0.09
+  },
+  "emerging": {
+   "share": 0.25
+  },
+  "resource": {
+   "share": 0.28
+  },
+  "developing": {
+   "share": 0.38
+  }
+ },
+ "countries": {
+  "USA": {
+   "share": 0.08,
+   "lo": 0.06,
+   "hi": 0.1
+  },
+  "GBR": {
+   "share": 0.1,
+   "lo": 0.08,
+   "hi": 0.12
+  },
+  "DEU": {
+   "share": 0.1,
+   "lo": 0.08,
+   "hi": 0.13
+  },
+  "FRA": {
+   "share": 0.11,
+   "lo": 0.09,
+   "hi": 0.14
+  },
+  "JPN": {
+   "share": 0.09,
+   "lo": 0.07,
+   "hi": 0.11
+  },
+  "KOR": {
+   "share": 0.17,
+   "lo": 0.12,
+   "hi": 0.21
+  },
+  "AUS": {
+   "share": 0.1,
+   "lo": 0.08,
+   "hi": 0.13
+  },
+  "CAN": {
+   "share": 0.1,
+   "lo": 0.08,
+   "hi": 0.13
+  },
+  "SGP": {
+   "share": 0.1,
+   "lo": 0.07,
+   "hi": 0.13
+  },
+  "CHE": {
+   "share": 0.07,
+   "lo": 0.05,
+   "hi": 0.09
+  },
+  "CHN": {
+   "share": 0.13,
+   "lo": 0.1,
+   "hi": 0.18
+  },
+  "IND": {
+   "share": 0.24,
+   "lo": 0.18,
+   "hi": 0.3
+  },
+  "BRA": {
+   "share": 0.28,
+   "lo": 0.22,
+   "hi": 0.34
+  },
+  "ARG": {
+   "share": 0.26,
+   "lo": 0.2,
+   "hi": 0.33
+  },
+  "ZAF": {
+   "share": 0.24,
+   "lo": 0.18,
+   "hi": 0.3
+  },
+  "MEX": {
+   "share": 0.3,
+   "lo": 0.23,
+   "hi": 0.36
+  },
+  "IDN": {
+   "share": 0.22,
+   "lo": 0.17,
+   "hi": 0.28
+  },
+  "TUR": {
+   "share": 0.28,
+   "lo": 0.22,
+   "hi": 0.34
+  },
+  "EGY": {
+   "share": 0.33,
+   "lo": 0.25,
+   "hi": 0.4
+  },
+  "VNM": {
+   "share": 0.17,
+   "lo": 0.12,
+   "hi": 0.22
+  },
+  "POL": {
+   "share": 0.19,
+   "lo": 0.14,
+   "hi": 0.23
+  },
+  "CHL": {
+   "share": 0.19,
+   "lo": 0.15,
+   "hi": 0.24
+  },
+  "RUS": {
+   "share": 0.3,
+   "lo": 0.22,
+   "hi": 0.37
+  },
+  "SAU": {
+   "share": 0.19,
+   "lo": 0.14,
+   "hi": 0.25
+  },
+  "NGA": {
+   "share": 0.45,
+   "lo": 0.35,
+   "hi": 0.58
+  },
+  "ARE": {
+   "share": 0.25,
+   "lo": 0.18,
+   "hi": 0.31
+  },
+  "NOR": {
+   "share": 0.13,
+   "lo": 0.1,
+   "hi": 0.17
+  },
+  "ETH": {
+   "share": 0.38,
+   "lo": 0.3,
+   "hi": 0.45
+  }
+ }
+}

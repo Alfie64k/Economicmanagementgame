@@ -1,0 +1,173 @@
+{
+ "version": 1,
+ "note": "Approximate collective-bargaining coverage, effective bargaining strength (a judgement) and labour income share, compiled for gameplay from OECD/ICTWSS and ILO-style figures; not official statistics.",
+ "archetypes": {
+  "advanced": {
+   "coverage": 0.4,
+   "strength": 0.75,
+   "labourShare": 0.58
+  },
+  "hub": {
+   "coverage": 0.35,
+   "strength": 0.65,
+   "labourShare": 0.5
+  },
+  "emerging": {
+   "coverage": 0.2,
+   "strength": 0.5,
+   "labourShare": 0.46
+  },
+  "resource": {
+   "coverage": 0.2,
+   "strength": 0.4,
+   "labourShare": 0.42
+  },
+  "developing": {
+   "coverage": 0.08,
+   "strength": 0.3,
+   "labourShare": 0.45
+  }
+ },
+ "countries": {
+  "USA": {
+   "coverage": 0.12,
+   "strength": 0.8,
+   "labourShare": 0.58
+  },
+  "GBR": {
+   "coverage": 0.26,
+   "strength": 0.8,
+   "labourShare": 0.59
+  },
+  "DEU": {
+   "coverage": 0.54,
+   "strength": 0.9,
+   "labourShare": 0.61
+  },
+  "FRA": {
+   "coverage": 0.98,
+   "strength": 0.55,
+   "labourShare": 0.6
+  },
+  "JPN": {
+   "coverage": 0.17,
+   "strength": 0.75,
+   "labourShare": 0.55
+  },
+  "KOR": {
+   "coverage": 0.14,
+   "strength": 0.7,
+   "labourShare": 0.55
+  },
+  "AUS": {
+   "coverage": 0.6,
+   "strength": 0.65,
+   "labourShare": 0.55
+  },
+  "CAN": {
+   "coverage": 0.3,
+   "strength": 0.8,
+   "labourShare": 0.57
+  },
+  "SGP": {
+   "coverage": 0.2,
+   "strength": 0.45,
+   "labourShare": 0.43
+  },
+  "CHE": {
+   "coverage": 0.49,
+   "strength": 0.8,
+   "labourShare": 0.65
+  },
+  "CHN": {
+   "coverage": 0.4,
+   "strength": 0.2,
+   "labourShare": 0.5
+  },
+  "IND": {
+   "coverage": 0.1,
+   "strength": 0.6,
+   "labourShare": 0.38
+  },
+  "BRA": {
+   "coverage": 0.55,
+   "strength": 0.6,
+   "labourShare": 0.54
+  },
+  "ARG": {
+   "coverage": 0.45,
+   "strength": 0.8,
+   "labourShare": 0.49
+  },
+  "ZAF": {
+   "coverage": 0.3,
+   "strength": 0.9,
+   "labourShare": 0.5
+  },
+  "MEX": {
+   "coverage": 0.1,
+   "strength": 0.4,
+   "labourShare": 0.38
+  },
+  "IDN": {
+   "coverage": 0.12,
+   "strength": 0.5,
+   "labourShare": 0.4
+  },
+  "TUR": {
+   "coverage": 0.08,
+   "strength": 0.5,
+   "labourShare": 0.42
+  },
+  "EGY": {
+   "coverage": 0.15,
+   "strength": 0.3,
+   "labourShare": 0.35
+  },
+  "VNM": {
+   "coverage": 0.4,
+   "strength": 0.2,
+   "labourShare": 0.46
+  },
+  "POL": {
+   "coverage": 0.13,
+   "strength": 0.6,
+   "labourShare": 0.52
+  },
+  "CHL": {
+   "coverage": 0.2,
+   "strength": 0.6,
+   "labourShare": 0.46
+  },
+  "RUS": {
+   "coverage": 0.3,
+   "strength": 0.3,
+   "labourShare": 0.47
+  },
+  "SAU": {
+   "coverage": 0.02,
+   "strength": 0.1,
+   "labourShare": 0.35
+  },
+  "NGA": {
+   "coverage": 0.12,
+   "strength": 0.7,
+   "labourShare": 0.4
+  },
+  "ARE": {
+   "coverage": 0.02,
+   "strength": 0.1,
+   "labourShare": 0.33
+  },
+  "NOR": {
+   "coverage": 0.7,
+   "strength": 0.9,
+   "labourShare": 0.52
+  },
+  "ETH": {
+   "coverage": 0.05,
+   "strength": 0.3,
+   "labourShare": 0.45
+  }
+ }
+}

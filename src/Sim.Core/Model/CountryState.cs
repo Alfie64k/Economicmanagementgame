@@ -155,6 +155,22 @@ public sealed class CountryState
     public int CrisisMonths;
     public string Status = "";
 
+    // ---- shadow economy (version 3) ----
+    /// <summary>Informal share of activity that escapes tax (0 to 1). Starts at <see cref="Shadow0"/> and moves slowly with the tax wedge, corruption and enforcement.</summary>
+    public double Shadow, Shadow0;
+    /// <summary>What the target share is made of, as shares of activity: start level, tax wedge, corruption, enforcement, policy and bounds. They sum to the target.</summary>
+    public double[] ShadowDrivers = new double[5];
+
+    // ---- labour market depth (version 3) ----
+    /// <summary>Collective-bargaining coverage now and at the start (0 to 1) and how much of it is real power (0 to 1). Coverage moves with the "bargaining" modifier.</summary>
+    public double UnionCoverage, UnionCoverage0, UnionStrength;
+    /// <summary>Real-wage shortfall (log) after unexpected price rises, the bargained wage premium that wins it back (annualised), the inflation that premium adds, and the strike hazard (0 to 1).</summary>
+    public double WageGap, WagePremium, WageSpiral, StrikeRisk;
+    /// <summary>Stock of long-term unemployed (share of the labour force) and the rise in the natural rate it causes. Separate from <see cref="NairuParts"/>, which keeps its five entries.</summary>
+    public double LtuStock, NairuHyst;
+    /// <summary>Labour's share of income now, at the start, and its slow structural path (before the short-run squeeze from a real-wage shortfall). Not the sector employment array <see cref="LabourShare"/>.</summary>
+    public double LabourIncomeShare, LabourIncomeShare0, LabourIncomeTrend;
+
     /// <summary>Detailed tax-and-benefit code (the player's country only; null for AI governments and for games started before it existed).</summary>
     public FiscalCode? Fiscal;
 
@@ -178,6 +194,10 @@ public sealed class CountryState
     [JsonIgnore] public double DeficitToGdp => Deficit / Math.Max(1e-9, GdpNominal);
     [JsonIgnore] public double CaToGdp => CurrentAccount / Math.Max(1e-9, Gdp);
     [JsonIgnore] public double RealRate => PolicyRate - InflExp;
+    /// <summary>Tax-base multiplier from informality, (1 - Shadow) / (1 - Shadow0): exactly 1.0 at the start.</summary>
+    [JsonIgnore] public double ShadowMult { get { double d = 1 - Shadow0; return d <= 1e-9 ? 1.0 : (1 - Shadow) / d; } }
+    /// <summary>Effective bargaining power: coverage times strength (0 to 1).</summary>
+    [JsonIgnore] public double BargainingPower => UnionCoverage * UnionStrength;
 
     public double Mod(string key) => Mods.TryGetValue(key, out var v) ? v : 0.0;
 }

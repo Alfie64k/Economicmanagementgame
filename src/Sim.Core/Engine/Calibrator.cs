@@ -182,6 +182,10 @@ public static class Calibrator
         c.Revenue = (d.Fiscal.Revenue) * y0; c.Spending = (d.Fiscal.Revenue + d.Fiscal.Deficit) * y0; c.Interest = interest0; c.Deficit = d.Fiscal.Deficit * y0;
         for (int i = 0; i < 12; i++) c.CompRing[i] = MacroEngine.Snap(c);
         FiscalEngine.AnchorSpread(c, d.Macro.Yield10);
+
+        // ---- shadow economy and labour market (version 3): starting values from the data files ----
+        ShadowEngine.Init(c);
+        LabourMarketEngine.Init(c);
         return c;
     }
 }
