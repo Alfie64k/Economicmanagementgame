@@ -28,7 +28,8 @@ public partial class MonetaryView : View
     {
         var page = Page("Monetary policy", "The central bank follows a Taylor-type rule unless you pin the rate. Overriding an independent bank costs political capital and credibility.");
         _tiles.AddThemeConstantOverride("separation", 10); page.AddChild(_tiles);
-        var charts = UI.HBox(12); foreach (var c in new LineChart[] { _rates, _fx }) { c.SizeFlagsHorizontal = SizeFlags.ExpandFill; c.CustomMinimumSize = new Vector2(300, 220); charts.AddChild(UI.Fill(UI.Card(c, null, 10), true, false)); }
+        var charts = UI.HBox(12); foreach (var c in new LineChart[] { _rates, _fx }) { c.Annotated = true; c.SyncGroup = "mon"; c.SizeFlagsHorizontal = SizeFlags.ExpandFill; c.CustomMinimumSize = new Vector2(300, 220); charts.AddChild(UI.Fill(UI.Card(c, null, 10), true, false)); }
+        page.AddChild(new ChartRangeBar());
         page.AddChild(charts);
 
         var ctl = UI.VBox(8);
@@ -93,6 +94,7 @@ public partial class MonetaryView : View
         T("Credibility", UI.Pct(c.Cred, 0), $"bank independence {UI.Pct(c.CbIndependence, 0)}");
         double x0 = h.Count > 0 ? h[0].Month : 0;
         double[] x = h.Select(p => (double)p.Month).ToArray();
+        _rates.Markers = _fx.Markers = ChartPrefs.For(w);
         _rates.StartYear = _fx.StartYear = w.StartYear; _rates.YFormat = v => v.ToString("0.0") + "%";
         _rates.SetSeries(new[]
         {

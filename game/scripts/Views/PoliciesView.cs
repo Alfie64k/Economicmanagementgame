@@ -13,7 +13,7 @@ public partial class PoliciesView : View
 {
     public override string Title => "Policies";
     readonly VBoxContainer _list = new();
-    readonly HBoxContainer _chips = new();
+    readonly HFlowContainer _chips = new();
     readonly Label _result = UI.Lbl("", 13, Pal.Dim, false, HorizontalAlignment.Left, true);
     string _cat = "all";
     int _lastSig = -1;
@@ -30,7 +30,7 @@ public partial class PoliciesView : View
     public PoliciesView()
     {
         var page = Page("Policies", "Legislation that reshapes the economy over years. Add a bill to this turn's plan; it goes to the vote, and costs its political capital, when you end the turn. It takes time to implement and may be voted down in a democracy.");
-        _chips.AddThemeConstantOverride("separation", 6); page.AddChild(_chips);
+        _chips.AddThemeConstantOverride("h_separation", 6); _chips.AddThemeConstantOverride("v_separation", 6); page.AddChild(_chips);
         page.AddChild(_result);
         _list.AddThemeConstantOverride("separation", 10); page.AddChild(_list);
     }

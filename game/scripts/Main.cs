@@ -8,6 +8,7 @@ namespace EconGame;
 public partial class Main : Control
 {
     Control? _screen;
+    ColorRect? _ground;
     public static Main? Instance;
 
     public override void _Ready()
@@ -24,9 +25,9 @@ public partial class Main : Control
             };
             Theme = AppTheme.Build();
             SetAnchorsPreset(LayoutPreset.FullRect);
-            var bg = new ColorRect { Color = Pal.Bg };
-            bg.SetAnchorsPreset(LayoutPreset.FullRect);
-            AddChild(bg);
+            _ground = new ColorRect { Color = Pal.Bg };
+            _ground.SetAnchorsPreset(LayoutPreset.FullRect);
+            AddChild(_ground);
             Game.Changed += () => { };
             var args = OS.GetCmdlineUserArgs();
             if (System.Array.IndexOf(args, "--selftest") >= 0) { AddChild(new SelfTest(args)); return; }
@@ -67,5 +68,5 @@ public partial class Main : Control
     public void ShowGame() => Show(new GameShell());
     public void ShowSettings(System.Action back) => Show(new SettingsScreen(back));
 
-    public void ApplyTheme() { Theme = AppTheme.Build(); }
+    public void ApplyTheme() { Theme = AppTheme.Build(); if (_ground != null) _ground.Color = Pal.Bg; }
 }

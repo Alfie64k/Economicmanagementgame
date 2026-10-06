@@ -237,3 +237,45 @@ public class JournalTests
         Assert.Null(Journal.Review(w, 24));
     }
 }
+
+public class GlossaryTests
+{
+    [Fact]
+    public void Every_term_is_complete_unique_and_cross_references_resolve()
+    {
+        Assert.InRange(Glossary.Terms.Count, 60, 120);
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var t in Glossary.Terms)
+        {
+            Assert.True(names.Add(t.Term), "duplicate term " + t.Term);
+            Assert.False(string.IsNullOrWhiteSpace(t.Short) || string.IsNullOrWhiteSpace(t.Game), t.Term);
+            Assert.Contains(t.Category, Glossary.Categories);
+            if (t.Page != null) Assert.Contains(t.Page, Glossary.Pages);
+            foreach (var s in t.See ?? Array.Empty<string>()) Assert.True(Glossary.Find(s) != null, $"{t.Term} refers to unknown term '{s}'");
+        }
+        foreach (var c in Glossary.Categories) Assert.Contains(Glossary.Terms, t => t.Category == c);
+    }
+
+    [Fact]
+    public void Aliases_do_not_collide_with_other_terms()
+    {
+        var seen = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var t in Glossary.Terms)
+            foreach (var n in new[] { t.Term }.Concat(t.Aka ?? Array.Empty<string>()))
+                Assert.True(seen.TryAdd(n, t.Term) || seen[n] == t.Term, $"'{n}' names both {seen.GetValueOrDefault(n)} and {t.Term}");
+    }
+
+    [Fact]
+    public void Search_ranks_exact_then_prefix_then_wording_and_respects_category()
+    {
+        Assert.Equal("NAIRU", Glossary.Search("nairu")[0].Term);
+        Assert.Equal("Policy rate", Glossary.Search("bank rate")[0].Term);          // an alias
+        Assert.Equal("Fiscal drag", Glossary.Search("bracket creep")[0].Term);
+        Assert.Equal("Marginal tax rate", Glossary.Search("marginal tax")[0].Term);
+        Assert.Contains(Glossary.Search("retire"), t => t.Term == "Pension age");     // alias and wording
+        Assert.Empty(Glossary.Search("zzzzqq"));
+        Assert.Equal(Glossary.Terms.Count, Glossary.Search("").Count);
+        Assert.All(Glossary.Search("", "Tax and benefits"), t => Assert.Equal("Tax and benefits", t.Category));
+        Assert.Equal(Glossary.Terms.Count, Glossary.Categories.Sum(c => Glossary.Search("", c).Count));
+    }
+}

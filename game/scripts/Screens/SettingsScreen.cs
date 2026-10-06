@@ -19,9 +19,18 @@ public partial class SettingsScreen : Control
         var scale = new AppSlider(); scale.Setup(0.8, 1.6, 0.1, Settings.TextScale, v => $"{v:0.0}×");
         scale.Changed += v => { Settings.TextScale = (float)v; Settings.Apply(); Main.Instance!.ApplyTheme(); };
         box.AddChild(Row("Text size", scale));
+        var ui = new AppSlider(); ui.Setup(0.8, 1.5, 0.1, Settings.UiScale, v => $"{v:0.0}×");
+        ui.Changed += v => { Settings.UiScale = (float)v; Settings.Apply(); };
+        ui.TooltipText = "Scales the whole interface: text, controls and spacing. Use Text size to scale text alone.";
+        box.AddChild(Row("Interface scale", ui));
         var cb = new CheckBox { Text = "Colour-blind safe palette", ButtonPressed = Settings.ColourBlind };
         cb.Toggled += on => { Settings.ColourBlind = on; Settings.Apply(); };
         box.AddChild(cb);
+        var hc = new CheckBox { Text = "High-contrast theme", ButtonPressed = Settings.HighContrast };
+        hc.Toggled += on => { Settings.HighContrast = on; Settings.Apply(); Main.Instance!.ApplyTheme(); Main.Instance.ShowSettings(_back); };
+        box.AddChild(hc);
+        var rm = new CheckBox { Text = "Reduce motion (notifications do not fade)", ButtonPressed = Settings.ReduceMotion };
+        rm.Toggled += on => Settings.ReduceMotion = on; box.AddChild(rm);
         var auto = new CheckBox { Text = "Autosave every year", ButtonPressed = Settings.Autosave };
         auto.Toggled += on => Settings.Autosave = on; box.AddChild(auto);
         var fs = new CheckBox { Text = "Fullscreen", ButtonPressed = Settings.Fullscreen };
@@ -53,7 +62,7 @@ public partial class SettingsScreen : Control
         crash.Toggled += on => Diagnostics.CrashLog = on; box.AddChild(crash);
         box.AddChild(UI.HBox(10, UI.Btn("Copy feedback report to clipboard", Diagnostics.CopyReport), UI.Dim("Paste it into an issue or email; contains no personal data.", 12)));
         root.AddChild(UI.Card(box));
-        root.AddChild(UI.Dim("Keyboard: Space pause · 1-4 speed · Ctrl+Tab or PageUp/PageDown change view · Tab moves focus · Esc menu", 13));
+        root.AddChild(UI.Dim("Keyboard: Space pause · 1-4 speed · Ctrl+Tab or PageUp/PageDown change view · Tab moves focus · Esc menu · F1 help · F2 glossary", 13));
     }
 
     static Control Row(string label, Control c) { var l = UI.Lbl(label, 15, Pal.Dim); l.CustomMinimumSize = new Vector2(180, 0); c.SizeFlagsHorizontal = SizeFlags.ExpandFill; return UI.HBox(12, l, c); }

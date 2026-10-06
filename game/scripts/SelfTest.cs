@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Godot;
@@ -112,6 +113,7 @@ public partial class SelfTest : Node
             }
             await Cabinet(shell, shots);
             await RunControls(shell, shots);
+            shell = await Polish(main, shell, shots);
             // real-time loop: speed 4 must advance the sim
             shell.DismissModal(); shell.Navigate("Dashboard");
             int savedTriggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
@@ -258,6 +260,73 @@ public partial class SelfTest : Node
         Shot(shots, "23_rankings_rival");
         Game.Rival = "";
         shell.Navigate("Journal"); await Frames(8); Shot(shots, "24_journal");
+    }
+
+    static T? Find<T>(Node root) where T : Node
+    {
+        if (root is T t) return t;
+        foreach (var c in root.GetChildren()) { var r = Find<T>(c); if (r != null) return r; }
+        return null;
+    }
+    static void FindAll<T>(Node root, List<T> into) where T : Node
+    {
+        if (root is T t) into.Add(t);
+        foreach (var c in root.GetChildren()) FindAll(c, into);
+    }
+
+    /// <summary>Annotated charts, the glossary and the accessibility settings.</summary>
+    async System.Threading.Tasks.Task<GameShell> Polish(Main main, GameShell shell, string shots)
+    {
+        // annotated charts: markers for what you did and what happened, a shared crosshair, and a time window
+        shell.DismissModal(); shell.Navigate("Dashboard"); await Frames(8);
+        var marks = EconGame.Ui.ChartPrefs.For(Game.World);
+        if (marks.Count == 0) throw new Exception("the journal gave the charts no markers after a game with several actions");
+        EconGame.Ui.ChartPrefs.Set(0, true); await Frames(4);
+        var charts = new List<EconGame.Ui.LineChart>(); FindAll(shell.Current!, charts);
+        var annotated = charts.Where(c => c.Annotated && c.SyncGroup == "dash").ToList();
+        if (annotated.Count != 4) throw new Exception($"expected four synchronised dashboard charts, found {annotated.Count}");
+        var first = annotated[0]; var mk = marks.First(m => m.Mine);
+        if (first.ScreenXOf(mk.X) is not float mx) throw new Exception("a marker month is outside the chart");
+        var pr = first.PlotRect; await Hover(new Vector2(mx, pr.Position.Y + pr.Size.Y / 2)); await Frames(4); Shot(shots, "27_chart_marker_hover");
+        EconGame.Ui.ChartPrefs.Set(24, true); await Frames(4);
+        if (annotated[0].ScreenXOf(Game.World.Month - 25) != null) throw new Exception("the two-year window still shows older months");
+        await Hover(new Vector2(first.PlotRect.Position.X + first.PlotRect.Size.X * 0.6f, first.PlotRect.Position.Y + 40)); await Frames(4); Shot(shots, "27b_chart_two_years_synced");
+        await Hover(new Vector2(5, 5)); EconGame.Ui.ChartPrefs.Set(0, true); await Frames(2);
+
+        // glossary: F2 opens it, typing filters it, Escape closes it
+        await Key(Godot.Key.F2); await Frames(6);
+        var gp = Find<EconGame.Ui.GlossaryPanel>(shell) ?? throw new Exception("F2 did not open the glossary");
+        gp.Search("taper"); await Frames(4);
+        if (gp.ResultCount == 0 || gp.Selected == "") throw new Exception("glossary search for 'taper' found nothing");
+        Shot(shots, "28_glossary");
+        await Key(Godot.Key.Escape); await Frames(6);
+        if (Find<EconGame.Ui.GlossaryPanel>(shell) != null) throw new Exception("Escape did not close the glossary");
+
+        // accessibility: high contrast recolours the interface, the interface scale changes the content scale factor
+        Settings.HighContrast = true; Settings.Apply(); main.ApplyTheme(); main.ShowSettings(() => { }); await Frames(6); Shot(shots, "02c_settings_high_contrast");
+        if (EconGame.Ui.Pal.Text != new Color("FFFFFF") || EconGame.Ui.Pal.Bg != new Color("000000")) throw new Exception("high contrast did not change the palette");
+        main.ShowGame(); await Frames(8); Shot(shots, "29_dashboard_high_contrast");
+        Settings.HighContrast = false; Settings.Apply(); main.ApplyTheme();
+        Settings.UiScale = 1.25f; Settings.Apply(); await Frames(4);
+        if (DisplayServer.GetName() != "headless" && Math.Abs(GetTree().Root.ContentScaleFactor - 1.25f) > 1e-3) throw new Exception("interface scale did not reach the window");
+        main.ShowGame(); await Frames(8); Shot(shots, "29b_dashboard_scale_125");
+        // the largest interface scale: the layout must still fit the window (top bar on two rows, news panel folded away)
+        Settings.UiScale = 1.5f; Settings.Apply(); main.ShowGame(); await Frames(10);
+        var big = main.GetChildren().OfType<GameShell>().First(); var vis = GetViewport().GetVisibleRect().Size;
+        foreach (var pg in new[] { "Dashboard", "Budget", "Monetary", "Policies", "Investment", "Sectors", "Trade", "Society", "Forecast", "Cabinet", "Rankings", "Journal", "Report" })
+        {
+            big.DismissModal(); big.Navigate(pg); await Frames(8);
+            var cur = big.Current!; var need = cur.GetCombinedMinimumSize().X;
+            if (need > cur.Size.X + 1) throw new Exception($"{pg} needs {need:0}px but only {cur.Size.X:0}px are available at interface scale 1.5");
+            var menu = FindButton(big, b => b.Text == "Menu") ?? throw new Exception("no Menu button at scale 1.5");
+            var endBtn = FindButton(big, b => b.Text.StartsWith("End turn")) ?? throw new Exception("no End turn button at scale 1.5");
+            if (menu.GlobalPosition.X + menu.Size.X > vis.X + 1 || endBtn.GlobalPosition.X + endBtn.Size.X > vis.X + 1)
+                throw new Exception($"top bar overflows the window at scale 1.5 on {pg}: menu ends at {menu.GlobalPosition.X + menu.Size.X}, window {vis.X}");
+            Shot(shots, "30_scale150_" + pg.ToLower());
+        }
+        Settings.UiScale = 1.0f; Settings.Apply(); main.ShowGame(); await Frames(6);
+        if (EconGame.Ui.Pal.Text == new Color("FFFFFF")) throw new Exception("standard palette not restored");
+        return main.GetChildren().OfType<GameShell>().First();
     }
 
     /// <summary>Run to a date, auto-pause, and the year-in-review modal.</summary>

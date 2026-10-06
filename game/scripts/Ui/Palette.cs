@@ -6,30 +6,38 @@ namespace EconGame.Ui;
 public static class Pal
 {
     public static bool ColourBlind;           // swaps good/bad onto blue/orange
+    public static bool HighContrast;          // near-black ground, white text, strong borders
     public static float TextScale = 1.0f;
 
-    public static readonly Color Bg = new("0E1318");
-    public static readonly Color Panel = new("161D25");
-    public static readonly Color PanelAlt = new("1C2630");
-    public static readonly Color PanelHi = new("243241");
-    public static readonly Color Border = new("2C3A49");
-    public static readonly Color Text = new("E7EDF3");
-    public static readonly Color Dim = new("93A3B4");
-    public static readonly Color Faint = new("5E6E7F");
-    public static readonly Color Accent = new("4DA3FF");
-    public static Color Good => ColourBlind ? new Color("56B4E9") : new Color("3FB68B");
-    public static Color Bad => ColourBlind ? new Color("E69F00") : new Color("E5604F");
-    public static readonly Color Warn = new("E0B13A");
+    // plain static fields (not properties): colours are read thousands of times a frame, so they are assigned once by Use()
+    public static Color Bg, Panel, PanelAlt, PanelHi, Border, Text, Dim, Faint, Accent, Warn;
+    public static Color Good => ColourBlind ? new Color("56B4E9") : HighContrast ? new Color("4DFFB4") : new Color("3FB68B");
+    public static Color Bad => ColourBlind ? new Color("E69F00") : HighContrast ? new Color("FF7B6B") : new Color("E5604F");
 
     // interaction-state tokens (see StateStyles): none depends on the colour-blind palette, and every state also
     // carries a non-colour cue (edge bar, outline, ring, weight)
-    public static readonly Color Hover = PanelHi;
-    public static readonly Color HoverEdge = Faint;
-    public static readonly Color SelFill = Panel.Lerp(Accent, 0.20f);
-    public static readonly Color SelFillHover = Panel.Lerp(Accent, 0.32f);
-    public static readonly Color SelBar = Accent;
-    public static readonly Color Press = Accent.Darkened(0.45f);
-    public static readonly Color FocusRing = Text;
+    public static Color Hover, HoverEdge, SelFill, SelFillHover, SelBar, Press, FocusRing;
+
+    static Pal() { Use(false); }
+
+    /// <summary>Switch between the standard and high-contrast palettes. Callers rebuild the theme and the current screen afterwards.</summary>
+    public static void Use(bool highContrast)
+    {
+        HighContrast = highContrast;
+        if (highContrast)
+        {
+            Bg = new("000000"); Panel = new("0A0A0A"); PanelAlt = new("151515"); PanelHi = new("2A2A2A"); Border = new("9A9A9A");
+            Text = new("FFFFFF"); Dim = new("E0E0E0"); Faint = new("B0B0B0"); Accent = new("66CCFF"); Warn = new("FFD23F");
+        }
+        else
+        {
+            Bg = new("0E1318"); Panel = new("161D25"); PanelAlt = new("1C2630"); PanelHi = new("243241"); Border = new("2C3A49");
+            Text = new("E7EDF3"); Dim = new("93A3B4"); Faint = new("5E6E7F"); Accent = new("4DA3FF"); Warn = new("E0B13A");
+        }
+        Hover = PanelHi; HoverEdge = highContrast ? Text : Faint;
+        SelFill = Panel.Lerp(Accent, highContrast ? 0.35f : 0.20f); SelFillHover = Panel.Lerp(Accent, highContrast ? 0.50f : 0.32f);
+        SelBar = Accent; Press = Accent.Darkened(0.45f); FocusRing = highContrast ? new Color("FFD23F") : Text;
+    }
 
     public static readonly Color[] Series =
     {

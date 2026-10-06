@@ -8,6 +8,12 @@ public static class Settings
     const string Path = "user://settings.cfg";
     public static float TextScale = 1.0f;
     public static bool ColourBlind;
+    /// <summary>Near-black ground, white text, stronger borders and a yellow keyboard-focus ring.</summary>
+    public static bool HighContrast;
+    /// <summary>Scales the whole interface (text, controls and spacing), unlike <see cref="TextScale"/> which scales text only.</summary>
+    public static float UiScale = 1.0f;
+    /// <summary>No fading notifications: they appear and disappear without animation.</summary>
+    public static bool ReduceMotion;
     public static bool Autosave = true;
     public static int DefaultSpeed = 1;
     public static bool Fullscreen;
@@ -25,6 +31,9 @@ public static class Settings
         {
             TextScale = (float)(double)cf.GetValue("ui", "text_scale", 1.0);
             ColourBlind = (bool)cf.GetValue("ui", "colour_blind", false);
+            HighContrast = (bool)cf.GetValue("ui", "high_contrast", false);
+            UiScale = Mathf.Clamp((float)(double)cf.GetValue("ui", "ui_scale", 1.0), 0.8f, 1.5f);
+            ReduceMotion = (bool)cf.GetValue("ui", "reduce_motion", false);
             Autosave = (bool)cf.GetValue("game", "autosave", true);
             DefaultSpeed = (int)cf.GetValue("game", "speed", 1);
             Fullscreen = (bool)cf.GetValue("ui", "fullscreen", false);
@@ -42,6 +51,7 @@ public static class Settings
     {
         var cf = new ConfigFile();
         cf.SetValue("ui", "text_scale", (double)TextScale); cf.SetValue("ui", "colour_blind", ColourBlind);
+        cf.SetValue("ui", "high_contrast", HighContrast); cf.SetValue("ui", "ui_scale", (double)UiScale); cf.SetValue("ui", "reduce_motion", ReduceMotion);
         cf.SetValue("game", "autosave", Autosave); cf.SetValue("game", "speed", DefaultSpeed);
         cf.SetValue("game", "pause_triggers", PauseTriggers); cf.SetValue("game", "annual_review", AnnualReview);
         cf.SetValue("ui", "fullscreen", Fullscreen); cf.SetValue("privacy", "crash_log", Diagnostics.CrashLog); cf.SetValue("audio", "volume", (double)Volume);
@@ -52,6 +62,8 @@ public static class Settings
     public static void Apply()
     {
         Pal.TextScale = TextScale; Pal.ColourBlind = ColourBlind;
+        if (Pal.HighContrast != HighContrast) Pal.Use(HighContrast);
+        if (Engine.GetMainLoop() is SceneTree tree && DisplayServer.GetName() != "headless") tree.Root.ContentScaleFactor = UiScale;
         AudioServer.SetBusVolumeDb(0, Mathf.LinearToDb(Mathf.Max(0.0001f, Volume)));
         if (DisplayServer.GetName() != "headless") DisplayServer.WindowSetMode(Fullscreen ? DisplayServer.WindowMode.Fullscreen : DisplayServer.WindowMode.Windowed);
     }

@@ -37,8 +37,9 @@ public partial class DashboardView : View
         }
         page.AddChild(tiles);
 
+        page.AddChild(new ChartRangeBar());
         var charts = new GridContainer { Columns = 2 }; charts.AddThemeConstantOverride("h_separation", 12); charts.AddThemeConstantOverride("v_separation", 12);
-        foreach (var ch in new LineChart[] { _gdp, _macro, _fiscal, _soc }) { ch.CustomMinimumSize = new Vector2(300, 190); ch.SizeFlagsHorizontal = SizeFlags.ExpandFill; charts.AddChild(UI.Fill(UI.Card(ch, null, 10), true, false)); }
+        foreach (var ch in new LineChart[] { _gdp, _macro, _fiscal, _soc }) { ch.Annotated = true; ch.SyncGroup = "dash"; ch.CustomMinimumSize = new Vector2(300, 190); ch.SizeFlagsHorizontal = SizeFlags.ExpandFill; charts.AddChild(UI.Fill(UI.Card(ch, null, 10), true, false)); }
         page.AddChild(charts);
 
         var whyBox = UI.VBox(8);
@@ -77,6 +78,7 @@ public partial class DashboardView : View
         double[] x = h.Select(p => (double)p.Month).ToArray();
         double g0v = h.Count > 0 ? h[0].Gdp : 1;
         _gdp.StartYear = _macro.StartYear = _fiscal.StartYear = _soc.StartYear = w.StartYear;
+        _gdp.Markers = _macro.Markers = _fiscal.Markers = _soc.Markers = ChartPrefs.For(w);
         _gdp.YFormat = v => v.ToString("0");
         _gdp.SetSeries(new[] { new Series { Name = "GDP", X = x, Y = h.Select(p => 100 * p.Gdp / g0v).ToArray(), Color = Pal.Series[0] } });
         _macro.YFormat = v => v.ToString("0.0") + "%";

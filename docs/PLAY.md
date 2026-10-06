@@ -28,7 +28,7 @@ Then either:
 ## Sanity checks without the engine
 
 ```bash
-dotnet test EconGame.sln                                # 138 tests
+dotnet test EconGame.sln                                # 141 tests
 dotnet run --project src/Sim.Cli -- smoke --years 30    # 28 countries, 30 years each, no NaNs/runaways
 dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 ```
@@ -41,7 +41,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 * **Build errors on first open** — run `dotnet build game/EconomicGame.csproj` once from a terminal and read the error; .NET 8 SDK must be on `PATH`.
 * **Black or garbled window** — the project uses the Compatibility renderer; update GPU drivers. Run `godot --path game --rendering-driver opengl3`.
 * **Globe is slow or blank** — toggle back to the 2D map (World map page); the 2D map is fully featured.
-* **Window too big for the screen** — Settings changes text scale, fullscreen and the colour-blind palette; the default window is 1600×900.
+* **Window too big for the screen, or text too small** — Settings changes text size, interface scale (0.8–1.5×; the top bar wraps and the news panel folds away at large scales), a high-contrast theme, the colour-blind palette and fullscreen; the default window is 1600×900.
 
 ## Controls
 
@@ -55,6 +55,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 | Tab / Shift+Tab | Move keyboard focus (Enter or Space activates) |
 | Esc | Menu (save, load, quit) |
 | F1 | Help |
+| F2 | Glossary (search about 80 terms; each links to the page where it is changed) |
 | Map: drag / wheel / click | Pan / zoom / select country |
 | Globe: drag | Rotate |
 

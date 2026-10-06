@@ -26,7 +26,8 @@ public partial class SocietyView : View
         row.AddChild(UI.Fill(Cards.Section("What is driving approval", _approval, "Percentage-point contributions to your long-run approval target."), true, false));
         page.AddChild(row);
         var row2 = UI.HBox(12);
-        foreach (var c in new LineChart[] { _pop, _emis }) { c.CustomMinimumSize = new Vector2(300, 190); c.SizeFlagsHorizontal = SizeFlags.ExpandFill; row2.AddChild(UI.Fill(UI.Card(c, null, 10), true, false)); }
+        foreach (var c in new LineChart[] { _pop, _emis }) { c.Annotated = true; c.SyncGroup = "soc"; c.CustomMinimumSize = new Vector2(300, 190); c.SizeFlagsHorizontal = SizeFlags.ExpandFill; row2.AddChild(UI.Fill(UI.Card(c, null, 10), true, false)); }
+        page.AddChild(new ChartRangeBar());
         page.AddChild(row2);
         page.AddChild(Cards.Section("Political system", _politics));
         page.AddChild(Cards.Section("Environment & energy", _env));
@@ -55,6 +56,7 @@ public partial class SocietyView : View
         _approval.Set(ex.Items.Where(i => i.Label != "Baseline mood").Select(i => new BarItem { Label = i.Label, Value = i.Value, Color = i.Value >= 0 ? Pal.Good : Pal.Bad }));
 
         double[] x = h.Select(p => (double)p.Month).ToArray();
+        _pop.Markers = _emis.Markers = ChartPrefs.For(w);
         _pop.StartYear = _emis.StartYear = w.StartYear; _pop.YFormat = v => v.ToString("0.0"); _emis.YFormat = v => v.ToString("0");
         _pop.SetSeries(new[] { new Series { Name = "Population", X = x, Y = h.Select(p => p.Pop).ToArray(), Color = Pal.Series[2] } });
         _emis.SetSeries(new[] { new Series { Name = "Emissions", X = x, Y = h.Select(p => p.EmissionsMt).ToArray(), Color = Pal.Series[5] } });

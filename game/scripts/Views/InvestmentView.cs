@@ -59,7 +59,7 @@ public partial class InvestmentView : View
             string flag = p.Spent > planned * frac * 1.2 ? "  ⚠ over budget" : p.Elapsed > p.PlannedMonths ? "  ⚠ behind schedule" : "";
             var cancel = Command.CancelProject(c.Id, p.Id); string ckey = Simulation.KeyOf(cancel);
             Button cb = Game.Staged(ckey) != null ? UI.Btn("Withdraw cancellation", () => { Game.Unstage(ckey); _result.Text = "↶ Withdrawn from the plan"; }) : UI.Btn("Plan cancellation", () => Act(cancel));
-            var row = UI.HBox(12, UI.Lbl(def?.Name ?? p.Id, 15, Pal.Text, true), bar, UI.Dim($"{p.Elapsed:0}/{p.PlannedMonths} months · spent {Money.Local(c, p.Spent * c.PriceLevel)} of {Money.Local(c, planned * c.PriceLevel)} planned{flag}" + (Game.Staged(ckey) != null ? "  · cancelling at the end of the turn" : ""), 12), cb);
+            var row = UI.VBox(3, UI.HBox(12, UI.Lbl(def?.Name ?? p.Id, 15, Pal.Text, true), bar, cb), UI.Dim($"{p.Elapsed:0}/{p.PlannedMonths} months · spent {Money.Local(c, p.Spent * c.PriceLevel)} of {Money.Local(c, planned * c.PriceLevel)} planned{flag}" + (Game.Staged(ckey) != null ? "  · cancelling at the end of the turn" : ""), 12, true));
             _pipeline.AddChild(row);
         }
         foreach (var q in Game.Sim!.Plan.Where(q => q.Type == "project"))

@@ -12,6 +12,10 @@
 * Run to ▾ (end of quarter, end of year, next election, a year ahead) and auto-pause: the running clock stops for adviser alerts, recessions, elections, policies and projects taking effect, IMF programmes, grade drops, high inflation or any event, as chosen in Settings, and says why.
 * Rankings page: twelve league tables across all 28 countries with year-ago ranks, neighbours above and below, and a rival comparison.
 * Journal page and year in review: a timeline of your actions and what happened with twelve-month impacts, and a review of the year just played every January (switch off in Settings); also reachable from the end-of-game screen.
+* Charts: the Dashboard, Monetary and Society charts can show the last 2 years, 5 years or everything, mark what you did (▼) and what happened to you (▲) with hover read-outs, and share a crosshair so hovering one chart reads the same month on the others.
+* Glossary (F2, also in Help and the menu): about 80 searchable terms in seven categories, each with how this game uses it, related terms and a link to the page where it is changed.
+* Accessibility: interface scale (0.8–1.5×, whole interface, not just text), high-contrast theme, reduce-motion option, and a layout that holds together at large scales (top bar on two rows, news panel foldable with a News toggle, wrapping filter chips). The Policies filter chips and Investment project rows no longer overflow narrow windows.
+* Year review: GDP per head was shown in thousands of dollars.
 * Settings: check boxes now show properly (they were drawn as filled buttons with no visible tick box when unticked); new pause-trigger and year-in-review options.
 
 ## 1.0.0-rc1

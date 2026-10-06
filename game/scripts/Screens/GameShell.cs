@@ -27,6 +27,11 @@ public partial class GameShell : Control
     Button _endTurn = new(), _planBtn = new();
     MenuButton _runTo = new();
     Label _auto = new();
+    // responsive layout: below ~1500 logical pixels the top bar wraps onto two rows and the news panel starts hidden
+    HBoxContainer _barA = new(), _barB = new(), _barTop = new(), _barBottom = new();
+    PanelContainer _nav = new(), _feedPanel = new();
+    Button _feedToggle = new();
+    bool _stacked; bool? _feedWanted;
     string _pauseReason = "";
     int _cabinetSig = -1; int _cabinetCount;
     VBoxContainer? _planBox;
@@ -73,6 +78,7 @@ public partial class GameShell : Control
         Game.Ended += ShowEnd;
         Game.Ticked += MarkDirty; Game.Changed += MarkDirty; Game.PlanChanged += OnPlanChanged; Game.PlanApplied += OnPlanApplied;
         Game.Paused += OnAutoPaused; Game.YearEnded += OnYearEnded;
+        Resized += ApplyLayout; Callable.From(ApplyLayout).CallDeferred();
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
         Navigate("Dashboard");
         UpdateTop(); UpdateFeed(true);
@@ -87,7 +93,7 @@ public partial class GameShell : Control
     {
         var bar = new PanelContainer();
         bar.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.Panel, 0, Pal.Border, 0, 10));
-        var h = UI.HBox(14);
+        var h = _barA = UI.HBox(14);
         _country = UI.Lbl(Game.Player.Name, 20, Pal.Text, true);
         _date = UI.Lbl("", 16, Pal.Dim);
         h.AddChild(_country); h.AddChild(_date);
@@ -110,21 +116,27 @@ public partial class GameShell : Control
         _endTurn = UI.Btn("End turn ▸", EndTurn, true, 0);
         _endTurn.TooltipText = "Play one month (Enter). Your plan is applied first, then the economy moves.";
         h.AddChild(_planBtn); h.AddChild(_endTurn);
+        h = _barB = UI.HBox(14); _barB.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         _ticker = UI.Lbl("", 13, Pal.Dim); _ticker.ClipText = true; _ticker.CustomMinimumSize = new Vector2(120, 0); _ticker.SizeFlagsHorizontal = SizeFlags.ExpandFill; h.AddChild(_ticker);
         _auto = Cards.Chip("AUTOPILOT", Pal.Series[2]); _auto.Visible = false; _auto.TooltipText = "The cabinet is running tax, spending and rates. Open the Cabinet page to take control back."; h.AddChild(_auto);
         _alert = UI.Lbl("", 14, Pal.Warn, true); h.AddChild(_alert);
         var pcBox = UI.VBox(2); _pcLabel = UI.Lbl("Political capital", 12, Pal.Dim);
-        _pcBar.CustomMinimumSize = new Vector2(180, 10);
+        _pcBar.CustomMinimumSize = new Vector2(160, 10); _pcLabel.ClipText = true; _pcLabel.CustomMinimumSize = new Vector2(160, 0);
         pcBox.AddChild(_pcLabel); pcBox.AddChild(_pcBar); h.AddChild(pcBox);
         _score = UI.Lbl("", 18, Pal.Accent, true); h.AddChild(_score);
+        _feedToggle = UI.Chip("News", true, () => { _feedWanted = _feedToggle.ButtonPressed; ApplyLayout(); });
+        _feedToggle.TooltipText = "Show or hide the news and advisers panel";
+        h.AddChild(_feedToggle);
         h.AddChild(UI.Btn("Menu", ShowMenu));
-        bar.AddChild(h);
+        _barTop = UI.HBox(14); _barBottom = UI.HBox(14); _barBottom.Visible = false;
+        _barTop.AddChild(_barA); _barTop.AddChild(_barB);
+        bar.AddChild(UI.VBox(6, _barTop, _barBottom));
         return bar;
     }
 
     Control BuildNav()
     {
-        var nav = new PanelContainer { CustomMinimumSize = new Vector2(180, 0) };
+        var nav = _nav = new PanelContainer { CustomMinimumSize = new Vector2(180, 0) };
         nav.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.Panel, 0, Pal.Border, 0, 8));
         var v = UI.VBox(4);
         foreach (var (name, _) in _pages)
@@ -141,7 +153,7 @@ public partial class GameShell : Control
 
     Control BuildFeed()
     {
-        var panel = new PanelContainer { CustomMinimumSize = new Vector2(330, 0) };
+        var panel = _feedPanel = new PanelContainer { CustomMinimumSize = new Vector2(330, 0) };
         panel.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.Panel, 0, Pal.Border, 0, 10));
         var v = UI.VBox(8);
         v.AddChild(UI.H2("News & advisers"));
@@ -161,6 +173,17 @@ public partial class GameShell : Control
         v.AddChild(UI.Scroll(_feed));
         panel.AddChild(v);
         return panel;
+    }
+
+    /// <summary>Wrap the top bar onto two rows and fold the news panel away when the window is narrow (large interface scale or a small screen).</summary>
+    void ApplyLayout()
+    {
+        float w = Size.X; if (w <= 0) return;
+        bool stack = w < 1500;
+        if (stack != _stacked) { _stacked = stack; _barB.Reparent(stack ? _barBottom : _barTop, false); _barBottom.Visible = stack; }
+        bool feed = _feedWanted ?? !stack;
+        _feedPanel.Visible = feed; _feedToggle.SetPressedNoSignal(feed);
+        _nav.CustomMinimumSize = new Vector2(w < 1300 ? 150 : 180, 0);
     }
 
     // ---------------- navigation ----------------
@@ -254,6 +277,7 @@ public partial class GameShell : Control
         else if ((k.Keycode == Key.Enter || k.Keycode == Key.KpEnter) && !k.AltPressed) EndTurn();
         else if (k.Keycode == Key.Escape) ShowMenu();
         else if (k.Keycode == Key.F1) ShowHelp();
+        else if (k.Keycode == Key.F2) ShowGlossary();
     }
 
     void UpdateTop()
@@ -444,7 +468,9 @@ public partial class GameShell : Control
         var p = new PanelContainer(); p.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelHi, 10, accent ?? Pal.Accent, 1, 12));
         var l = UI.Lbl(text, 14, Pal.Text, false, HorizontalAlignment.Left, true); l.CustomMinimumSize = new Vector2(420, 0); p.AddChild(l);
         _toasts.AddChild(p); EconGame.Audio.Sfx.Ok();
-        var tw = CreateTween(); tw.TweenInterval(9.0); tw.TweenProperty(p, "modulate:a", 0.0, 0.8); tw.TweenCallback(Callable.From(() => p.QueueFree()));
+        var tw = CreateTween(); tw.TweenInterval(9.0);
+        if (!Settings.ReduceMotion) tw.TweenProperty(p, "modulate:a", 0.0, 0.8);
+        tw.TweenCallback(Callable.From(() => p.QueueFree()));
     }
 
     void CheckHints(World w)
@@ -489,20 +515,26 @@ public partial class GameShell : Control
         Overlay(box);
     }
 
+    public void ShowGlossary(string? term = null)
+    {
+        _modal?.QueueFree(); _modal = null;
+        Overlay(new GlossaryPanel(Close, Navigate, term), 980);
+    }
+
     void ShowHelp()
     {
         var box = UI.VBox(8);
         box.AddChild(UI.H1("How to play"));
         foreach (var line in new[]
         {
-            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Run to ▾ — let the clock run to a date · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help",
+            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Run to ▾ — let the clock run to a date · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help · F2 — glossary",
             "Dashboard: click a headline tile to see why it moved. Hover for a quick explanation.",
             "Budget: drag sliders to draft changes, preview five years ahead, then enact. Cuts cost more political capital than rises.",
             "Policies and Investment: reforms and projects take years; the legislature may refuse and projects can overrun.",
             "Trade and World map: deals, tariffs, sanctions and aid ripple through partners. Drag to pan, scroll to zoom, switch to the 3D globe.",
             "Advisers disagree on purpose. Elections (democracies) and coups (autocracies) end your term if you lose public support.",
         }) box.AddChild(UI.Lbl(line, 14, Pal.Dim, false, HorizontalAlignment.Left, true));
-        box.AddChild(UI.Btn("Close", Close, true, 120));
+        box.AddChild(UI.HBox(10, UI.Btn("Close", Close, true, 120), UI.Btn("Glossary (F2)", () => ShowGlossary(), false, 160)));
         Overlay(box, 720);
     }
 
@@ -512,6 +544,7 @@ public partial class GameShell : Control
         var box = UI.VBox(10);
         box.AddChild(UI.H1("Game menu"));
         box.AddChild(UI.Btn("Resume", Close, true, 280));
+        box.AddChild(UI.Btn("Glossary (F2)", () => ShowGlossary(), false, 280));
         box.AddChild(UI.Btn("Save to slot 1", () => { Game.Save("slot1"); Close(); }, false, 280));
         box.AddChild(UI.Btn("Settings", () => { Close(); Main.Instance!.ShowSettings(() => Main.Instance!.ShowGame()); }, false, 280));
         box.AddChild(UI.Btn("Quit to main menu", () => { Game.Save("auto"); Game.Quit(); Main.Instance!.ShowMainMenu(); }, false, 280));
