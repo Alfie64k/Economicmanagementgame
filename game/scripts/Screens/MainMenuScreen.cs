@@ -22,6 +22,7 @@ public partial class MainMenuScreen : Control
         cont.Disabled = newest == null; box.AddChild(cont);
         var load = UI.Btn("Saves…", () => main.ShowSaves(), false, 420);
         load.Disabled = newest == null; box.AddChild(load);
+        box.AddChild(UI.Btn($"Achievements ({Profile.Count}/{Sim.Core.Scoring.Achievements.All.Count})", () => main.ShowAchievements(), false, 420));
         box.AddChild(UI.Btn("Settings", () => main.ShowSettings(() => main.ShowMainMenu()), false, 420));
         box.AddChild(UI.Btn("Quit", () => GetTree().Quit(), false, 420));
         box.AddChild(UI.Spacer(0, 10));

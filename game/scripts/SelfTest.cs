@@ -25,6 +25,7 @@ public partial class SelfTest : Node
         var main = Main.Instance!;
         Game.SuppressModals = true;   // the year-in-review modal would block the scripted walk; it is exercised explicitly below
         Game.SaveDir = "user://selftest_saves";   // never touch a player's real saves
+        Profile.Path = "user://selftest_profile.cfg"; Profile.Clear();
         { var d = DirAccess.Open("user://"); if (d != null && d.DirExists("selftest_saves")) { var sd = DirAccess.Open(Game.SaveDir); foreach (var f in sd.GetFiles()) sd.Remove(f); } }
 
         try
@@ -129,6 +130,7 @@ public partial class SelfTest : Node
             if (!Game.Save("selftest")) throw new Exception("save failed");
             Game.Speed = 0; Game.Load("selftest");
             if (Game.Sim!.StateHash() != hash) throw new Exception("load changed the state");
+            shell = await Awards(main, shots);
             // scenario flow
             var sc = Sim.Core.Scoring.Scenarios.Find("tut_budget")!;
             Game.NewGame(sc.Country, Difficulty.Easy, 5, sc); main.ShowGame(); await Frames(5);
@@ -275,6 +277,32 @@ public partial class SelfTest : Node
     {
         if (root is T t) into.Add(t);
         foreach (var c in root.GetChildren()) FindAll(c, into);
+    }
+
+    /// <summary>Achievements: not on sandbox, earned on Normal, remembered in the profile and shown on the screen.</summary>
+    async System.Threading.Tasks.Task<GameShell> Awards(Main main, string shots)
+    {
+        Game.NewGame("DEU", Difficulty.Sandbox, 11); main.ShowGame(); await Frames(4);
+        Game.Stage(Sim.Core.Model.Command.SetTax(Game.Player.Id, Sim.Core.Model.Tax.Income, Game.Player.TaxRate[(int)Sim.Core.Model.Tax.Income] + 0.01));
+        for (int i = 0; i < 12; i++) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); }
+        if (Profile.Count != 0) throw new Exception("a sandbox game earned an achievement");
+
+        Game.NewGame("DEU", Difficulty.Normal, 11); main.ShowGame(); await Frames(4);
+        var shell = main.GetChildren().OfType<GameShell>().First();
+        Game.Stage(Sim.Core.Model.Command.SetTax(Game.Player.Id, Sim.Core.Model.Tax.Income, Game.Player.TaxRate[(int)Sim.Core.Model.Tax.Income] + 0.01));
+        EconGame.Ui.AchievementsPanel? panel = null;
+        for (int i = 0; i < 12; i++) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); }
+        await Frames(6); Shot(shots, "32_achievement_toast");
+        if (!Profile.Has("first_budget")) throw new Exception("a changed tax on Normal did not earn First budget");
+        int n = Profile.Count; Game.CheckAchievements(false);
+        if (Profile.Count != n) throw new Exception("an award was granted twice");
+        shell.DismissModal();
+        main.ShowAchievements(); await Frames(6); Shot(shots, "32b_achievements");
+        panel = Find<EconGame.Ui.AchievementsPanel>(main) ?? throw new Exception("the achievements screen did not open");
+        main.ShowMainMenu(); await Frames(4);
+        if (FindButton(main, b => b.Text.StartsWith("Achievements (")) == null) throw new Exception("no Achievements button on the main menu");
+        Game.NewGame("DEU", Difficulty.Normal, 11); main.ShowGame(); await Frames(4);
+        return main.GetChildren().OfType<GameShell>().First();
     }
 
     /// <summary>Rolling autosaves, named slots, quick save and load, the saves list.</summary>

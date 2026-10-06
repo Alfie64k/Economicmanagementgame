@@ -279,3 +279,91 @@ public class GlossaryTests
         Assert.Equal(Glossary.Terms.Count, Glossary.Categories.Sum(c => Glossary.Search("", c).Count));
     }
 }
+
+public class AchievementTests
+{
+    static Simulation Played(int months, Difficulty d = Difficulty.Normal)
+    {
+        var s = Simulation.New("GBR", 4, false); s.World.Events = false; Scenarios.ApplyDifficulty(s.World, d); s.Run(months); return s;
+    }
+
+    static World W(int months, Difficulty d = Difficulty.Normal) => Played(months, d).World;
+
+    static HistoryPoint P(int m, double infl = 0.02, double unemp = 0.05, double debt = 0.9, double def = 0.04, double growth = 0.02, double gdp = 100) =>
+        new() { Month = m, Inflation = infl, Unemployment = unemp, DebtToGdp = debt, DeficitToGdp = def, Growth = growth, Gdp = gdp, Pop = 60, EmissionsMt = 400, Gini = 0.35 };
+
+    static World With(Action<List<HistoryPoint>> build, Difficulty d = Difficulty.Normal)
+    {
+        var s = Played(2, d); var h = s.World.History[s.World.PlayerId]; h.Clear(); build(h); return s.World;
+    }
+
+    [Fact]
+    public void Ids_are_unique_and_every_award_has_a_name_and_a_description()
+    {
+        Assert.Equal(Achievements.All.Count, Achievements.All.Select(a => a.Id).Distinct().Count());
+        Assert.All(Achievements.All, a => Assert.False(string.IsNullOrWhiteSpace(a.Name) || string.IsNullOrWhiteSpace(a.Description)));
+        Assert.InRange(Achievements.All.Count, 15, 40);
+        foreach (var t in Enum.GetValues<Tier>()) Assert.Contains(Achievements.All, a => a.Tier == t);
+    }
+
+    [Fact]
+    public void Sandbox_and_easy_games_earn_nothing_and_a_new_game_earns_nothing()
+    {
+        Assert.Empty(Achievements.Check(W(130, Difficulty.Sandbox)));
+        Assert.Empty(Achievements.Check(W(130, Difficulty.Easy)));
+        Assert.Empty(Achievements.Check(W(1)));
+    }
+
+    [Fact]
+    public void Checking_is_deterministic_and_pure()
+    {
+        var sim = Played(150); string hash = sim.StateHash();
+        var a = Achievements.Check(sim.World); var b = Achievements.Check(sim.World);
+        Assert.Equal(a, b); Assert.Contains("survivor", a);
+        Assert.Equal(hash, sim.StateHash());
+    }
+
+    [Fact]
+    public void Time_based_awards_follow_the_calendar()
+    {
+        Assert.DoesNotContain("survivor", Achievements.Check(W(100)));
+        Assert.Contains("survivor", Achievements.Check(W(121)));
+        Assert.DoesNotContain("long_game", Achievements.Check(W(121)));
+    }
+
+    [Fact]
+    public void A_soft_landing_needs_inflation_back_to_target_without_a_jobs_slump()
+    {
+        var good = With(h => { for (int m = 0; m <= 30; m++) h.Add(P(m, infl: m == 0 ? 0.08 : 0.08 - 0.06 * m / 24.0 < 0.03 ? 0.025 : 0.08 - 0.06 * m / 24.0, unemp: 0.05 + 0.01 * Math.Min(1, m / 12.0))); });
+        Assert.Contains("soft_landing", Achievements.Check(good));
+        var costly = With(h => { for (int m = 0; m <= 30; m++) h.Add(P(m, infl: m < 20 ? 0.08 : 0.02, unemp: 0.05 + 0.04 * Math.Min(1, m / 12.0))); });
+        Assert.DoesNotContain("soft_landing", Achievements.Check(costly));
+    }
+
+    [Fact]
+    public void Debt_surplus_and_inflation_streaks_are_recognised()
+    {
+        var w = With(h => { for (int m = 0; m <= 70; m++) h.Add(P(m, infl: 0.02, debt: 1.0 - 0.15 * Math.Min(1, m / 48.0), def: -0.005)); });
+        var got = Achievements.Check(w);
+        Assert.Contains("debt_diet", got); Assert.Contains("balanced_books", got); Assert.Contains("steady_hand", got);
+        var slow = With(h => { for (int m = 0; m <= 200; m += 12) { h.Add(P(m, debt: 1.0 - 0.15 * m / 192.0, def: 0.03)); } });
+        Assert.DoesNotContain("debt_diet", Achievements.Check(slow));
+    }
+
+    [Fact]
+    public void Recovering_from_a_deep_recession_means_regaining_the_old_peak()
+    {
+        var back = With(h => { for (int m = 0; m <= 60; m++) h.Add(P(m, growth: m is >= 12 and <= 18 ? -0.05 : 0.02, gdp: m < 12 ? 100 : m < 24 ? 94 : 100 + (m - 24) * 0.3)); });
+        Assert.Contains("crisis_survivor", Achievements.Check(back));
+        var not = With(h => { for (int m = 0; m <= 60; m++) h.Add(P(m, growth: m is >= 12 and <= 18 ? -0.05 : 0.02, gdp: m < 12 ? 100 : 90)); });
+        Assert.DoesNotContain("crisis_survivor", Achievements.Check(not));
+    }
+
+    [Fact]
+    public void End_of_run_awards_wait_for_the_end()
+    {
+        var w = Played(70).World;
+        Assert.DoesNotContain("top_marks", Achievements.Check(w, ended: false));
+        foreach (var a in Achievements.All.Where(a => a.AtEnd)) Assert.True(a.AtEnd);
+    }
+}

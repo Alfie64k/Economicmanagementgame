@@ -24,6 +24,8 @@ public static class Game
     public static event Action<string>? Paused;
     /// <summary>A calendar year has just finished (the month it ended at).</summary>
     public static event Action<int>? YearEnded;
+    /// <summary>An achievement was earned for the first time.</summary>
+    public static event Action<AchievementDef>? AchievementEarned;
     /// <summary>Watches for things worth stopping the clock for. Recreated for every game and load.</summary>
     public static PauseWatcher? Watcher;
     /// <summary>The month a "run to…" request should stop at, or -1.</summary>
@@ -129,7 +131,17 @@ public static class Game
         else if (Speed > 0 && Sim.World.Decisions.Count == 0 && why != null) { Speed = 0; RunTo = -1; Paused?.Invoke(why); }
         else if (RunTo > 0 && Sim.World.Month >= RunTo && Speed > 0) { Speed = 0; RunTo = -1; Paused?.Invoke("Reached the date you asked for."); }
         if (Sim.World.Month > 0 && Sim.World.Month % 12 == 0 && !Sim.World.GameOver) YearEnded?.Invoke(Sim.World.Month);
+        bool over = Sim.World.GameOver || (Scenario != null && Sim.World.Month >= Scenario.Years * 12);
+        if (over || (Sim.World.Month > 0 && Sim.World.Month % 12 == 0)) CheckAchievements(over);
         return true;
+    }
+
+    /// <summary>Award anything newly earned. Evaluated once a year and at the end of a run, so it never costs a noticeable fraction of a turn.</summary>
+    public static void CheckAchievements(bool ended)
+    {
+        if (Sim == null) return;
+        foreach (var id in Achievements.Check(Sim.World, ended))
+            if (Profile.Unlock(id, Player.Name) && Achievements.Find(id) is { } def) AchievementEarned?.Invoke(def);
     }
 
     public static void NotifyChanged() => Changed?.Invoke();

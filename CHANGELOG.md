@@ -17,6 +17,7 @@
 * Accessibility: interface scale (0.8–1.5×, whole interface, not just text), high-contrast theme, reduce-motion option, and a layout that holds together at large scales (top bar on two rows, news panel foldable with a News toggle, wrapping filter chips). The Policies filter chips and Investment project rows no longer overflow narrow windows.
 * Year review: GDP per head was shown in thousands of dollars.
 * Saves: a saves list (main menu and in-game) with country, date, grade and time for every save; named slots with overwrite and confirmed delete; three rolling autosaves each January; F5 quick save and F9 quick load. Continue loads the newest save.
+* Achievements: 20 awards (bronze, silver, gold) read from your history and logs, for example Soft landing, Debt diet, Balanced books, Climber, Hat-trick and Top marks. Earned on Normal and Hard runs only; remembered in a small local profile, announced with a toast, listed from the main menu and the game menu. Dashboard GDP axis no longer repeats whole-number labels in a young game.
 * Settings: check boxes now show properly (they were drawn as filled buttons with no visible tick box when unticked); new pause-trigger and year-in-review options.
 
 ## 1.0.0-rc1

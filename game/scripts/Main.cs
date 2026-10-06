@@ -68,6 +68,7 @@ public partial class Main : Control
     public void ShowGame() => Show(new GameShell());
     public void ShowSettings(System.Action back) => Show(new SettingsScreen(back));
     public void ShowSaves() => Show(new SavesScreen());
+    public void ShowAchievements() => Show(new AchievementsScreen());
 
     public void ApplyTheme() { Theme = AppTheme.Build(); if (_ground != null) _ground.Color = Pal.Bg; }
 }

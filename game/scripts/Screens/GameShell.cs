@@ -77,7 +77,7 @@ public partial class GameShell : Control
         Game.DecisionPending += ShowDecision;
         Game.Ended += ShowEnd;
         Game.Ticked += MarkDirty; Game.Changed += MarkDirty; Game.PlanChanged += OnPlanChanged; Game.PlanApplied += OnPlanApplied;
-        Game.Paused += OnAutoPaused; Game.YearEnded += OnYearEnded;
+        Game.Paused += OnAutoPaused; Game.YearEnded += OnYearEnded; Game.AchievementEarned += OnAchievement;
         Resized += ApplyLayout; Callable.From(ApplyLayout).CallDeferred();
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
         Navigate("Dashboard");
@@ -86,7 +86,7 @@ public partial class GameShell : Control
         if (Game.Scenario != null) ShowBriefing();
     }
 
-    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; Game.Paused -= OnAutoPaused; Game.YearEnded -= OnYearEnded; }
+    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; Game.Paused -= OnAutoPaused; Game.YearEnded -= OnYearEnded; Game.AchievementEarned -= OnAchievement; }
 
     // ---------------- layout ----------------
     Control BuildTopBar()
@@ -238,6 +238,8 @@ public partial class GameShell : Control
         _pauseReason = why; UpdateTop();
         Toast("Paused: " + why, Pal.Warn);
     }
+
+    void OnAchievement(AchievementDef a) => Toast($"★ Achievement: {a.Name}. {a.Description}", AchievementsPanel.TierColour(a.Tier));
 
     void OnYearEnded(int month)
     {
@@ -566,6 +568,7 @@ public partial class GameShell : Control
         box.AddChild(UI.H1("Game menu"));
         box.AddChild(UI.Btn("Resume", Close, true, 280));
         box.AddChild(UI.Btn("Glossary (F2)", () => ShowGlossary(), false, 280));
+        box.AddChild(UI.Btn("Achievements", () => { _modal?.QueueFree(); _modal = null; Overlay(new AchievementsPanel(Close, true), 900); }, false, 280));
         box.AddChild(UI.Btn("Quick save (F5)", () => { QuickSave(); Close(); }, false, 280));
         box.AddChild(UI.Btn("Saves…", () => ShowSaves(), false, 280));
         box.AddChild(UI.Btn("Settings", () => { Close(); Main.Instance!.ShowSettings(() => Main.Instance!.ShowGame()); }, false, 280));

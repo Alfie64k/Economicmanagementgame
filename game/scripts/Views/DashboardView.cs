@@ -79,8 +79,9 @@ public partial class DashboardView : View
         double g0v = h.Count > 0 ? h[0].Gdp : 1;
         _gdp.StartYear = _macro.StartYear = _fiscal.StartYear = _soc.StartYear = w.StartYear;
         _gdp.Markers = _macro.Markers = _fiscal.Markers = _soc.Markers = ChartPrefs.For(w);
-        _gdp.YFormat = v => v.ToString("0");
-        _gdp.SetSeries(new[] { new Series { Name = "GDP", X = x, Y = h.Select(p => 100 * p.Gdp / g0v).ToArray(), Color = Pal.Series[0] } });
+        var gdpIdx = h.Select(p => 100 * p.Gdp / g0v).ToArray();
+        _gdp.YFormat = gdpIdx.Length > 0 && gdpIdx.Max() - gdpIdx.Min() < 4 ? (v => v.ToString("0.0")) : (v => v.ToString("0"));   // a short game's range is a point or two: whole numbers would repeat
+        _gdp.SetSeries(new[] { new Series { Name = "GDP", X = x, Y = gdpIdx, Color = Pal.Series[0] } });
         _macro.YFormat = v => v.ToString("0.0") + "%";
         _macro.SetSeries(new[]
         {
