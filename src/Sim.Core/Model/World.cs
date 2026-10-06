@@ -12,7 +12,7 @@ public sealed class HistoryPoint
 /// <summary>Everything needed to save, load and replay a game.</summary>
 public sealed class World
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
     public int Version = CurrentVersion;
     public ulong Seed;
     public int StartYear = 2024;
@@ -22,6 +22,14 @@ public sealed class World
     public bool RecordHistory = true;
     public bool Advisors = true;
     public bool Events = true;
+    /// <summary>
+    /// Version 3 dynamics: the shadow economy, wage bargaining and the wage-price spiral, long-term unemployment hysteresis, strike risk and the
+    /// labour share. False freezes all of that state at its starting values and reproduces the version 2 model exactly (used by tests and as a
+    /// "classic economy" baseline).
+    /// </summary>
+    public bool EconomicDepth = true;
+    /// <summary>Finer switches, only read while <see cref="EconomicDepth"/> is on: the informal-sector engine, and the labour block (wage bargaining, hysteresis, strikes, labour share). They let tests exercise one system on its own.</summary>
+    public bool ShadowEconomy = true, LabourMarket = true;
     public List<CountryState> Countries = new();
     public Rng[] CountryRng = Array.Empty<Rng>();
     public Rng WorldRng = new();

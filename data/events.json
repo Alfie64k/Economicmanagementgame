@@ -541,7 +541,13 @@
     "unemp<0.07",
     "infl>0.03"
    ],
-   "probMods": [],
+   "probMods": [
+    {
+     "metric": "strike",
+     "ref": 0.0,
+     "slope": 4.0
+    }
+   ],
    "effects": [
     {
      "kind": "mod",
@@ -581,6 +587,13 @@
        "kind": "state",
        "key": "approval",
        "value": 0.04,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "wagecatchup",
+       "value": 0.6,
        "months": 0,
        "scale": "none"
       }

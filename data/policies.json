@@ -11,7 +11,8 @@
     "nairu": -0.012,
     "tfp": 0.001,
     "gini": 0.012,
-    "approval": -0.03
+    "approval": -0.03,
+    "bargaining": -0.12
    },
    "budget": {},
    "subsidy": {},
@@ -33,7 +34,8 @@
     "nairu": 0.006,
     "gini": -0.015,
     "tfp": -0.0005,
-    "approval": 0.02
+    "approval": 0.02,
+    "bargaining": 0.15
    },
    "budget": {},
    "subsidy": {},
@@ -786,6 +788,7 @@
    "delay": 12,
    "mods": {
     "revenue": 0.006,
+    "shadow": -0.1,
     "corruption": -0.002
    },
    "budget": {

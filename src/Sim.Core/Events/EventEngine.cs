@@ -1,3 +1,4 @@
+using Sim.Core.Engine;
 using Sim.Core.Model;
 using Sim.Core.Util;
 
@@ -17,6 +18,7 @@ public static class EventEngine
             "democracy" => c.Democracy, "renewables" => c.Renewables, "temp" => g.TempAnomaly, "oil" => g.OilIdx,
             "growth" => c.GdpGrowth, "realloan" => c.RealLoanRate, "agri" => c.Va0[(int)Sector.Agriculture] / c.Gdp0,
             "rnd" => c.AssetIdx[(int)Asset.RnD], "peg" => c.Regime == FxRegime.Peg ? 1 : 0, "default" => c.InDefault ? 1 : 0,
+            "strike" => c.StrikeRisk, "shadow" => c.Shadow,
             _ => throw new ArgumentException("unknown metric " + name),
         };
     }
@@ -207,6 +209,7 @@ public static class EventEngine
                         case "corruption": c.Corruption = Maths.Clamp(c.Corruption + v, 0, 1); break;
                         case "polcap": c.PoliticalCapital = Maths.Clamp(c.PoliticalCapital + v, 0, 100); break;
                         case "gini": c.Gini = Maths.Clamp(c.Gini + v, 0.15, 0.7); break;
+                        case "wagecatchup": LabourMarketEngine.CatchUp(c, v); break;   // a pay settlement: this share of the real-wage shortfall is made good
                     }
                     break;
                 case "mod":

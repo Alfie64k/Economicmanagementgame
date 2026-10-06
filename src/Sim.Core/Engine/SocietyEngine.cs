@@ -9,7 +9,8 @@ public static class SocietyEngine
     public static double TaxBurden(CountryState c)
     {
         double r = 0;
-        for (int t = 0; t < Dim.Taxes; t++) r += FiscalEngine.TaxRevenueReal(c, (Tax)t, c.Gdp, c.Cons, c.Imports);
+        // the statutory take before evasion: what voters feel is the rate they are asked to pay, not what informality lets people avoid
+        for (int t = 0; t < Dim.Taxes; t++) r += FiscalEngine.TaxRevenueAt(c, (Tax)t, c.TaxRate[t], c.Gdp, c.Cons, c.Imports, erode: false);
         return r / Math.Max(1e-9, c.Gdp);
     }
 
@@ -27,7 +28,9 @@ public static class SocietyEngine
             - 0.3 * TaxCodeEngine.IncomeTaxOffset(c)
             + TaxCodeEngine.GiniDelta(c)
             - 0.04 * idx(Asset.Education) - 0.02 * idx(Asset.Housing)
-            + c.Mod("gini");
+            + c.Mod("gini")
+            + ShadowEngine.GiniSlope * (c.Shadow - c.Shadow0)
+            - LabourMarketEngine.ShareGini * (c.LabourIncomeShare - c.LabourIncomeShare0);
         c.Gini += (Maths.Clamp(giniTarget, 0.2, 0.65) - c.Gini) * 0.02 * dt * 12;
 
         // approval
@@ -42,7 +45,8 @@ public static class SocietyEngine
             + 0.15 * idx(Asset.Health) + 0.10 * idx(Asset.Education) + 0.10 * idx(Asset.Housing) + 0.05 * idx(Asset.Infrastructure)
             - 0.3 * (c.Corruption - c.Corruption0)
             - 0.5 * Math.Max(0, c.DebtToGdp - 1.2) * 0.1
-            + c.Mod("approval") + TaxCodeEngine.ApprovalDelta(c);
+            + c.Mod("approval") + TaxCodeEngine.ApprovalDelta(c)
+            - ShadowEngine.ApprovalSlope * (c.Shadow - c.Shadow0);
         var ad = c.ApprovalDrivers;
         ad[0] = c.Approval0; ad[1] = 2.0 * (growth - 0.02); ad[2] = -1.5 * (c.Unemp - c.Unemp0); ad[3] = -1.2 * Math.Max(0, c.Inflation - 0.04);
         ad[4] = -0.8 * (c.Gini - c.Gini0); ad[5] = -1.5 * (burden - c.Burden0);

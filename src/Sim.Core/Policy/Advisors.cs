@@ -48,6 +48,15 @@ public static class Advisors
                 $"Sovereign spreads are {c.RiskPremium * 10000:F0}bp above their baseline and 10-year yields are {Fmt.P(c.Yield10, 1)}.");
         if (revShare > 0.15)
             Add("Finance Minister", Severity.Warning, "interest", $"Debt interest now absorbs {Fmt.P(revShare, 0)} of revenue, crowding out services.");
+        if (c.Shadow > c.Shadow0 + 0.015)
+        {
+            var d = c.ShadowDrivers;
+            string why = d[1] >= d[2] && d[1] >= d[3] ? "Heavier taxes are pushing activity off the books" : d[2] >= d[3] ? "Corruption is eroding compliance" : "Weaker tax enforcement is letting more activity go unreported";
+            Add("Finance Minister", Severity.Warning, "shadow",
+                $"The informal economy has grown to {Fmt.P(c.Shadow, 1)} of GDP ({Fmt.P(c.Shadow0, 1)} at the start), shrinking the tax base by {Fmt.P(1 - c.ShadowMult, 1)}. {why}.");
+        }
+        else if (c.Shadow < c.Shadow0 - 0.015)
+            Add("Finance Minister", Severity.Info, "shadowfall", $"Compliance is improving: the informal economy is down to {Fmt.P(c.Shadow, 1)} of GDP ({Fmt.P(c.Shadow0, 1)} at the start), which widens the tax base by {Fmt.P(c.ShadowMult - 1, 1)}.");
         if (debt < ceiling - 0.2 && def < 0.02 && c.Gap < 0.01)
             Add("Finance Minister", Severity.Info, "space", $"We have fiscal space (debt {Fmt.P(debt, 0)}, deficit {Fmt.P(def, 1)}). A productive investment programme would be affordable.",
                 c.Projects.Any(p => p.Id == "broadband") ? null : Command.StartProject(c.Id, "broadband"), Stance.Support);
@@ -61,6 +70,9 @@ public static class Advisors
         else if (c.Inflation < c.InflTarget - 0.015 && c.Gap < -0.01)
             Add("Central Bank Governor", Severity.Warning, "deflation", $"Inflation of {Fmt.P(c.Inflation, 1)} and a negative output gap raise deflation risk. Rates are {Fmt.P(c.PolicyRate, 1)}.",
                 Command.SetRate(c.Id, true, Math.Round(Math.Max(0, rule - 0.005), 3)), Stance.Support);
+        if (c.WageSpiral > 0.004)
+            Add("Central Bank Governor", c.WageSpiral > 0.015 ? Severity.Alert : Severity.Warning, "spiral",
+                $"Wage settlements are adding {c.WageSpiral * 100:F1}pp to inflation (union coverage {Fmt.P(c.UnionCoverage, 0)}, credibility {Fmt.P(c.Cred, 0)}). The more the public trusts the bank to bring prices back, the less of this shock reaches pay.");
         if (c.RateMode == RateMode.Manual && Math.Abs(c.PolicyRate - rule) > 0.02)
             Add("Central Bank Governor", Severity.Warning, "manual", $"The policy rate is being held {Math.Abs(c.PolicyRate - rule) * 10000:F0}bp {(c.PolicyRate > rule ? "above" : "below")} what the rule suggests; expectations may de-anchor.",
                 Command.SetRate(c.Id, false, 0));
@@ -79,6 +91,11 @@ public static class Advisors
         if (c.Unemp > c.NairU + 0.02)
             Add("Social Policy Minister", Severity.Warning, "unemp", $"Unemployment is {Fmt.P(c.Unemp, 1)}, {(c.Unemp - c.NairU) * 100:F1}pp above the natural rate. Demand support or active labour programmes would help.",
                 Command.SetBudget(c.Id, BudgetLine.Infrastructure, c.Budget[(int)BudgetLine.Infrastructure] + 0.003), Stance.Support);
+        if (c.NairuHyst > 0.005)
+            Add("Social Policy Minister", Severity.Warning, "scarring", $"Long-term unemployment is lifting the natural rate by {c.NairuHyst * 100:F1}pp. The longer people stay out of work the less employable they become; active labour programmes and a faster recovery would limit it.");
+        if (c.StrikeRisk > 0.05)
+            Add("Social Policy Minister", c.StrikeRisk > 0.2 ? Severity.Alert : Severity.Warning, "strikes",
+                $"Real wages are {c.WageGap * 100:F1}% below where they would be and the unions are mobilising (strike risk {Fmt.P(c.StrikeRisk, 0)}). A pay deal costs money and feeds prices; refusing one risks a walk-out.");
         if (c.Gini > c.Gini0 + 0.02)
             Add("Social Policy Minister", Severity.Warning, "gini", $"Inequality has risen (Gini {c.Gini:F2} vs {c.Gini0:F2}).", null, Stance.Support);
         if (c.Approval < 0.30)

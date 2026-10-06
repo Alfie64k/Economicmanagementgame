@@ -27,5 +27,13 @@ public static class Migrations
             }
             w.Version = 2;
         }
+        if (w.Version < 3)
+        {
+            // version 3 added the shadow economy and the labour-market state. Every country starts at its catalogue values, which are the neutral
+            // values the dynamics are measured against (shadow share at its start, wage gap and long-term unemployed at zero, labour share at
+            // its start), so the economy does not jump: the drivers, whatever they have become by now, move the new state gradually from here.
+            foreach (var c in w.Countries) { ShadowEngine.Init(c); LabourMarketEngine.Init(c); }
+            w.Version = 3;
+        }
     }
 }
