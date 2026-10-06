@@ -62,6 +62,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 
 ## A ten-minute test script
 
+0. The first time you start a sandbox game a short tutorial coach walks you through one turn. Close it any time; **Help (F1) → Replay the tutorial** brings it back.
 1. Main menu → **New game (sandbox)** → pick Germany (stable) or Brazil (more drama) → **Start as this country**. (For guided play use **Scenarios & campaign**, starting with "1. Your First Budget".)
 2. Dashboard: note GDP growth, inflation, unemployment, debt/GDP, approval. Press **Space**, speed 3, run two years.
 3. **Monetary**: drag the target-rate slider and watch the panel below it: expected inflation, unemployment, output gap and currency in 3 months, 6 months and a year, against carrying on. Add a pin to the plan, end the turn, and watch the real economy follow the same lag.

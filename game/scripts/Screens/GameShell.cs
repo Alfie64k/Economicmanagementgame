@@ -32,6 +32,7 @@ public partial class GameShell : Control
     PanelContainer _nav = new(), _feedPanel = new();
     Button _feedToggle = new();
     bool _stacked; bool? _feedWanted;
+    TutorialCoach? _coach;
     string _pauseReason = "";
     int _cabinetSig = -1; int _cabinetCount;
     VBoxContainer? _planBox;
@@ -76,7 +77,7 @@ public partial class GameShell : Control
         AddChild(_toasts);
         Game.DecisionPending += ShowDecision;
         Game.Ended += ShowEnd;
-        Game.Ticked += MarkDirty; Game.Changed += MarkDirty; Game.PlanChanged += OnPlanChanged; Game.PlanApplied += OnPlanApplied;
+        Game.Ticked += MarkDirty; Game.Ticked += CoachTick; Game.Changed += MarkDirty; Game.PlanChanged += OnPlanChanged; Game.PlanApplied += OnPlanApplied;
         Game.Paused += OnAutoPaused; Game.YearEnded += OnYearEnded; Game.AchievementEarned += OnAchievement;
         Resized += ApplyLayout; Callable.From(ApplyLayout).CallDeferred();
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
@@ -84,9 +85,29 @@ public partial class GameShell : Control
         UpdateTop(); UpdateFeed(true);
         if (Game.World.Decisions.Count > 0) ShowDecision();
         if (Game.Scenario != null) ShowBriefing();
+        else if (!Settings.TutorialSeen && Game.World.Month == 0 && !Game.SuppressModals) StartTutorial();
     }
 
-    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; Game.Paused -= OnAutoPaused; Game.YearEnded -= OnYearEnded; Game.AchievementEarned -= OnAchievement; }
+    public TutorialCoach? Coach => _coach;
+    void CoachTick() => _coach?.Notify("turn");
+
+    /// <summary>Begin (or restart) the guided first turn.</summary>
+    public void StartTutorial()
+    {
+        _coach?.QueueFree();
+        Navigate("Dashboard"); Game.ClearPlan();
+        _coach = new TutorialCoach(TutorialTarget, () => _coach = null);
+        AddChild(_coach);
+    }
+
+    Control? TutorialTarget(string key) => key switch
+    {
+        "endturn" => _endTurn, "plan" => _planBtn, "runto" => _runTo,
+        _ when key.StartsWith("nav:") => _navBtns.GetValueOrDefault(key[4..]),
+        _ => null,
+    };
+
+    public override void _ExitTree() { Game.Ticked -= CoachTick; Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; Game.Paused -= OnAutoPaused; Game.YearEnded -= OnYearEnded; Game.AchievementEarned -= OnAchievement; }
 
     // ---------------- layout ----------------
     Control BuildTopBar()
@@ -200,6 +221,7 @@ public partial class GameShell : Control
             if (sel) kv.Value.AddThemeFontOverride("font", UI.Bold); else kv.Value.RemoveThemeFontOverride("font");
         }
         view.Refresh();
+        _coach?.Notify("nav:" + name);
     }
 
     void CyclePage(int dir) { int i = _pages.FindIndex(p => p.name == _currentName); Navigate(_pages[(i + dir + _pages.Count) % _pages.Count].name); }
@@ -230,7 +252,7 @@ public partial class GameShell : Control
                 target = el; break;
             default: target = w.Month + 12; break;
         }
-        _pauseReason = ""; Game.StartRunTo(target); UpdateTop();
+        _pauseReason = ""; Game.StartRunTo(target); UpdateTop(); _coach?.Notify("runto");
     }
 
     void OnAutoPaused(string why)
@@ -359,7 +381,7 @@ public partial class GameShell : Control
     void OnPlanChanged()
     {
         if (!Game.Running) return;
-        UpdatePlanReadouts(); MarkDirty();
+        UpdatePlanReadouts(); MarkDirty(); _coach?.Notify("plan");
         if (_modal == null) _planBox = null;
         else if (_planBox != null && IsInstanceValid(_planBox)) BuildPlan();
     }
@@ -557,7 +579,7 @@ public partial class GameShell : Control
             "Trade and World map: deals, tariffs, sanctions and aid ripple through partners. Drag to pan, scroll to zoom, switch to the 3D globe.",
             "Advisers disagree on purpose. Elections (democracies) and coups (autocracies) end your term if you lose public support.",
         }) box.AddChild(UI.Lbl(line, 14, Pal.Dim, false, HorizontalAlignment.Left, true));
-        box.AddChild(UI.HBox(10, UI.Btn("Close", Close, true, 120), UI.Btn("Glossary (F2)", () => ShowGlossary(), false, 160)));
+        box.AddChild(UI.HBox(10, UI.Btn("Close", Close, true, 120), UI.Btn("Glossary (F2)", () => ShowGlossary(), false, 160), UI.Btn("Replay the tutorial", () => { Close(); StartTutorial(); }, false, 200)));
         Overlay(box, 720);
     }
 

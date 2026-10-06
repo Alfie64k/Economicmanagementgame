@@ -26,6 +26,7 @@ public partial class SelfTest : Node
         Game.SuppressModals = true;   // the year-in-review modal would block the scripted walk; it is exercised explicitly below
         Game.SaveDir = "user://selftest_saves";   // never touch a player's real saves
         Profile.Path = "user://selftest_profile.cfg"; Profile.Clear();
+        Settings.Path = "user://selftest_settings.cfg"; Settings.TutorialSeen = true;
         { var d = DirAccess.Open("user://"); if (d != null && d.DirExists("selftest_saves")) { var sd = DirAccess.Open(Game.SaveDir); foreach (var f in sd.GetFiles()) sd.Remove(f); } }
 
         try
@@ -130,6 +131,7 @@ public partial class SelfTest : Node
             if (!Game.Save("selftest")) throw new Exception("save failed");
             Game.Speed = 0; Game.Load("selftest");
             if (Game.Sim!.StateHash() != hash) throw new Exception("load changed the state");
+            shell = await Tutorial(main, shots);
             shell = await Awards(main, shots);
             // scenario flow
             var sc = Sim.Core.Scoring.Scenarios.Find("tut_budget")!;
@@ -277,6 +279,35 @@ public partial class SelfTest : Node
     {
         if (root is T t) into.Add(t);
         foreach (var c in root.GetChildren()) FindAll(c, into);
+    }
+
+    /// <summary>The guided first turn: each step completes when the player does what it asks.</summary>
+    async System.Threading.Tasks.Task<GameShell> Tutorial(Main main, string shots)
+    {
+        Game.NewGame("GBR", Difficulty.Easy, 5); main.ShowGame(); await Frames(6);
+        var shell = main.GetChildren().OfType<GameShell>().First();
+        shell.StartTutorial(); await Frames(6);
+        var coach = shell.Coach ?? throw new Exception("the tutorial coach did not start");
+        void At(int step, string why) { if (coach.CurrentStep != step) throw new Exception($"tutorial: expected step {step + 1} {why}, at step {coach.CurrentStep + 1}"); }
+        At(0, "at the start"); Shot(shots, "33_tutorial_step1");
+        var next = FindButton(coach, b => b.Text == "Next ▸" && b.IsVisibleInTree()) ?? throw new Exception("no Next button on an informational step");
+        await Click(next.GlobalPosition + next.Size / 2); await Frames(4); At(1, "after Next");
+        await Frames(10); Shot(shots, "33b_tutorial_highlight");
+        var nav = FindButton(shell, b => b.Text == "Budget") ?? throw new Exception("no Budget nav"); await Click(nav.GlobalPosition + nav.Size / 2); await Frames(6); At(2, "after opening Budget");
+        Game.Stage(Sim.Core.Model.Command.SetTax(Game.Player.Id, Sim.Core.Model.Tax.Income, Game.Player.TaxRate[(int)Sim.Core.Model.Tax.Income] + 0.01)); await Frames(4); At(3, "after staging a change");
+        var next2 = FindButton(coach, b => b.Text == "Next ▸" && b.IsVisibleInTree()) ?? throw new Exception("no Next on the review step");
+        await Click(next2.GlobalPosition + next2.Size / 2); await Frames(4); At(4, "after reviewing the plan");
+        int m = Game.World.Month; await Key(Godot.Key.Enter); await Frames(8);
+        if (Game.World.Month != m + 1) throw new Exception("Enter did not end the turn during the tutorial"); At(5, "after ending the turn");
+        shell.Navigate("Monetary"); await Frames(4); At(6, "after opening Monetary");
+        shell.Navigate("Cabinet"); await Frames(4); At(7, "after opening the Cabinet");
+        Shot(shots, "33c_tutorial_runto");
+        var skip = FindButton(coach, b => b.Text == "Skip step" && b.IsVisibleInTree()) ?? throw new Exception("no Skip step button"); await Click(skip.GlobalPosition + skip.Size / 2); await Frames(4); At(8, "after skipping");
+        var fin = FindButton(coach, b => b.Text == "Finish" && b.IsVisibleInTree()) ?? throw new Exception("no Finish button on the last step"); await Click(fin.GlobalPosition + fin.Size / 2); await Frames(6);
+        if (shell.Coach != null || !Settings.TutorialSeen) throw new Exception("the tutorial did not close and record that it was seen");
+        Settings.TutorialSeen = true;
+        Game.NewGame("GBR", Difficulty.Easy, 5); main.ShowGame(); await Frames(4);
+        return main.GetChildren().OfType<GameShell>().First();
     }
 
     /// <summary>Achievements: not on sandbox, earned on Normal, remembered in the profile and shown on the screen.</summary>

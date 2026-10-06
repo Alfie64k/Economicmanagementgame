@@ -56,6 +56,8 @@ public partial class SettingsScreen : Control
             triggers.AddChild(t);
         }
         box.AddChild(triggers);
+        var coach = new CheckBox { Text = "Guide me through the first turn of a new game", ButtonPressed = !Settings.TutorialSeen };
+        coach.Toggled += on => Settings.TutorialSeen = !on; box.AddChild(coach);
         var review = new CheckBox { Text = "Show a year-in-review each January", ButtonPressed = Settings.AnnualReview };
         review.Toggled += on => Settings.AnnualReview = on; box.AddChild(review);
         var crash = new CheckBox { Text = "Keep a local crash log (never sent anywhere)", ButtonPressed = Diagnostics.CrashLog };
