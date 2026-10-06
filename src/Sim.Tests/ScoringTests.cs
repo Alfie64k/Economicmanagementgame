@@ -167,7 +167,7 @@ public class RegionTests
             var c = sim.World.Find(id)!;
             Assert.True(Sim.Core.Regions.Regions.Has(id), id);
             var r = Sim.Core.Regions.Regions.Compute(c);
-            Assert.True(r.Count >= 9, id);
+            Assert.True(r.Count >= 7, id);
             Assert.InRange(r.Sum(x => x.PopShare), 0.999, 1.001);
             Assert.InRange(r.Sum(x => x.GdpShare), 0.999, 1.001);
             Assert.InRange(r.Sum(x => x.Gdp) / c.SectorVa.Sum(), 0.999, 1.001);

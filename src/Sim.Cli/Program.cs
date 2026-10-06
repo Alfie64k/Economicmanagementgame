@@ -84,6 +84,15 @@ static class Program
                     foreach (var f in rep.Findings) Console.WriteLine("FINDING: " + f);
                     return rep.Findings.Count == 0 ? 0 : 4;
                 }
+            case "regions":
+                {
+                    var sim = Simulation.New(country, seed, false); sim.World.Events = false; sim.Run(years * 12);
+                    var c = sim.World.Player;
+                    c.SectorVa[(int)Sector.Energy] *= 2.0;
+                    foreach (var r in Sim.Core.Regions.Regions.Compute(c).OrderByDescending(r => r.GdpShare).Take(12))
+                        Console.WriteLine($"{r.Def.Name,-22} pop {r.PopShare * 100,5:F1}%  gdp {r.GdpShare * 100,5:F1}%  rel {r.GdpPerHeadRel,4:F2}  growth {r.GrowthSinceStart * 100,5:F1}%  u {r.Unemployment * 100,4:F1}%  {r.LeadingSector}");
+                    return 0;
+                }
             case "trace":
                 {
                     var sim = Simulation.New(country, seed, false);

@@ -6,7 +6,9 @@ namespace Sim.Core.Regions;
 
 public sealed class RegionDef
 {
-    public string Id { get; set; } = "", Name { get; set; } = "", Country { get; set; } = "";
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Country { get; set; } = "";
     public double Area { get; set; }
     public double Lat { get; set; }
     public double Lon { get; set; }
@@ -42,6 +44,7 @@ public static class Regions
     {
         ulong h = 1469598103934665603UL;
         foreach (char ch in id + "|" + salt) { h ^= ch; h *= 1099511628211UL; }
+        h ^= h >> 30; h *= 0xBF58476D1CE4E5B9UL; h ^= h >> 27; h *= 0x94D049BB133111EBUL; h ^= h >> 31;   // avalanche
         return (h >> 11) * (1.0 / (1UL << 53));
     }
 
