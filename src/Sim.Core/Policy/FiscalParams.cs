@@ -86,7 +86,7 @@ public static class FiscalParams
             A("Pen.Level", P, "Full state pension", 0, 1.5, 0.005, "Annual pension per recipient."),
             K("Pen.Age", P, "State pension age", PKind.Years, 55, 75, 1, "Raising it saves pension spending and keeps older people in work, and is politically toxic. It overlaps the 'Raise retirement age' policy."),
             K("Pen.Index", P, "Annual uprating", PKind.Choice, 0, 3, 1, "Triple lock: the larger of earnings growth, inflation and 2.5% every year, so pensions drift up against earnings.", PenIndexOptions),
-            A("Une.Level", U, "Weekly-equivalent benefit (annual)", 0, 1, 0.005, "Annual jobseeker support per recipient. A higher replacement rate raises the natural rate of unemployment."),
+            A("Une.Level", U, "Jobseeker benefit (annual)", 0, 1, 0.005, "Annual jobseeker support per recipient. A higher replacement rate raises the natural rate of unemployment."),
             K("Une.Months", U, "Maximum duration (months)", PKind.Months, 1, 36, 1, "Months before the main benefit runs out. Longer durations raise the natural rate of unemployment and cushion demand in a recession."),
             A("Chi.Level", F, "Per child, per year", 0, 0.5, 0.002, "Child benefit for the first child."),
             A("Chi.Threshold", F, "Withdrawn above income of (0 = universal)", 0, 15, 0.05, "Households above this income lose the benefit."),

@@ -46,7 +46,41 @@ public partial class SelfTest : Node
                     Sim.Core.Model.Tax t = Sim.Core.Model.Tax.Income;
                     EconGame.App.Draft.Set(t, c.TaxRate[(int)t] * 1.1, c.TaxRate[(int)t]);
                     EconGame.App.Draft.Set(Sim.Core.Model.BudgetLine.Infrastructure, c.Budget[(int)Sim.Core.Model.BudgetLine.Infrastructure] + 0.01, c.Budget[(int)Sim.Core.Model.BudgetLine.Infrastructure]);
-                    ((EconGame.Views.BudgetView)shell.Current!).RunPreview(); await Frames(120);
+                    var bv = (EconGame.Views.BudgetView)shell.Current!;
+                    bv.RunPreview(); await Frames(120);
+                    EconGame.App.Draft.Clear(); await Frames(2);
+                    if (c.Fiscal != null)
+                    {
+                        var f = c.Fiscal;
+                        foreach (var tab in new[] { "Overview", "Income tax", "Payroll", "Corporation tax", "VAT", "Pensions & welfare", "Departments" })
+                        {
+                            if (!bv.ShowTab(tab)) throw new Exception("Budget has no tab '" + tab + "'");
+                            await Frames(4);
+                            Shot(shots, "04t_budget_" + tab.Replace(' ', '_').Replace("&", "and").ToLower());
+                        }
+                        // a taper edit on the income-tax tab: a cut to the allowance and a steeper taper raise revenue, and the deciles respond
+                        bv.ShowTab("Income tax"); await Frames(4);
+                        EconGame.App.Draft.SetFiscal("Inc.Allow", f.Get("Inc.Allow") * 0.9, f.Get("Inc.Allow"));
+                        EconGame.App.Draft.SetFiscal("Inc.TaperRate", Math.Min(0.9, f.Get("Inc.TaperRate") + 0.25), f.Get("Inc.TaperRate"));
+                        await Frames(4);
+                        if (!(bv.Estimate.Changed && bv.Estimate.TaxGdp[0] > 0)) throw new Exception("cutting the allowance should raise income-tax revenue in the estimate");
+                        if (!(bv.Estimate.DecileNet.Min() < 0)) throw new Exception("cutting the allowance should leave some tenth worse off");
+                        Shot(shots, "04a_budget_income_tax");
+                        EconGame.App.Draft.Clear();
+                        // a more generous unemployment benefit costs money and lifts first-year demand
+                        bv.ShowTab("Pensions & welfare"); await Frames(4);
+                        EconGame.App.Draft.SetFiscal("Une.Level", f.Get("Une.Level") * 1.3, f.Get("Une.Level")); await Frames(4);
+                        if (!(bv.Estimate.BenSpendGdp[1] > 0 && bv.Estimate.DemandGdp > 0)) throw new Exception("a higher jobseeker benefit should cost more and lift demand");
+                        // staged, it joins the plan and nothing changes until the turn is played
+                        double before = f.Get("Une.Level");
+                        foreach (var cmd in EconGame.App.Draft.ToCommands(c)) Game.Stage(cmd);
+                        EconGame.App.Draft.Clear(); await Frames(4);
+                        if (!Game.Sim!.Plan.Any(q => q.Type == "fiscal")) throw new Exception("the fiscal change was not staged");
+                        if (Math.Abs(f.Get("Une.Level") - before) > 1e-12) throw new Exception("a staged fiscal change must not apply before the turn is played");
+                        Shot(shots, "04b_budget_welfare");
+                        Game.ClearPlan(); await Frames(2);
+                        bv.ShowTab("Overview"); await Frames(3);
+                    }
                 }
                 if (page == "Monetary")
                 {
