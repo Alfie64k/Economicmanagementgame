@@ -79,6 +79,9 @@ public partial class WorldMapView : View
 
     public void ShowRegionsDemo() { _regionMode = true; _regionFocus = null; var sh = _sel == null ? null : MapData.Find(_sel.Id); if (sh != null) _map.FocusOn(sh); _sig = -1; Refresh(); }
 
+    public string? SelectedId => _sel?.Id;
+    public Vector2? ScreenPosOf(string id) { var s = MapData.Find(id); if (s == null || _globe.Visible) return null; return _map2d.GlobalPosition + _map2d.Offset + s.Centroid * _map2d.Zoom; }
+
     void SelectPlayer() { Select(Game.Player.Id, false); }
 
     string HoverInfo(Shape s)

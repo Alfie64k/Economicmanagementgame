@@ -25,6 +25,7 @@ public partial class SelfTest : Node
 
         try
         {
+            await UiFlow(main);
             main.ShowMainMenu(); await Frames(3); Shot(shots, "00_menu");
             main.ShowCountrySelect(); await Frames(4); Shot(shots, "01_select");
             main.ShowScenarios(); await Frames(3); Shot(shots, "02_scenarios");
@@ -83,6 +84,58 @@ public partial class SelfTest : Node
         }
         catch (Exception ex) { GD.PrintErr("SELFTEST FAILED: " + ex); }
         GetTree().Quit();
+    }
+
+    static Button? FindButton(Node root, Func<Button, bool> pred)
+    {
+        if (root is Button b && pred(b)) return b;
+        foreach (var c in root.GetChildren()) { var r = FindButton(c, pred); if (r != null) return r; }
+        return null;
+    }
+    static bool HasLabel(Node n, string text) => n is Label l ? l.Text == text : n.GetChildren().Any(c => HasLabel(c, text));
+
+    async System.Threading.Tasks.Task Click(Vector2 p)
+    {
+        foreach (bool down in new[] { true, false })
+        {
+            var e = new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = down, ButtonMask = down ? MouseButtonMask.Left : 0 };
+            GetViewport().PushInput(e, true); await Frames(2);
+        }
+    }
+
+    async System.Threading.Tasks.Task Key(Key k)
+    {
+        foreach (bool down in new[] { true, false }) { GetViewport().PushInput(new InputEventKey { Keycode = k, PhysicalKeycode = k, Pressed = down }, false); await Frames(2); }
+    }
+
+    /// <summary>Drives the real UI with synthetic mouse and keyboard events: menu, country pick, start, shortcuts, map click.</summary>
+    async System.Threading.Tasks.Task UiFlow(Main main)
+    {
+        main.ShowMainMenu(); await Frames(4);
+        var play = FindButton(main, b => b.Text.StartsWith("New game")) ?? throw new Exception("no New game button");
+        await Click(play.GlobalPosition + play.Size / 2); await Frames(6);
+        var row = FindButton(main, b => HasLabel(b, "Germany")) ?? throw new Exception("country list has no Germany row");
+        await Click(row.GlobalPosition + row.Size / 2); await Frames(4);
+        var start = FindButton(main, b => b.Text.StartsWith("Start as")) ?? throw new Exception("no Start button");
+        if (start.Disabled) throw new Exception("Start disabled after picking a country");
+        await Click(start.GlobalPosition + start.Size / 2); await Frames(8);
+        if (!Game.Running || Game.Player.Id != "DEU") throw new Exception("UI flow did not start Germany");
+        var shell = main.GetChildren().OfType<GameShell>().First();
+        await Key(Godot.Key.Tab); await Frames(3);
+        if (shell.CurrentName != "Budget") throw new Exception("Tab did not advance the page (" + shell.CurrentName + ")");
+        await Key(Godot.Key.Space); await Frames(2);
+        if (Game.Speed == 0) throw new Exception("Space did not start the clock");
+        await Key(Godot.Key.Space); await Frames(2);
+        if (Game.Speed != 0) throw new Exception("Space did not pause");
+        var nav = FindButton(shell, b => b.Text == "World map") ?? throw new Exception("no World map nav button");
+        await Click(nav.GlobalPosition + nav.Size / 2); await Frames(10);
+        var mv = (EconGame.Views.WorldMapView)shell.Current!;
+        await Frames(10);
+        var pos = mv.ScreenPosOf("BRA") ?? throw new Exception("map position missing");
+        await Click(pos); await Frames(6);
+        if (mv.SelectedId != "BRA") throw new Exception($"clicking Brazil on the map selected {mv.SelectedId}");
+        GD.Print("UIFLOW OK");
+        Game.Quit();
     }
 
     async System.Threading.Tasks.Task Frames(int n) { for (int i = 0; i < n; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); }

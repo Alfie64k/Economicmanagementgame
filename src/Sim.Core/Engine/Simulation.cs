@@ -24,6 +24,7 @@ public sealed class Simulation
         w.WorldRng = new Rng(Rng.Mix(seed, "world"));
         if (w.Find(playerId) == null) throw new ArgumentException($"Unknown country {playerId}", nameof(playerId));
         Politics.Init(w);
+        WorldEngine.RebuildTrade(w);
         var sim = new Simulation(w);
         sim.RecordNow();
         return sim;

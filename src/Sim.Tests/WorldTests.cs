@@ -12,6 +12,13 @@ public class WorldTests
     static int Ix(World w, string id) => w.Countries.FindIndex(c => c.Id == id);
 
     [Fact]
+    public void Trade_matrix_exists_from_the_first_month()
+    {
+        var w = Det("GBR").World;
+        Assert.Equal(w.Countries.Count, w.Trade.W.Length);
+    }
+
+    [Fact]
     public void Trade_weights_are_normalised_and_gravity_shaped()
     {
         var sim = Det("USA"); sim.Tick();
