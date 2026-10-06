@@ -162,3 +162,39 @@ Multiplayer/hot-seat, modding API (data packs + scripted events), historical cam
 | 10 Polish + release | Done in code | accessibility, audio, diagnostics, presets and release workflow; art pass, closed beta and platform exports still to be run on a machine with export templates |
 
 Known gaps: the 190-country roster, subnational statistical data, a live data importer, localisation beyond British English, and a human playtest of balance and fun.
+
+---
+
+## Post-1.0 round: the twenty ideas
+
+After the first hands-on test the list below was drawn up and built in the order shown. "Built" means in the game, covered by tests and exercised by the UI self-test (`tools/shots.sh`); "Not built" items are honest backlog, not promises.
+
+| # | Idea | Status | Where |
+|---|---|---|---|
+| 1 | Turn-plan tray: stage, price, remove, preview against carrying on | Built | Plan tray, End turn (Enter); `Simulation.Stage/Unstage` |
+| 2 | Actionable adviser cards: add to plan, preview, snooze, visible disagreement | Built | Cabinet page; `Advisors.Conflicts` |
+| 3 | Auto-pause triggers and Run to ▾ | Built | `PauseWatcher`, Settings, top bar |
+| 4 | Glossary with the game's own definitions | Built (searchable panel, F2); live-mechanism tooltips only partly | `Glossary` (82 terms) |
+| 5 | Wage bargaining, union coverage, wage-price spiral, strikes | See "Labour market" below | `LabourMarketEngine` |
+| 6 | Shadow economy and tax-base erosion | See "Labour market" below | `LabourMarketEngine`, `FiscalEngine` |
+| 7 | League tables and a rival | Built (12 tables, year-ago ranks, rival comparison) | Rankings page |
+| 8 | Journal, annual review, twelve-month impact strips | Built (the you-versus-autopilot counterfactual is not) | Journal page, year in review |
+| 9 | QE, forward guidance and a real lower bound | Not built | needs a central-bank balance sheet and a credibility state |
+| 10 | Annotated charts with ranges and shared crosshair | Built (the timeline scrubber is not) | `LineChart`, `ChartRangeBar` |
+| 11 | Tutorial coach | Built (nine action-gated steps) | `TutorialCoach` |
+| 12 | Sovereign debt management: maturity ladder, currency mix, rollover cliffs | Not built | debt is still one stock with an average interest rate |
+| 13 | Saves hub, rolling autosaves, quick save and load | Built; Ironman and scenario objectives v2 are not | `SaveStore`, Saves page |
+| 14 | Event system v2: history-aware conditions, multi-step storylines | Not built | events are still single-shot with conditions on the current state |
+| 15 | Demographic transition, migration flows, remittances | Not built | population is driven by fixed fertility and mortality paths |
+| 16 | Accessibility: non-colour cues, true UI scale, high contrast, reduced motion | Built; tooltip delay skipped (Godot 4.3 reads it only when the viewport is created) and reduced motion is minimal because the game has little animation | Settings |
+| 17 | Housing market and mortgage-credit cycle | Not built | |
+| 18 | FX intervention, capital flows and sudden stops | Not built | the FX regime and reserves exist; there is no intervention command or capital-flow state |
+| 19 | AI-initiated diplomacy and a diplomatic inbox | Not built | AI governments still act only through trade and contagion |
+| 20 | Achievements and a local profile | Built (20 awards, Normal and Hard only) | `Achievements`, `Profile` |
+
+Also not built from the original plan: named plan alternatives overlaid on carry-on, a "pause after the plan commits" option, a permanent Simple/Advanced Budget toggle, Ironman mode, and scenario objectives v2 with an unlock chain.
+
+### Tax and welfare
+The Budget page is a tabbed editor over a per-country tax and benefit code (allowance and taper, up to eight income-tax bands, indexation, payroll contributions, corporation tax, VAT categories, pensions and seven individual benefits). Starting codes are 2024/25 statutory figures for all 28 countries, labelled approximate in `docs/DATA.md`. Unchanged codes reproduce the earlier aggregate model bit for bit. GDP effects differ by instrument (spending propensities, who gains from a tax cut, labour supply, natural unemployment, investment); all coefficients are starting priors, not estimates.
+
+Known simplifications: no behavioural elasticity of taxable income beyond the labour-supply term, no property, excise or capital-gains levies yet, and the catalogue policies `pension_age` and `ubi` overlap the new levers.
