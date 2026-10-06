@@ -31,9 +31,64 @@ public static class Balance
 
     static void Try(Simulation s, Command c) => s.Execute(c);
 
+    /// <summary>Change one tax-code or benefit parameter (no-op when the player has no detailed code).</summary>
+    static void Fisc(Simulation s, string key, Func<double, double> f)
+    {
+        var c = s.World.Player; if (c.Fiscal == null) return;
+        s.Execute(Command.SetFiscal(c.Id, key, f(c.Fiscal.Get(key))));
+    }
+
+    static void Bands(Simulation s, Func<List<(double From, double Rate)>, List<(double From, double Rate)>> f)
+    {
+        var c = s.World.Player; if (c.Fiscal == null) return;
+        s.Execute(Command.SetBands(c.Id, f(FiscalParams.Bands(c.Fiscal.P))));
+    }
+
     public static readonly Strategy[] Strategies =
     {
         new() { Name = "laissez-faire" },
+        // tax-and-benefit probes: each leans hard on one family of levers, to catch exploits in the detailed code
+        new()
+        {
+            Name = "tax-cutter", Yearly = (s, y) =>
+            {
+                var c = s.World.Player;
+                if (y == 0) { Fisc(s, "Inc.Allow", v => v * 1.25); Fisc(s, "Corp.Main", v => v - 0.05); Fisc(s, "Corp.Expensing", _ => 1.0); }
+                if (y is 1 or 2) Bands(s, b => b.Select(x => (x.From, x.Rate * 0.92)).ToList());
+                if (y >= 2 && c.DeficitToGdp > 0.05) Fisc(s, "Vat.Std", v => v + 0.01);
+            }
+        },
+        new()
+        {
+            Name = "welfare-state", Yearly = (s, y) =>
+            {
+                var c = s.World.Player;
+                if (y < 6) { Fisc(s, "Une.Level", v => v * 1.1); Fisc(s, "Mt.Level", v => v * 1.1); Fisc(s, "Chi.Level", v => v * 1.1); Fisc(s, "Pen.Level", v => v * 1.05); Fisc(s, "Hou.Level", v => v * 1.1); }
+                if (y == 0) Fisc(s, "Une.Months", v => v + 6);
+                if (c.DeficitToGdp > 0.04) Bands(s, b => b.Select(x => (x.From, x.Rate + 0.01)).ToList());
+            }
+        },
+        new()
+        {
+            Name = "fiscal-drag", Yearly = (s, y) =>
+            {
+                var c = s.World.Player;
+                if (y == 0) { Fisc(s, "Thr.Index", _ => 2); Fisc(s, "Pen.Index", _ => 1); }
+                if (y is 1 or 2 or 3) Fisc(s, "Pen.Age", v => v + 1);
+                if (c.DeficitToGdp < 0.0 && y >= 4) Fisc(s, "Pen.Level", v => v * 1.03);
+            }
+        },
+        new()
+        {
+            Name = "consumption-shift", Yearly = (s, y) =>
+            {
+                if (y == 0)
+                {
+                    Fisc(s, "Vat.Std", v => v + 0.05); Fisc(s, "Vat.Food", _ => 0); Fisc(s, "Vat.Energy", _ => 0); Fisc(s, "Vat.Housing", _ => 0);
+                    Fisc(s, "Pay.ErRate", v => Math.Max(0, v - 0.03)); Fisc(s, "Inc.Allow", v => v * 1.1);
+                }
+            }
+        },
         new()
         {
             Name = "austerity", Yearly = (s, y) =>

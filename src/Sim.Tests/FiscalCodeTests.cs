@@ -308,4 +308,61 @@ public class FiscalCodeTests
         var json = old.Save();
         Assert.Equal(rate, Simulation.Load(json).World.Player.TaxRate[(int)Tax.Income]);   // identical on load whatever the catalogue holds
     }
+
+    static void StagePlan(Simulation g)
+    {
+        g.World.Player.PoliticalCapital = 100;
+        g.Stage(Command.SetFiscal("GBR", "Inc.Allow", g.World.Player.Fiscal!.Get("Inc.Allow") * 1.1));
+        g.Stage(Command.SetBands("GBR", new[] { (0.0, 0.20), (0.9, 0.32), (3.0, 0.42), (6.0, 0.45) }));
+        g.Stage(Command.SetFiscal("GBR", "Une.Level", g.World.Player.Fiscal.Get("Une.Level") * 1.2));
+        g.Stage(Command.SetFiscal("GBR", "Pen.Age", 67));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void A_staged_fiscal_plan_is_deterministic_across_saves_and_fresh_runs(bool stochastic)
+    {
+        var a = FiscalFixture.Game(true, stochastic: stochastic); a.Run(4);
+        StagePlan(a);
+        Assert.Equal(4, a.Plan.Count);
+        var before = a.World.Player.Fiscal!.Get("Une.Level");
+        var b = Simulation.Load(a.Save());                          // saved with the plan still queued
+        Assert.Equal(4, b.Plan.Count);
+        Assert.Equal(before, a.World.Player.Fiscal.Get("Une.Level"));   // nothing applied before the turn is played
+        a.Run(20); b.Run(20);
+        Assert.Equal(a.StateHash(), b.StateHash());
+        Assert.Equal(4, FiscalParams.Bands(a.World.Player.Fiscal.P).Count);
+        Assert.Equal(67, a.World.Player.Fiscal.Get("Pen.Age"));
+
+        var c = FiscalFixture.Game(true, stochastic: stochastic); c.Run(4);     // the same actions in a fresh run
+        StagePlan(c); c.Run(20);
+        Assert.Equal(a.StateHash(), c.StateHash());
+    }
+
+    [Fact]
+    public void Staged_fiscal_edits_replace_by_key_and_the_band_table_is_one_entry()
+    {
+        var g = FiscalFixture.Game(true); g.World.Player.PoliticalCapital = 100;
+        g.Stage(Command.SetFiscal("GBR", "Corp.Main", 0.20));
+        var r = g.Stage(Command.SetFiscal("GBR", "Corp.Main", 0.18));
+        Assert.True(r.Replaced); Assert.Single(g.Plan);
+        g.Stage(Command.SetBands("GBR", new[] { (0.0, 0.19), (1.0, 0.35) }));
+        g.Stage(Command.SetBands("GBR", new[] { (0.0, 0.19), (1.2, 0.35), (4.0, 0.45) }));
+        Assert.Equal(2, g.Plan.Count);
+        Assert.Equal(3, FiscalDraft.Apply(g.World.Player, g.Plan).Keys.Count(k => k.StartsWith("Inc.B") && k.EndsWith(".Rate")));
+        Assert.True(g.Unstage("fiscal:" + FiscalParams.BandsKey));
+        Assert.Single(g.Plan);
+    }
+
+    [Fact]
+    public void A_legacy_slider_move_and_a_structural_edit_in_the_same_turn_both_land()
+    {
+        var g = FiscalFixture.Game(true); var c = g.World.Player; g.World.Player.PoliticalCapital = 100;
+        double t0 = c.TaxRate[(int)Tax.Income];
+        g.Stage(Command.SetTax("GBR", Tax.Income, t0 + 0.01));
+        g.Stage(Command.SetFiscal("GBR", "Inc.Allow", c.Fiscal!.Get("Inc.Allow") * 0.8));
+        g.Tick();
+        Assert.True(c.TaxRate[(int)Tax.Income] > t0 + 0.01 + 1e-4, "a lower allowance adds to the slider's rise");
+    }
 }
