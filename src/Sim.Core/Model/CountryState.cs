@@ -155,6 +155,9 @@ public sealed class CountryState
     public int CrisisMonths;
     public string Status = "";
 
+    /// <summary>Detailed tax-and-benefit code (the player's country only; null for AI governments and for games started before it existed).</summary>
+    public FiscalCode? Fiscal;
+
     // ---- policies & projects ----
     public List<ActivePolicy> Policies = new();
     public List<Project> Projects = new();

@@ -15,7 +15,7 @@ public sealed class Simulation
 
     public Simulation(World w) { World = w; }
 
-    public static Simulation New(string playerId, ulong seed = 1, bool stochastic = true, IEnumerable<CountryData>? roster = null, int startYear = 2024)
+    public static Simulation New(string playerId, ulong seed = 1, bool stochastic = true, IEnumerable<CountryData>? roster = null, int startYear = 2024, bool detailedTax = true)
     {
         var data = (roster ?? CountryLoader.LoadEmbedded()).ToList();
         var w = new World { Seed = seed, PlayerId = playerId, Stochastic = stochastic, StartYear = startYear };
@@ -25,6 +25,7 @@ public sealed class Simulation
         if (w.Find(playerId) == null) throw new ArgumentException($"Unknown country {playerId}", nameof(playerId));
         Politics.Init(w);
         WorldEngine.RebuildTrade(w);
+        if (detailedTax) w.Player.Fiscal = TaxCodeCatalog.Build(w.Player);
         var sim = new Simulation(w);
         sim.RecordNow();
         return sim;
@@ -62,7 +63,7 @@ public sealed class Simulation
     /// <summary>Identity of a command inside the plan: staging another command with the same key replaces the earlier one.</summary>
     public static string KeyOf(Command c) => c.Type switch
     {
-        "tax" or "budget" or "subsidy" or "tradedeal" or "alliance" or "sanction" or "tariff" or "aid" => c.Type + ":" + c.Id,
+        "tax" or "budget" or "subsidy" or "tradedeal" or "alliance" or "sanction" or "tariff" or "aid" or "fiscal" => c.Type + ":" + c.Id,
         "enact" or "repeal" => "policy:" + c.Id,
         "project" => "project:" + c.Id,
         "cancelproject" => c.Id != "" ? "cancel:" + c.Id : "cancel#" + (int)c.Value,
@@ -209,8 +210,12 @@ public sealed class Simulation
     static readonly JsonSerializerOptions Json = new() { IncludeFields = true, WriteIndented = false, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals };
 
     public string Save() => JsonSerializer.Serialize(World, Json);
-    public static Simulation Load(string json) =>
-        new(JsonSerializer.Deserialize<World>(json, Json) ?? throw new InvalidDataException("bad save"));
+    public static Simulation Load(string json)
+    {
+        var w = JsonSerializer.Deserialize<World>(json, Json) ?? throw new InvalidDataException("bad save");
+        Migrations.Upgrade(w);
+        return new Simulation(w);
+    }
 
     /// <summary>Stable fingerprint of key state for determinism / regression tests.</summary>
     public string StateHash()

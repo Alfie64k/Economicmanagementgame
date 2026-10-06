@@ -48,8 +48,9 @@ public static class CommandProcessor
                     if (Math.Abs(r - r0) < 1e-9) return CommandResult.Same();
                     if (c.ImfAutopilot && r < r0) return CommandResult.Fail("Blocked by IMF programme conditionality: no tax cuts during the programme");
                     double cost = Math.Min(40, 4 + 30 * Math.Abs(r - r0) / Math.Max(0.05, c.TaxRate0[(int)t]));
-                    return Spend(cost, $"{t} tax {(r > r0 ? "raised" : "cut")} to {Fmt.P(r, 1)}", () => c.TaxRate[(int)t] = r);
+                    return Spend(cost, $"{t} tax {(r > r0 ? "raised" : "cut")} to {Fmt.P(r, 1)}", () => { c.TaxRate[(int)t] = r; TaxCodeEngine.Touch(c); });
                 }
+            case "fiscal": return Fiscal(c, cmd, dryRun, Spend);
             case "budget":
                 {
                     if (!Enum.TryParse<BudgetLine>(cmd.Id, out var l)) return CommandResult.Fail("Unknown budget line");
@@ -184,6 +185,38 @@ public static class CommandProcessor
     }
 
     static CommandResult Also(this CommandResult r, Action a) { a(); return r; }
+
+    /// <summary>Changes one parameter of the tax-and-benefit code (or replaces the whole income-tax band table).</summary>
+    static CommandResult Fiscal(CountryState c, Command cmd, bool dryRun, Func<double, string, Action, CommandResult> spend)
+    {
+        if (c.Fiscal is not { Init: true } f) return CommandResult.Fail("This country has no detailed tax code");
+        var np = new Dictionary<string, double>(f.P);
+        string what;
+        if (cmd.Id == FiscalParams.BandsKey)
+        {
+            var nb = FiscalParams.DecodeBands(cmd.Data);
+            if (nb == null) return CommandResult.Fail("Invalid band table");
+            FiscalParams.SetBands(np, nb); FiscalParams.Normalise(np);
+            what = "Income-tax bands: " + FiscalParams.ShowBands(c, FiscalParams.Bands(np));
+        }
+        else
+        {
+            var def = FiscalParams.Def(cmd.Id);
+            if (def == null || !Maths.Finite(cmd.Value)) return CommandResult.Fail("Unknown tax or benefit setting");
+            np[cmd.Id] = Maths.Clamp(cmd.Value, def.Min, def.Max);
+            FiscalParams.Normalise(np);
+            what = $"{def.Group}: {def.Label.ToLowerInvariant()} {FiscalParams.Show(c, cmd.Id, f.Get(cmd.Id))} → {FiscalParams.Show(c, cmd.Id, np.TryGetValue(cmd.Id, out var nv) ? nv : cmd.Value)}";
+        }
+        if (FiscalDraft.Same(f.P, np)) return CommandResult.Same();
+        if (c.ImfAutopilot)
+        {
+            var est = FiscalDraft.Evaluate(c, np);
+            if (est.RevenueGdp < -0.0005) return CommandResult.Fail("Blocked by IMF programme conditionality: no tax cuts during the programme");
+            if (est.SpendGdp > 0.0005) return CommandResult.Fail("Blocked by IMF programme conditionality: no benefit increases during the programme");
+        }
+        double cost = FiscalDraft.PcCost(c, np) / (c.Gov == "autocracy" ? 0.7 : 1.0);
+        return spend(cost, what, () => { f.P = np; TaxCodeEngine.Touch(c); });
+    }
 
     static CommandResult Enact(World w, CountryState c, int idx, string id, bool dry, double pcMult)
     {

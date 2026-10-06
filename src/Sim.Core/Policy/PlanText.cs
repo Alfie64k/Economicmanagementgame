@@ -29,6 +29,16 @@ public static class PlanText
                 return $"{TaxNames[t]}: {Fmt.P(c.TaxRate[(int)t], 1)} → {Fmt.P(Maths.Clamp(cmd.Value, 0, 0.9), 1)}";
             case "budget" when Enum.TryParse<BudgetLine>(cmd.Id, out var l):
                 return $"{LineNames[l]}: {Fmt.P(c.Budget[(int)l], 2)} → {Fmt.P(Maths.Clamp(cmd.Value, 0, 0.6), 2)} of GDP";
+            case "fiscal":
+                {
+                    if (c.Fiscal is not { Init: true } f) return "Change the tax code";
+                    if (cmd.Id == FiscalParams.BandsKey)
+                        return FiscalParams.DecodeBands(cmd.Data) is { } nb ? "Income-tax bands: " + FiscalParams.ShowBands(c, nb) : "Income-tax bands";
+                    var def = FiscalParams.Def(cmd.Id);
+                    if (def == null) return "Change the tax code";
+                    double nv = Maths.Clamp(cmd.Value, def.Min, def.Max);
+                    return $"{def.Group}: {def.Label} {FiscalParams.Show(c, cmd.Id, f.Get(cmd.Id))} → {FiscalParams.Show(c, cmd.Id, nv)}";
+                }
             case "rate":
                 return cmd.Id == "Manual" ? $"Pin the policy rate at {Fmt.P(cmd.Value, 2)}" : "Return the central bank to its rule";
             case "minwage": return $"Minimum wage: {Fmt.P(c.MinWageRatio, 0)} → {Fmt.P(cmd.Value, 0)} of the median";

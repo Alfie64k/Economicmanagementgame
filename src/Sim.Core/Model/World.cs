@@ -12,7 +12,8 @@ public sealed class HistoryPoint
 /// <summary>Everything needed to save, load and replay a game.</summary>
 public sealed class World
 {
-    public int Version = 1;
+    public const int CurrentVersion = 2;
+    public int Version = CurrentVersion;
     public ulong Seed;
     public int StartYear = 2024;
     public int Month;                       // months since start
@@ -75,6 +76,7 @@ public sealed class Command
     public string Country = "";
     public string Id = "";
     public double Value, Value2;
+    public string Data = "";      // free-form payload (the band table of a fiscal command)
 
     public static Command SetTax(string country, Tax t, double rate) => new() { Type = "tax", Country = country, Id = t.ToString(), Value = rate };
     public static Command SetBudget(string country, BudgetLine l, double share) => new() { Type = "budget", Country = country, Id = l.ToString(), Value = share };
@@ -93,6 +95,9 @@ public sealed class Command
     public static Command Sanction(string country, string target, bool on) => new() { Type = "sanction", Country = country, Id = target, Value = on ? 1 : 0 };
     public static Command Alliance(string country, string partner) => new() { Type = "alliance", Country = country, Id = partner };
     public static Command Aid(string country, string recipient, double shareOfGdp) => new() { Type = "aid", Country = country, Id = recipient, Value = shareOfGdp };
+    public static Command SetFiscal(string country, string key, double value) => new() { Type = "fiscal", Country = country, Id = key, Value = value };
+    public static Command SetBands(string country, IReadOnlyList<(double From, double Rate)> bands) =>
+        new() { Type = "fiscal", Country = country, Id = Policy.FiscalParams.BandsKey, Data = Policy.FiscalParams.EncodeBands(bands) };
     public static Command Autopilot(string country, bool on) => new() { Type = "autopilot", Country = country, Id = on ? "on" : "off" };
 }
 

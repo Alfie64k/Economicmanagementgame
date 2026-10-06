@@ -96,6 +96,7 @@ public static class FiscalEngine
     {
         double ageing = Math.Pow(c.Old / Math.Max(1e-6, c.Old0), 0.4);
         double stab = 0.35 * Math.Max(-0.02, c.Unemp - c.NairU) * c.Potential;
-        return c.Budget[(int)BudgetLine.Social] * c.Potential * ageing + stab;
+        // the player's benefit rules (levels, ages, durations, tapers) scale each strand of the Social line; neutral (1.0) while they are untouched
+        return c.Budget[(int)BudgetLine.Social] * c.Potential * ageing * TaxCodeEngine.BenefitMix(c) + stab * TaxCodeEngine.StabilizerMix(c);
     }
 }

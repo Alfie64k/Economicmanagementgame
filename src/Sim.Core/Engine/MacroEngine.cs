@@ -13,6 +13,7 @@ public static class MacroEngine
         double shockD = stochastic ? rng.Normal() * 0.004 : 0;
         double shockS = stochastic ? rng.Normal() * 0.0015 : 0;
         RampModifiers(c);
+        TaxCodeEngine.Step(c);
         Demography.Step(c, dt);
         PublicAssets(c, dt);
         Supply(c, g, dt, shockS);
@@ -78,7 +79,7 @@ public static class MacroEngine
             c.Tfp[s] *= Math.Exp((gA + extra) * dt);
         }
 
-        double part = c.Participation * (1 + 0.04 * (c.AssetIdx[(int)Asset.Health] - 1) + c.Mod("participation"));
+        double part = c.Participation * (1 + 0.04 * (c.AssetIdx[(int)Asset.Health] - 1) + c.Mod("participation")) * TaxCodeEngine.LabourIdx(c);
         double lf = c.Pop * c.Working * Maths.Clamp(part, 0.3, 0.9);
         double lstar = lf * (1 - c.NairU);
         double pot = 0;
@@ -99,7 +100,7 @@ public static class MacroEngine
         double incTax = FiscalEngine.TaxRevenueReal(c, Tax.Income, c.Gdp, c.Cons, c.Imports);
         double payTax = FiscalEngine.TaxRevenueReal(c, Tax.Payroll, c.Gdp, c.Cons, c.Imports);
         double interestReal = c.Debt * c.AvgDebtCost / P;
-        double yd = c.HhIncomeShare * c.Gdp - incTax - payTax + FiscalEngine.SocialReal(c) + 0.7 * interestReal;
+        double yd = c.HhIncomeShare * c.Gdp - incTax - payTax + FiscalEngine.SocialReal(c) + 0.7 * interestReal + TaxCodeEngine.MpcAdj(c);
 
         double s = c.SavingsRate0 + 0.35 * Maths.Clamp(c.RealRate - c.RealRate0, -0.05, 0.05) + 0.20 * c.Unrest + c.Mod("savings");
         c.SavingsRate = Maths.Clamp(s, 0.0, 0.6);
@@ -107,7 +108,7 @@ public static class MacroEngine
         c.Cons += (consTarget - c.Cons) * 0.35;
 
         // private investment (+ FDI deviation)
-        double corpDelta = c.TaxRate[(int)Tax.Corporate] - c.TaxRate0[(int)Tax.Corporate];
+        double corpDelta = TaxCodeEngine.CorpDelta(c);
         double conf = (0.85 + 0.3 * c.Stability) / (0.85 + 0.3 * c.Stability0);
         double fdi = FdiAttractiveness(c, g) * c.Fdi0 * (c.Potential / c.Potential0);
         double i0Share = c.InvPriv0 / c.Potential0;
@@ -156,7 +157,7 @@ public static class MacroEngine
     {
         double a = (1 + c.Mod("fdi"))
                  * (1 + 0.5 * (c.Stability - c.Stability0))
-                 * Math.Max(0.2, 1 - 2.0 * (c.TaxRate[(int)Tax.Corporate] - c.TaxRate0[(int)Tax.Corporate]))
+                 * Math.Max(0.2, 1 - 2.0 * TaxCodeEngine.CorpDelta(c))
                  * (1 + 0.4 * Math.Log(c.AssetIdx[(int)Asset.Infrastructure]))
                  * (1 - 0.5 * (c.Corruption - c.Corruption0))
                  * Math.Max(0.1, 1 - 4.0 * Math.Max(0, c.RiskPremium))
@@ -173,7 +174,7 @@ public static class MacroEngine
         c.NairUBase = Maths.Clamp(c.NairUBase, c.Unemp0 - 0.02, c.Unemp0 + 0.08);
         double pay = c.TaxRate[(int)Tax.Payroll] - c.TaxRate0[(int)Tax.Payroll];
         c.NairuParts[0] = c.NairUBase; c.NairuParts[1] = 0.25 * (c.MinWageRatio - c.MinWageRatio0); c.NairuParts[2] = 0.15 * pay;
-        c.NairuParts[3] = -0.03 * Math.Log(c.HumanCapital); c.NairuParts[4] = c.Mod("nairu");
+        c.NairuParts[3] = -0.03 * Math.Log(c.HumanCapital); c.NairuParts[4] = c.Mod("nairu") + TaxCodeEngine.NairuAdj(c);
         c.NairU = Maths.Clamp(c.NairuParts.Sum(), 0.01, 0.45);
 
         // wage dynamics (real wage index tracks productivity and labour-market tightness)

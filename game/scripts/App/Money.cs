@@ -7,15 +7,7 @@ namespace EconGame.App;
 /// <summary>Currency formatting. Models are in each country's own currency; neutral comparisons are shown in GBP.</summary>
 public static class Money
 {
-    static readonly Dictionary<string, string> Symbols = new()
-    {
-        ["USD"] = "$", ["GBP"] = "£", ["EUR"] = "€", ["JPY"] = "¥", ["CNY"] = "CN¥", ["INR"] = "₹", ["BRL"] = "R$", ["RUB"] = "₽",
-        ["SAR"] = "SAR ", ["SGD"] = "S$", ["ARS"] = "AR$", ["NGN"] = "₦", ["ZAR"] = "R", ["MXN"] = "MX$", ["IDR"] = "Rp", ["TRY"] = "₺",
-        ["KRW"] = "₩", ["AUD"] = "A$", ["CAD"] = "C$", ["EGP"] = "E£", ["VND"] = "₫", ["PLN"] = "zł", ["CLP"] = "CL$", ["ETB"] = "Br",
-        ["AED"] = "AED ", ["CHF"] = "CHF ", ["NOK"] = "kr ",
-    };
-
-    public static string Symbol(string cur) => Symbols.TryGetValue(cur, out var s) ? s : cur + " ";
+    public static string Symbol(string cur) => Sim.Core.Util.Fmt.Symbol(cur);
 
     /// <summary>Format an amount given in billions of local currency.</summary>
     public static string Bn(string currency, double bn)
@@ -31,6 +23,9 @@ public static class Money
     public static double GbpRate = 0.8;
     public static void Track(World w) { GbpRate = w.Find("GBR")?.Fx ?? GbpRate; }
     public static string Gbp(double usdBn) => Bn("GBP", usdBn * GbpRate);
+
+    /// <summary>A personal amount in local currency (an allowance or a benefit), not billions.</summary>
+    public static string Amount(string currency, double v) => Sim.Core.Util.Fmt.Amount(currency, v);
 
     public static string Num(double v, int d = 1) => v.ToString("N" + d, CultureInfo.InvariantCulture);
 }

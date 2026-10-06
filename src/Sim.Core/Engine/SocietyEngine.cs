@@ -24,7 +24,8 @@ public static class SocietyEngine
         double giniTarget = c.Gini0
             + 0.5 * (c.Unemp - c.Unemp0)
             - 0.8 * (socialShare - c.Budget0[(int)BudgetLine.Social])
-            - 0.3 * (c.TaxRate[(int)Tax.Income] - c.TaxRate0[(int)Tax.Income])
+            - 0.3 * TaxCodeEngine.IncomeTaxOffset(c)
+            + TaxCodeEngine.GiniDelta(c)
             - 0.04 * idx(Asset.Education) - 0.02 * idx(Asset.Housing)
             + c.Mod("gini");
         c.Gini += (Maths.Clamp(giniTarget, 0.2, 0.65) - c.Gini) * 0.02 * dt * 12;
@@ -41,11 +42,11 @@ public static class SocietyEngine
             + 0.15 * idx(Asset.Health) + 0.10 * idx(Asset.Education) + 0.10 * idx(Asset.Housing) + 0.05 * idx(Asset.Infrastructure)
             - 0.3 * (c.Corruption - c.Corruption0)
             - 0.5 * Math.Max(0, c.DebtToGdp - 1.2) * 0.1
-            + c.Mod("approval");
+            + c.Mod("approval") + TaxCodeEngine.ApprovalDelta(c);
         var ad = c.ApprovalDrivers;
         ad[0] = c.Approval0; ad[1] = 2.0 * (growth - 0.02); ad[2] = -1.5 * (c.Unemp - c.Unemp0); ad[3] = -1.2 * Math.Max(0, c.Inflation - 0.04);
         ad[4] = -0.8 * (c.Gini - c.Gini0); ad[5] = -1.5 * (burden - c.Burden0);
-        ad[6] = 0.15 * idx(Asset.Health) + 0.10 * idx(Asset.Education) + 0.10 * idx(Asset.Housing) + 0.05 * idx(Asset.Infrastructure);
+        ad[6] = 0.15 * idx(Asset.Health) + 0.10 * idx(Asset.Education) + 0.10 * idx(Asset.Housing) + 0.05 * idx(Asset.Infrastructure) + TaxCodeEngine.ApprovalDelta(c);
         ad[7] = -0.3 * (c.Corruption - c.Corruption0); ad[8] = target - c.Approval0 - (ad[1] + ad[2] + ad[3] + ad[4] + ad[5] + ad[6] + ad[7]);
         c.Approval += (Maths.Clamp(target, 0.03, 0.95) - c.Approval) * 0.04;
 

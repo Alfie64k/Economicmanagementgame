@@ -1,0 +1,3120 @@
+{
+ "version": 1,
+ "note": "Approximate 2024/25 statutory parameters compiled for gameplay; not tax advice. Archetype templates stand in where a country is not modelled in detail.",
+ "archetypes": {
+  "advanced": {
+   "label": "Advanced-economy template (approximate)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.3,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.1
+     },
+     {
+      "from": 0.4,
+      "rate": 0.2
+     },
+     {
+      "from": 0.9,
+      "rate": 0.3
+     },
+     {
+      "from": 3.0,
+      "rate": 0.4
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.1,
+      "rate": 0.08
+     },
+     {
+      "from": 2.5,
+      "rate": 0.02
+     }
+    ],
+    "employer": {
+     "from": 0.05,
+     "rate": 0.15
+    }
+   },
+   "corp": {
+    "main": 0.25,
+    "small": 0.25,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.19,
+    "reduced": 0.07,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.42,
+     "unemployment": 0.04,
+     "child": 0.06,
+     "disability": 0.1,
+     "housing": 0.04,
+     "meanstest": 0.1,
+     "other": 0.24
+    },
+    "pension": {
+     "level": 0.3,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 0.3,
+     "months": 12
+    },
+    "child": {
+     "level": 0.04,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 0.22
+    },
+    "housing": {
+     "level": 0.12
+    },
+    "meanstest": {
+     "level": 0.2,
+     "taper": 0.5,
+     "workAllowance": 0.1
+    }
+   }
+  },
+  "hub": {
+   "label": "Hub-economy template (approximate)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.2,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.03
+     },
+     {
+      "from": 0.6,
+      "rate": 0.08
+     },
+     {
+      "from": 1.5,
+      "rate": 0.15
+     },
+     {
+      "from": 4.0,
+      "rate": 0.22
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.08
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.08
+    }
+   },
+   "corp": {
+    "main": 0.15,
+    "small": 0.15,
+    "smallLimit": 0,
+    "expensing": 0.4
+   },
+   "vat": {
+    "standard": 0.08,
+    "reduced": 0.03,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.4,
+     "unemployment": 0.04,
+     "child": 0.06,
+     "disability": 0.1,
+     "housing": 0.03,
+     "meanstest": 0.08,
+     "other": 0.29
+    },
+    "pension": {
+     "level": 0.25,
+     "age": 65,
+     "index": "earnings"
+    },
+    "unemployment": {
+     "level": 0.35,
+     "months": 12
+    },
+    "child": {
+     "level": 0.03,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 0.2
+    },
+    "housing": {
+     "level": 0.08
+    },
+    "meanstest": {
+     "level": 0.2,
+     "taper": 0.6,
+     "workAllowance": 0.1
+    }
+   }
+  },
+  "emerging": {
+   "label": "Emerging-economy template (approximate)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.4,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 0.8,
+      "rate": 0.15
+     },
+     {
+      "from": 2.0,
+      "rate": 0.25
+     },
+     {
+      "from": 5.0,
+      "rate": 0.33
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.1,
+      "rate": 0.07
+     },
+     {
+      "from": 3.0,
+      "rate": 0.02
+     }
+    ],
+    "employer": {
+     "from": 0.1,
+     "rate": 0.12
+    }
+   },
+   "corp": {
+    "main": 0.25,
+    "small": 0.25,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.16,
+    "reduced": 0.08,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.45,
+     "unemployment": 0.02,
+     "child": 0.03,
+     "disability": 0.04,
+     "housing": 0.01,
+     "meanstest": 0.14,
+     "other": 0.31
+    },
+    "pension": {
+     "level": 0.22,
+     "age": 62,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 0.2,
+     "months": 6
+    },
+    "child": {
+     "level": 0.02,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 0.12
+    },
+    "housing": {
+     "level": 0.05
+    },
+    "meanstest": {
+     "level": 0.12,
+     "taper": 0.5,
+     "workAllowance": 0.1
+    }
+   }
+  },
+  "resource": {
+   "label": "Resource-economy template (approximate)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.5,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 1.5,
+      "rate": 0.12
+     },
+     {
+      "from": 4.0,
+      "rate": 0.2
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.06
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.1
+    }
+   },
+   "corp": {
+    "main": 0.2,
+    "small": 0.2,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.1,
+    "reduced": 0.05,
+    "categories": {
+     "food": "reduced",
+     "energy": "reduced",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.3,
+     "unemployment": 0.01,
+     "child": 0.04,
+     "disability": 0.04,
+     "housing": 0.04,
+     "meanstest": 0.07,
+     "other": 0.5
+    },
+    "pension": {
+     "level": 0.3,
+     "age": 60,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 0.2,
+     "months": 6
+    },
+    "child": {
+     "level": 0.03,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 0.15
+    },
+    "housing": {
+     "level": 0.1
+    },
+    "meanstest": {
+     "level": 0.15,
+     "taper": 0.5,
+     "workAllowance": 0.1
+    }
+   }
+  },
+  "developing": {
+   "label": "Developing-economy template (approximate)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.8,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.1
+     },
+     {
+      "from": 2.0,
+      "rate": 0.2
+     },
+     {
+      "from": 5.0,
+      "rate": 0.3
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.05
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.08
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.3,
+    "smallLimit": 0,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.15,
+    "reduced": 0.07,
+    "categories": {
+     "food": "zero",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.3,
+     "unemployment": 0.0,
+     "child": 0.02,
+     "disability": 0.02,
+     "housing": 0.0,
+     "meanstest": 0.3,
+     "other": 0.36
+    },
+    "pension": {
+     "level": 0.1,
+     "age": 60,
+     "index": "neutral"
+    },
+    "unemployment": {
+     "level": 0.0,
+     "months": 3
+    },
+    "child": {
+     "level": 0.0,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 0.05
+    },
+    "housing": {
+     "level": 0.0
+    },
+    "meanstest": {
+     "level": 0.1,
+     "taper": 0.5,
+     "workAllowance": 0.0
+    }
+   }
+  }
+ },
+ "countries": {
+  "USA": {
+   "label": "United States 2024 (federal income tax, single filer; sales tax as VAT; approximate)",
+   "unit": "lcu",
+   "meanEarnings": 66000,
+   "income": {
+    "allowance": 14600,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.1
+     },
+     {
+      "from": 11600,
+      "rate": 0.12
+     },
+     {
+      "from": 47150,
+      "rate": 0.22
+     },
+     {
+      "from": 100525,
+      "rate": 0.24
+     },
+     {
+      "from": 191950,
+      "rate": 0.32
+     },
+     {
+      "from": 243725,
+      "rate": 0.35
+     },
+     {
+      "from": 609350,
+      "rate": 0.37
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.0765
+     },
+     {
+      "from": 168600,
+      "rate": 0.0145
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.0765
+    }
+   },
+   "corp": {
+    "main": 0.21,
+    "small": 0.21,
+    "smallLimit": 0,
+    "expensing": 0.6
+   },
+   "vat": {
+    "standard": 0.065,
+    "reduced": 0.0,
+    "categories": {
+     "food": "zero",
+     "energy": "reduced",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "exempt",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.5,
+     "unemployment": 0.02,
+     "child": 0.04,
+     "disability": 0.08,
+     "housing": 0.03,
+     "meanstest": 0.15,
+     "other": 0.18
+    },
+    "pension": {
+     "level": 23000,
+     "age": 67,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 23000,
+     "months": 6
+    },
+    "child": {
+     "level": 2000,
+     "threshold": 200000
+    },
+    "disability": {
+     "level": 18500
+    },
+    "housing": {
+     "level": 9000
+    },
+    "meanstest": {
+     "level": 9200,
+     "taper": 0.3,
+     "workAllowance": 4000
+    }
+   }
+  },
+  "GBR": {
+   "label": "United Kingdom 2024/25 (approximate)",
+   "unit": "lcu",
+   "meanEarnings": 35000,
+   "income": {
+    "allowance": 12570,
+    "taperStart": 100000,
+    "taperRate": 0.5,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.2
+     },
+     {
+      "from": 37700,
+      "rate": 0.4
+     },
+     {
+      "from": 125140,
+      "rate": 0.45
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 12570,
+      "rate": 0.08
+     },
+     {
+      "from": 50270,
+      "rate": 0.02
+     }
+    ],
+    "employer": {
+     "from": 9100,
+     "rate": 0.138
+    }
+   },
+   "corp": {
+    "main": 0.25,
+    "small": 0.19,
+    "smallLimit": 50000,
+    "expensing": 0.6
+   },
+   "vat": {
+    "standard": 0.2,
+    "reduced": 0.05,
+    "categories": {
+     "food": "zero",
+     "energy": "reduced",
+     "housing": "zero",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.42,
+     "unemployment": 0.03,
+     "child": 0.05,
+     "disability": 0.18,
+     "housing": 0.07,
+     "meanstest": 0.13,
+     "other": 0.12
+    },
+    "pension": {
+     "level": 11500,
+     "age": 66,
+     "index": "triplelock"
+    },
+    "unemployment": {
+     "level": 4700,
+     "months": 36
+    },
+    "child": {
+     "level": 1330,
+     "threshold": 60000
+    },
+    "disability": {
+     "level": 7000
+    },
+    "housing": {
+     "level": 5500
+    },
+    "meanstest": {
+     "level": 7000,
+     "taper": 0.55,
+     "workAllowance": 5000
+    }
+   }
+  },
+  "DEU": {
+   "label": "Germany 2024 (approximate; Tarif 2024 fitted by chord rates, solidarity surcharge ignored)",
+   "unit": "lcu",
+   "meanEarnings": 50000,
+   "income": {
+    "allowance": 11604,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.19
+     },
+     {
+      "from": 5401,
+      "rate": 0.267
+     },
+     {
+      "from": 20401,
+      "rate": 0.33
+     },
+     {
+      "from": 40401,
+      "rate": 0.393
+     },
+     {
+      "from": 55156,
+      "rate": 0.42
+     },
+     {
+      "from": 266221,
+      "rate": 0.45
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.205
+     },
+     {
+      "from": 62100,
+      "rate": 0.03
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.19
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.3,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.19,
+    "reduced": 0.07,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.52,
+     "unemployment": 0.05,
+     "child": 0.08,
+     "disability": 0.06,
+     "housing": 0.02,
+     "meanstest": 0.09,
+     "other": 0.18
+    },
+    "pension": {
+     "level": 20000,
+     "age": 67,
+     "index": "earnings"
+    },
+    "unemployment": {
+     "level": 15000,
+     "months": 12
+    },
+    "child": {
+     "level": 3000,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 11000
+    },
+    "housing": {
+     "level": 4600
+    },
+    "meanstest": {
+     "level": 7000,
+     "taper": 0.8,
+     "workAllowance": 1200
+    }
+   }
+  },
+  "FRA": {
+   "label": "France 2024 (approximate; single, no quotient familial, 10% employment deduction ignored)",
+   "unit": "lcu",
+   "meanEarnings": 43000,
+   "income": {
+    "allowance": 11294,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.11
+     },
+     {
+      "from": 17503,
+      "rate": 0.3
+     },
+     {
+      "from": 71047,
+      "rate": 0.41
+     },
+     {
+      "from": 165812,
+      "rate": 0.45
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.21
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.33
+    }
+   },
+   "corp": {
+    "main": 0.25,
+    "small": 0.15,
+    "smallLimit": 42500,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.2,
+    "reduced": 0.055,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.54,
+     "unemployment": 0.06,
+     "child": 0.07,
+     "disability": 0.03,
+     "housing": 0.03,
+     "meanstest": 0.05,
+     "other": 0.22
+    },
+    "pension": {
+     "level": 19500,
+     "age": 64,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 15000,
+     "months": 18
+    },
+    "child": {
+     "level": 1700,
+     "threshold": 75000
+    },
+    "disability": {
+     "level": 12200
+    },
+    "housing": {
+     "level": 2800
+    },
+    "meanstest": {
+     "level": 7600,
+     "taper": 0.4,
+     "workAllowance": 1000
+    }
+   }
+  },
+  "JPN": {
+   "label": "Japan 2024 (approximate; national income tax only, resident tax and surtax ignored)",
+   "unit": "lcu",
+   "meanEarnings": 4600000,
+   "income": {
+    "allowance": 1030000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 1950000,
+      "rate": 0.1
+     },
+     {
+      "from": 3300000,
+      "rate": 0.2
+     },
+     {
+      "from": 6950000,
+      "rate": 0.23
+     },
+     {
+      "from": 9000000,
+      "rate": 0.33
+     },
+     {
+      "from": 18000000,
+      "rate": 0.4
+     },
+     {
+      "from": 40000000,
+      "rate": 0.45
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.15
+     },
+     {
+      "from": 7800000,
+      "rate": 0.06
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.15
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.21,
+    "smallLimit": 8000000,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.1,
+    "reduced": 0.08,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.62,
+     "unemployment": 0.02,
+     "child": 0.08,
+     "disability": 0.04,
+     "housing": 0.01,
+     "meanstest": 0.05,
+     "other": 0.18
+    },
+    "pension": {
+     "level": 1500000,
+     "age": 65,
+     "index": "neutral"
+    },
+    "unemployment": {
+     "level": 1900000,
+     "months": 11
+    },
+    "child": {
+     "level": 120000,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 1000000
+    },
+    "housing": {
+     "level": 300000
+    },
+    "meanstest": {
+     "level": 1200000,
+     "taper": 0.8,
+     "workAllowance": 180000
+    }
+   }
+  },
+  "KOR": {
+   "label": "South Korea 2024 (approximate; national income tax, 42% and 40% brackets merged, local surtax ignored)",
+   "unit": "lcu",
+   "meanEarnings": 48000000,
+   "income": {
+    "allowance": 13500000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.06
+     },
+     {
+      "from": 14000000,
+      "rate": 0.15
+     },
+     {
+      "from": 50000000,
+      "rate": 0.24
+     },
+     {
+      "from": 88000000,
+      "rate": 0.35
+     },
+     {
+      "from": 150000000,
+      "rate": 0.38
+     },
+     {
+      "from": 300000000,
+      "rate": 0.41
+     },
+     {
+      "from": 1000000000,
+      "rate": 0.45
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.094
+     },
+     {
+      "from": 74000000,
+      "rate": 0.049
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.105
+    }
+   },
+   "corp": {
+    "main": 0.24,
+    "small": 0.09,
+    "smallLimit": 200000000,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.1,
+    "reduced": 0.05,
+    "categories": {
+     "food": "exempt",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.52,
+     "unemployment": 0.04,
+     "child": 0.05,
+     "disability": 0.02,
+     "housing": 0.02,
+     "meanstest": 0.08,
+     "other": 0.27
+    },
+    "pension": {
+     "level": 8000000,
+     "age": 63,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 23000000,
+     "months": 9
+    },
+    "child": {
+     "level": 1200000,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 5000000
+    },
+    "housing": {
+     "level": 4000000
+    },
+    "meanstest": {
+     "level": 8500000,
+     "taper": 0.7,
+     "workAllowance": 1000000
+    }
+   }
+  },
+  "AUS": {
+   "label": "Australia 2024/25 (approximate; Stage 3 rates; employer = superannuation guarantee 11.5%, a funded private contribution)",
+   "unit": "lcu",
+   "meanEarnings": 90000,
+   "income": {
+    "allowance": 18200,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.16
+     },
+     {
+      "from": 26800,
+      "rate": 0.3
+     },
+     {
+      "from": 116800,
+      "rate": 0.37
+     },
+     {
+      "from": 171800,
+      "rate": 0.45
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 26000,
+      "rate": 0.02
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.115
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.25,
+    "smallLimit": 5000000,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.1,
+    "reduced": 0.05,
+    "categories": {
+     "food": "zero",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "zero"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.3,
+     "unemployment": 0.07,
+     "child": 0.12,
+     "disability": 0.25,
+     "housing": 0.03,
+     "meanstest": 0.07,
+     "other": 0.16
+    },
+    "pension": {
+     "level": 29700,
+     "age": 67,
+     "index": "earnings"
+    },
+    "unemployment": {
+     "level": 19500,
+     "months": 36
+    },
+    "child": {
+     "level": 5700,
+     "threshold": 62000
+    },
+    "disability": {
+     "level": 29700
+    },
+    "housing": {
+     "level": 4800
+    },
+    "meanstest": {
+     "level": 25000,
+     "taper": 0.4,
+     "workAllowance": 5700
+    }
+   }
+  },
+  "CAN": {
+   "label": "Canada 2024 (approximate; federal income tax only, provincial taxes ignored; CPP/EI; combined GST/HST/PST average)",
+   "unit": "lcu",
+   "meanEarnings": 64000,
+   "income": {
+    "allowance": 15705,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.15
+     },
+     {
+      "from": 40162,
+      "rate": 0.205
+     },
+     {
+      "from": 96028,
+      "rate": 0.26
+     },
+     {
+      "from": 157500,
+      "rate": 0.29
+     },
+     {
+      "from": 231047,
+      "rate": 0.33
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 3500,
+      "rate": 0.0761
+     },
+     {
+      "from": 70000,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 3500,
+     "rate": 0.075
+    }
+   },
+   "corp": {
+    "main": 0.265,
+    "small": 0.12,
+    "smallLimit": 500000,
+    "expensing": 0.4
+   },
+   "vat": {
+    "standard": 0.12,
+    "reduced": 0.05,
+    "categories": {
+     "food": "zero",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.55,
+     "unemployment": 0.07,
+     "child": 0.1,
+     "disability": 0.04,
+     "housing": 0.03,
+     "meanstest": 0.08,
+     "other": 0.13
+    },
+    "pension": {
+     "level": 17500,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 29000,
+     "months": 10
+    },
+    "child": {
+     "level": 8000,
+     "threshold": 36500
+    },
+    "disability": {
+     "level": 12000
+    },
+    "housing": {
+     "level": 3500
+    },
+    "meanstest": {
+     "level": 12500,
+     "taper": 0.5,
+     "workAllowance": 5000
+    }
+   }
+  },
+  "CHN": {
+   "label": "China 2024 (approximate; IIT comprehensive income, special additional deductions ignored)",
+   "unit": "lcu",
+   "meanEarnings": 90000,
+   "income": {
+    "allowance": 60000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.03
+     },
+     {
+      "from": 36000,
+      "rate": 0.1
+     },
+     {
+      "from": 144000,
+      "rate": 0.2
+     },
+     {
+      "from": 300000,
+      "rate": 0.25
+     },
+     {
+      "from": 420000,
+      "rate": 0.3
+     },
+     {
+      "from": 660000,
+      "rate": 0.35
+     },
+     {
+      "from": 960000,
+      "rate": 0.45
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.105
+     },
+     {
+      "from": 270000,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.28
+    }
+   },
+   "corp": {
+    "main": 0.25,
+    "small": 0.05,
+    "smallLimit": 3000000,
+    "expensing": 0.4
+   },
+   "vat": {
+    "standard": 0.13,
+    "reduced": 0.09,
+    "categories": {
+     "food": "reduced",
+     "energy": "reduced",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "reduced",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.7,
+     "unemployment": 0.03,
+     "child": 0.0,
+     "disability": 0.01,
+     "housing": 0.04,
+     "meanstest": 0.05,
+     "other": 0.17
+    },
+    "pension": {
+     "level": 30000,
+     "age": 60,
+     "index": "neutral"
+    },
+    "unemployment": {
+     "level": 20000,
+     "months": 24
+    },
+    "child": {
+     "level": 0,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 3000
+    },
+    "housing": {
+     "level": 2500
+    },
+    "meanstest": {
+     "level": 7000,
+     "taper": 0.8,
+     "workAllowance": 3000
+    }
+   }
+  },
+  "IND": {
+   "label": "India FY2024-25 (approximate; new regime after July 2024 Budget, cess/surcharge/rebate ignored)",
+   "unit": "lcu",
+   "meanEarnings": 300000,
+   "income": {
+    "allowance": 375000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 400000,
+      "rate": 0.1
+     },
+     {
+      "from": 700000,
+      "rate": 0.15
+     },
+     {
+      "from": 900000,
+      "rate": 0.2
+     },
+     {
+      "from": 1200000,
+      "rate": 0.3
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.12
+     },
+     {
+      "from": 180000,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.07
+    }
+   },
+   "corp": {
+    "main": 0.2517,
+    "small": 0.25,
+    "smallLimit": 400000000,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.18,
+    "reduced": 0.05,
+    "categories": {
+     "food": "reduced",
+     "energy": "reduced",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.5,
+     "unemployment": 0.0,
+     "child": 0.0,
+     "disability": 0.01,
+     "housing": 0.04,
+     "meanstest": 0.3,
+     "other": 0.15
+    },
+    "pension": {
+     "level": 24000,
+     "age": 60,
+     "index": "neutral"
+    },
+    "unemployment": {
+     "level": 24000,
+     "months": 3
+    },
+    "child": {
+     "level": 0,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 3600
+    },
+    "housing": {
+     "level": 4000
+    },
+    "meanstest": {
+     "level": 25000,
+     "taper": 0.5,
+     "workAllowance": 0
+    }
+   }
+  },
+  "BRA": {
+   "label": "Brazil 2024 (approximate; IRPF table from Feb 2024, INSS employee ~11% to the 93k ceiling, VAT as an average of ICMS/PIS/COFINS/IPI/ISS)",
+   "unit": "lcu",
+   "meanEarnings": 45000,
+   "income": {
+    "allowance": 27110,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.075
+     },
+     {
+      "from": 6810,
+      "rate": 0.15
+     },
+     {
+      "from": 17900,
+      "rate": 0.225
+     },
+     {
+      "from": 28870,
+      "rate": 0.275
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.11
+     },
+     {
+      "from": 93432,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.2
+    }
+   },
+   "corp": {
+    "main": 0.34,
+    "small": 0.24,
+    "smallLimit": 240000,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.17,
+    "reduced": 0.07,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "reduced",
+     "services": "reduced",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.68,
+     "unemployment": 0.04,
+     "child": 0.01,
+     "disability": 0.04,
+     "housing": 0.01,
+     "meanstest": 0.06,
+     "other": 0.16
+    },
+    "pension": {
+     "level": 20000,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 21000,
+     "months": 5
+    },
+    "child": {
+     "level": 1800,
+     "threshold": 22000
+    },
+    "disability": {
+     "level": 18400
+    },
+    "housing": {
+     "level": 4000
+    },
+    "meanstest": {
+     "level": 8000,
+     "taper": 0.5,
+     "workAllowance": 2000
+    }
+   }
+  },
+  "ARG": {
+   "label": "Argentina 2024 (approximate; amounts are template multiples of mean earnings, rates are statutory)",
+   "unit": "me",
+   "income": {
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 0.4,
+      "rate": 0.12
+     },
+     {
+      "from": 0.9,
+      "rate": 0.19
+     },
+     {
+      "from": 1.5,
+      "rate": 0.27
+     },
+     {
+      "from": 2.5,
+      "rate": 0.31
+     },
+     {
+      "from": 4.0,
+      "rate": 0.35
+     }
+    ],
+    "index": "earnings"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.17
+     },
+     {
+      "from": 2.0,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.22
+    }
+   },
+   "corp": {
+    "main": 0.35,
+    "small": 0.35
+   },
+   "vat": {
+    "standard": 0.21,
+    "reduced": 0.105
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.65,
+     "unemployment": 0.01,
+     "child": 0.1,
+     "disability": 0.05,
+     "housing": 0.0,
+     "meanstest": 0.07,
+     "other": 0.12
+    },
+    "pension": {
+     "age": 65,
+     "index": "cpi"
+    }
+   }
+  },
+  "ZAF": {
+   "label": "South Africa 2024/25 (approximate)",
+   "unit": "lcu",
+   "meanEarnings": 300000,
+   "income": {
+    "allowance": 95750,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.18
+     },
+     {
+      "from": 141350,
+      "rate": 0.26
+     },
+     {
+      "from": 274750,
+      "rate": 0.31
+     },
+     {
+      "from": 417050,
+      "rate": 0.36
+     },
+     {
+      "from": 577250,
+      "rate": 0.39
+     },
+     {
+      "from": 762150,
+      "rate": 0.41
+     },
+     {
+      "from": 1721250,
+      "rate": 0.45
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.01
+     },
+     {
+      "from": 212544,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.015
+    }
+   },
+   "corp": {
+    "main": 0.27,
+    "small": 0.07,
+    "smallLimit": 365000,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.15,
+    "reduced": 0.075,
+    "categories": {
+     "food": "zero",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.34,
+     "unemployment": 0.05,
+     "child": 0.28,
+     "disability": 0.12,
+     "housing": 0.01,
+     "meanstest": 0.12,
+     "other": 0.08
+    },
+    "pension": {
+     "level": 25100,
+     "age": 60,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 50000,
+     "months": 8
+    },
+    "child": {
+     "level": 6100,
+     "threshold": 60000
+    },
+    "disability": {
+     "level": 25100
+    },
+    "housing": {
+     "level": 6000
+    },
+    "meanstest": {
+     "level": 4400,
+     "taper": 0.8,
+     "workAllowance": 0
+    }
+   }
+  },
+  "MEX": {
+   "label": "Mexico 2024 (approximate; annual ISR table merged to 7 bands by chord rates, employment subsidy ignored)",
+   "unit": "lcu",
+   "meanEarnings": 230000,
+   "income": {
+    "allowance": 0,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.059
+     },
+     {
+      "from": 75985,
+      "rate": 0.1385
+     },
+     {
+      "from": 185853,
+      "rate": 0.2136
+     },
+     {
+      "from": 374838,
+      "rate": 0.2352
+     },
+     {
+      "from": 590796,
+      "rate": 0.3
+     },
+     {
+      "from": 1127927,
+      "rate": 0.338
+     },
+     {
+      "from": 4511707,
+      "rate": 0.35
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.03
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.18
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.3,
+    "smallLimit": 0,
+    "expensing": 0.4
+   },
+   "vat": {
+    "standard": 0.16,
+    "reduced": 0.08,
+    "categories": {
+     "food": "zero",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.65,
+     "unemployment": 0.0,
+     "child": 0.02,
+     "disability": 0.02,
+     "housing": 0.02,
+     "meanstest": 0.08,
+     "other": 0.21
+    },
+    "pension": {
+     "level": 40000,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 0,
+     "months": 3
+    },
+    "child": {
+     "level": 9600,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 18600
+    },
+    "housing": {
+     "level": 6000
+    },
+    "meanstest": {
+     "level": 9000,
+     "taper": 0.5,
+     "workAllowance": 0
+    }
+   }
+  },
+  "IDN": {
+   "label": "Indonesia 2024 (approximate; PTKP single, BPJS employment and health)",
+   "unit": "lcu",
+   "meanEarnings": 40000000,
+   "income": {
+    "allowance": 54000000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 60000000,
+      "rate": 0.15
+     },
+     {
+      "from": 250000000,
+      "rate": 0.25
+     },
+     {
+      "from": 500000000,
+      "rate": 0.3
+     },
+     {
+      "from": 5000000000,
+      "rate": 0.35
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.04
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.105
+    }
+   },
+   "corp": {
+    "main": 0.22,
+    "small": 0.22,
+    "smallLimit": 0,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.11,
+    "reduced": 0.055,
+    "categories": {
+     "food": "exempt",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.3,
+     "unemployment": 0.01,
+     "child": 0.04,
+     "disability": 0.01,
+     "housing": 0.02,
+     "meanstest": 0.25,
+     "other": 0.37
+    },
+    "pension": {
+     "level": 12000000,
+     "age": 58,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 18000000,
+     "months": 6
+    },
+    "child": {
+     "level": 1500000,
+     "threshold": 40000000
+    },
+    "disability": {
+     "level": 3600000
+    },
+    "housing": {
+     "level": 1500000
+    },
+    "meanstest": {
+     "level": 3000000,
+     "taper": 0.5,
+     "workAllowance": 0
+    }
+   }
+  },
+  "TUR": {
+   "label": "Turkey 2024 (approximate; wage tariff above the minimum-wage exemption, stamp duty ignored)",
+   "unit": "lcu",
+   "meanEarnings": 450000,
+   "income": {
+    "allowance": 240000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.27
+     },
+     {
+      "from": 340000,
+      "rate": 0.35
+     },
+     {
+      "from": 2760000,
+      "rate": 0.4
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.15
+     },
+     {
+      "from": 1800000,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.2
+    }
+   },
+   "corp": {
+    "main": 0.25,
+    "small": 0.25,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.2,
+    "reduced": 0.1,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.7,
+     "unemployment": 0.02,
+     "child": 0.01,
+     "disability": 0.04,
+     "housing": 0.01,
+     "meanstest": 0.06,
+     "other": 0.16
+    },
+    "pension": {
+     "level": 140000,
+     "age": 60,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 96000,
+     "months": 10
+    },
+    "child": {
+     "level": 3000,
+     "threshold": 120000
+    },
+    "disability": {
+     "level": 60000
+    },
+    "housing": {
+     "level": 6000
+    },
+    "meanstest": {
+     "level": 30000,
+     "taper": 0.7,
+     "workAllowance": 0
+    }
+   }
+  },
+  "EGY": {
+   "label": "Egypt 2024 (approximate; amounts are multiples of an assumed ~100,000 pound mean wage, rates statutory)",
+   "unit": "me",
+   "income": {
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.1
+     },
+     {
+      "from": 0.15,
+      "rate": 0.15
+     },
+     {
+      "from": 0.3,
+      "rate": 0.2
+     },
+     {
+      "from": 1.6,
+      "rate": 0.225
+     },
+     {
+      "from": 3.6,
+      "rate": 0.25
+     },
+     {
+      "from": 11.6,
+      "rate": 0.275
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.11
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.19
+    }
+   },
+   "corp": {
+    "main": 0.225,
+    "small": 0.225
+   },
+   "vat": {
+    "standard": 0.14,
+    "reduced": 0.05,
+    "categories": {
+     "food": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.5,
+     "unemployment": 0.0,
+     "child": 0.01,
+     "disability": 0.02,
+     "housing": 0.0,
+     "meanstest": 0.15,
+     "other": 0.32
+    },
+    "pension": {
+     "age": 60,
+     "index": "cpi"
+    }
+   }
+  },
+  "VNM": {
+   "label": "Vietnam 2024 (approximate; amounts are multiples of an assumed ~8m dong a month mean wage, rates statutory)",
+   "unit": "me",
+   "income": {
+    "allowance": 1.4,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.05
+     },
+     {
+      "from": 0.625,
+      "rate": 0.1
+     },
+     {
+      "from": 1.25,
+      "rate": 0.15
+     },
+     {
+      "from": 2.25,
+      "rate": 0.2
+     },
+     {
+      "from": 4.0,
+      "rate": 0.25
+     },
+     {
+      "from": 6.5,
+      "rate": 0.3
+     },
+     {
+      "from": 10.0,
+      "rate": 0.35
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.105
+     },
+     {
+      "from": 4.5,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.215
+    }
+   },
+   "corp": {
+    "main": 0.2,
+    "small": 0.2
+   },
+   "vat": {
+    "standard": 0.1,
+    "reduced": 0.05
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.62,
+     "unemployment": 0.03,
+     "child": 0.01,
+     "disability": 0.02,
+     "housing": 0.0,
+     "meanstest": 0.06,
+     "other": 0.26
+    },
+    "pension": {
+     "age": 60,
+     "index": "cpi"
+    }
+   }
+  },
+  "POL": {
+   "label": "Poland 2024 (approximate; 30,000 tax-free amount, 12%/32%, ZUS plus 9% health)",
+   "unit": "lcu",
+   "meanEarnings": 96000,
+   "income": {
+    "allowance": 30000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.12
+     },
+     {
+      "from": 90000,
+      "rate": 0.32
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.215
+     },
+     {
+      "from": 234720,
+      "rate": 0.0775
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.205
+    }
+   },
+   "corp": {
+    "main": 0.19,
+    "small": 0.09,
+    "smallLimit": 900000,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.23,
+    "reduced": 0.08,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.6,
+     "unemployment": 0.01,
+     "child": 0.13,
+     "disability": 0.09,
+     "housing": 0.01,
+     "meanstest": 0.03,
+     "other": 0.13
+    },
+    "pension": {
+     "level": 44000,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 17000,
+     "months": 6
+    },
+    "child": {
+     "level": 9600,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 29000
+    },
+    "housing": {
+     "level": 3600
+    },
+    "meanstest": {
+     "level": 8600,
+     "taper": 0.8,
+     "workAllowance": 0
+    }
+   }
+  },
+  "CHL": {
+   "label": "Chile 2024 (approximate; global complementary tax with UTA ~ 790,000 pesos, AFP contributions)",
+   "unit": "lcu",
+   "meanEarnings": 12000000,
+   "income": {
+    "allowance": 10670000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.04
+     },
+     {
+      "from": 13000000,
+      "rate": 0.08
+     },
+     {
+      "from": 28800000,
+      "rate": 0.135
+     },
+     {
+      "from": 44600000,
+      "rate": 0.23
+     },
+     {
+      "from": 60400000,
+      "rate": 0.304
+     },
+     {
+      "from": 84100000,
+      "rate": 0.35
+     },
+     {
+      "from": 234200000,
+      "rate": 0.4
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.185
+     },
+     {
+      "from": 38000000,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.05
+    }
+   },
+   "corp": {
+    "main": 0.27,
+    "small": 0.25,
+    "smallLimit": 300000000,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.19,
+    "reduced": 0.095,
+    "categories": {
+     "food": "standard",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.55,
+     "unemployment": 0.03,
+     "child": 0.06,
+     "disability": 0.05,
+     "housing": 0.04,
+     "meanstest": 0.09,
+     "other": 0.18
+    },
+    "pension": {
+     "level": 2600000,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 5400000,
+     "months": 5
+    },
+    "child": {
+     "level": 180000,
+     "threshold": 9000000
+    },
+    "disability": {
+     "level": 2500000
+    },
+    "housing": {
+     "level": 1800000
+    },
+    "meanstest": {
+     "level": 1200000,
+     "taper": 0.5,
+     "workAllowance": 0
+    }
+   }
+  },
+  "RUS": {
+   "label": "Russia 2024 (approximate; 13%/15% personal income tax, unified insurance contributions paid by employers)",
+   "unit": "lcu",
+   "meanEarnings": 1050000,
+   "income": {
+    "allowance": 0,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.13
+     },
+     {
+      "from": 5000000,
+      "rate": 0.15
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.3
+    }
+   },
+   "corp": {
+    "main": 0.2,
+    "small": 0.2,
+    "smallLimit": 0,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.2,
+    "reduced": 0.1,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.72,
+     "unemployment": 0.01,
+     "child": 0.07,
+     "disability": 0.04,
+     "housing": 0.01,
+     "meanstest": 0.04,
+     "other": 0.11
+    },
+    "pension": {
+     "level": 265000,
+     "age": 63,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 80000,
+     "months": 12
+    },
+    "child": {
+     "level": 80000,
+     "threshold": 540000
+    },
+    "disability": {
+     "level": 190000
+    },
+    "housing": {
+     "level": 25000
+    },
+    "meanstest": {
+     "level": 150000,
+     "taper": 0.5,
+     "workAllowance": 0
+    }
+   }
+  },
+  "SAU": {
+   "label": "Saudi Arabia 2024 (approximate; no personal income tax, GOSI rates for nationals)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.0
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.0975
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.1175
+    }
+   },
+   "corp": {
+    "main": 0.2,
+    "small": 0.2
+   },
+   "vat": {
+    "standard": 0.15,
+    "reduced": 0.075,
+    "categories": {
+     "food": "standard",
+     "energy": "standard",
+     "health_edu": "zero"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.3,
+     "unemployment": 0.02,
+     "child": 0.02,
+     "disability": 0.05,
+     "housing": 0.06,
+     "meanstest": 0.12,
+     "other": 0.43
+    },
+    "pension": {
+     "age": 60,
+     "index": "cpi"
+    }
+   }
+  },
+  "NGA": {
+   "label": "Nigeria 2024 (approximate; amounts are multiples of an assumed ~1.3m naira mean wage, PAYE rates statutory)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.3,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.07
+     },
+     {
+      "from": 0.23,
+      "rate": 0.11
+     },
+     {
+      "from": 0.46,
+      "rate": 0.15
+     },
+     {
+      "from": 0.85,
+      "rate": 0.19
+     },
+     {
+      "from": 1.23,
+      "rate": 0.21
+     },
+     {
+      "from": 2.46,
+      "rate": 0.24
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.105
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.12
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.3
+   },
+   "vat": {
+    "standard": 0.075,
+    "reduced": 0.04,
+    "categories": {
+     "food": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.55,
+     "unemployment": 0.0,
+     "child": 0.03,
+     "disability": 0.01,
+     "housing": 0.0,
+     "meanstest": 0.15,
+     "other": 0.26
+    },
+    "pension": {
+     "level": 0.15,
+     "age": 60,
+     "index": "neutral"
+    },
+    "meanstest": {
+     "level": 0.08
+    }
+   }
+  },
+  "ARE": {
+   "label": "United Arab Emirates 2024 (approximate; no personal income tax, 9% corporate tax above AED 375,000)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.0
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.05
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.125
+    }
+   },
+   "corp": {
+    "main": 0.09,
+    "small": 0.0,
+    "smallLimit": 3.0,
+    "expensing": 0.2
+   },
+   "vat": {
+    "standard": 0.05,
+    "reduced": 0.025,
+    "categories": {
+     "food": "standard",
+     "energy": "standard",
+     "health_edu": "zero"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.35,
+     "unemployment": 0.01,
+     "child": 0.02,
+     "disability": 0.02,
+     "housing": 0.1,
+     "meanstest": 0.1,
+     "other": 0.4
+    },
+    "pension": {
+     "level": 0.5,
+     "age": 60,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 0.35,
+     "months": 3
+    }
+   }
+  },
+  "NOR": {
+   "label": "Norway 2024 (approximate; 22% general income tax plus trinnskatt, merged on one base)",
+   "unit": "lcu",
+   "meanEarnings": 700000,
+   "income": {
+    "allowance": 192700,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.22
+     },
+     {
+      "from": 15350,
+      "rate": 0.237
+     },
+     {
+      "from": 100150,
+      "rate": 0.26
+     },
+     {
+      "from": 477300,
+      "rate": 0.356
+     },
+     {
+      "from": 745200,
+      "rate": 0.386
+     },
+     {
+      "from": 1157300,
+      "rate": 0.396
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 69650,
+      "rate": 0.078
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.141
+    }
+   },
+   "corp": {
+    "main": 0.22,
+    "small": 0.22,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.25,
+    "reduced": 0.15,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "reduced",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.45,
+     "unemployment": 0.03,
+     "child": 0.05,
+     "disability": 0.22,
+     "housing": 0.01,
+     "meanstest": 0.03,
+     "other": 0.21
+    },
+    "pension": {
+     "level": 250000,
+     "age": 67,
+     "index": "earnings"
+    },
+    "unemployment": {
+     "level": 300000,
+     "months": 24
+    },
+    "child": {
+     "level": 21200,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 280000
+    },
+    "housing": {
+     "level": 35000
+    },
+    "meanstest": {
+     "level": 100000,
+     "taper": 0.8,
+     "workAllowance": 10000
+    }
+   }
+  },
+  "SGP": {
+   "label": "Singapore YA2024 (approximate; resident rates, CPF 20%/17% to the S$6,800 monthly ceiling, GST 9%)",
+   "unit": "lcu",
+   "meanEarnings": 80000,
+   "income": {
+    "allowance": 20000,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.0275
+     },
+     {
+      "from": 20000,
+      "rate": 0.07
+     },
+     {
+      "from": 60000,
+      "rate": 0.115
+     },
+     {
+      "from": 100000,
+      "rate": 0.15
+     },
+     {
+      "from": 140000,
+      "rate": 0.19
+     },
+     {
+      "from": 300000,
+      "rate": 0.225
+     },
+     {
+      "from": 980000,
+      "rate": 0.24
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.2
+     },
+     {
+      "from": 81600,
+      "rate": 0.0
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.15
+    }
+   },
+   "corp": {
+    "main": 0.17,
+    "small": 0.083,
+    "smallLimit": 200000,
+    "expensing": 0.4
+   },
+   "vat": {
+    "standard": 0.09,
+    "reduced": 0.045,
+    "categories": {
+     "food": "standard",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.1,
+     "unemployment": 0.01,
+     "child": 0.12,
+     "disability": 0.03,
+     "housing": 0.2,
+     "meanstest": 0.1,
+     "other": 0.44
+    },
+    "pension": {
+     "level": 6000,
+     "age": 65,
+     "index": "cpi"
+    },
+    "unemployment": {
+     "level": 12000,
+     "months": 6
+    },
+    "child": {
+     "level": 2000,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 4800
+    },
+    "housing": {
+     "level": 3500
+    },
+    "meanstest": {
+     "level": 9600,
+     "taper": 0.7,
+     "workAllowance": 0
+    }
+   }
+  },
+  "CHE": {
+   "label": "Switzerland 2024 (approximate; federal plus average cantonal/communal stand-in, AHV/IV/EO/ALV only)",
+   "unit": "lcu",
+   "meanEarnings": 90000,
+   "income": {
+    "allowance": 14500,
+    "taperStart": 0,
+    "taperRate": 0,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.08
+     },
+     {
+      "from": 30000,
+      "rate": 0.15
+     },
+     {
+      "from": 70000,
+      "rate": 0.22
+     },
+     {
+      "from": 140000,
+      "rate": 0.3
+     },
+     {
+      "from": 300000,
+      "rate": 0.36
+     },
+     {
+      "from": 700000,
+      "rate": 0.4
+     }
+    ],
+    "index": "cpi"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0,
+      "rate": 0.064
+     }
+    ],
+    "employer": {
+     "from": 0,
+     "rate": 0.07
+    }
+   },
+   "corp": {
+    "main": 0.15,
+    "small": 0.15,
+    "smallLimit": 0,
+    "expensing": 0.3
+   },
+   "vat": {
+    "standard": 0.081,
+    "reduced": 0.026,
+    "categories": {
+     "food": "reduced",
+     "energy": "standard",
+     "housing": "exempt",
+     "transport": "standard",
+     "services": "standard",
+     "goods": "standard",
+     "health_edu": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.55,
+     "unemployment": 0.07,
+     "child": 0.07,
+     "disability": 0.13,
+     "housing": 0.01,
+     "meanstest": 0.07,
+     "other": 0.1
+    },
+    "pension": {
+     "level": 29000,
+     "age": 65,
+     "index": "earnings"
+    },
+    "unemployment": {
+     "level": 63000,
+     "months": 19
+    },
+    "child": {
+     "level": 2800,
+     "threshold": 0
+    },
+    "disability": {
+     "level": 22000
+    },
+    "housing": {
+     "level": 6000
+    },
+    "meanstest": {
+     "level": 20000,
+     "taper": 0.8,
+     "workAllowance": 6000
+    }
+   }
+  },
+  "ETH": {
+   "label": "Ethiopia 2024 (approximate; amounts are multiples of an assumed ~7,000 birr a month mean wage, rates statutory)",
+   "unit": "me",
+   "income": {
+    "allowance": 0.29,
+    "bands": [
+     {
+      "from": 0,
+      "rate": 0.15
+     },
+     {
+      "from": 0.29,
+      "rate": 0.2
+     },
+     {
+      "from": 0.71,
+      "rate": 0.25
+     },
+     {
+      "from": 1.14,
+      "rate": 0.3
+     },
+     {
+      "from": 1.71,
+      "rate": 0.35
+     }
+    ],
+    "index": "frozen"
+   },
+   "payroll": {
+    "employee": [
+     {
+      "from": 0.0,
+      "rate": 0.07
+     }
+    ],
+    "employer": {
+     "from": 0.0,
+     "rate": 0.11
+    }
+   },
+   "corp": {
+    "main": 0.3,
+    "small": 0.3
+   },
+   "vat": {
+    "standard": 0.15,
+    "reduced": 0.075,
+    "categories": {
+     "food": "exempt"
+    }
+   },
+   "benefits": {
+    "shares": {
+     "pension": 0.25,
+     "unemployment": 0.0,
+     "child": 0.0,
+     "disability": 0.01,
+     "housing": 0.0,
+     "meanstest": 0.6,
+     "other": 0.14
+    },
+    "pension": {
+     "level": 0.08,
+     "age": 60,
+     "index": "neutral"
+    },
+    "meanstest": {
+     "level": 0.1
+    }
+   }
+  }
+ }
+}

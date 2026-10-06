@@ -13,6 +13,7 @@
     <EmbeddedResource Include="..\..\data\events.json" LogicalName="data/events.json" />
     <EmbeddedResource Include="..\..\data\scenarios.json" LogicalName="data/scenarios.json" />
     <EmbeddedResource Include="..\..\data\regions.json" LogicalName="data/regions.json" />
+    <EmbeddedResource Include="..\..\data\taxcodes.json" LogicalName="data/taxcodes.json" Condition="Exists('..\..\data\taxcodes.json')" />
   </ItemGroup>
 
 </Project>
