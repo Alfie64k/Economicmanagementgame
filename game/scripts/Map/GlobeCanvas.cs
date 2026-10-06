@@ -26,7 +26,12 @@ public partial class GlobeCanvas : Control, IMapSurface
     float _yaw, _pitch, _dist = 3.2f;
     bool _drag, _moved; Vector2 _dragStart, _mouse; float _yaw0, _pitch0;
     Shape? _hover; List<Pin> _pins = new(); string? _pinText;
-    Hud _hud = new();
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationMouseExit) { _hover = null; _pinText = null; _hud.Set(null, _mouse); }
+    }
+    readonly MapTip _hud = new();
     const int TexW = 4096, TexH = 2048;
 
     public override void _Ready()
@@ -65,7 +70,7 @@ void fragment(){ float f = pow(1.0 - abs(dot(normalize(NORMAL), normalize(VIEW))
 
         _globe.AddChild(_flowDots); _globe.AddChild(_pinDots);
         AddChild(_hud);
-        _hud.SetAnchorsPreset(LayoutPreset.FullRect); _hud.MouseFilter = MouseFilterEnum.Ignore;
+
         Resized += () => { };
         FocusLonLat(0, 30);
     }
@@ -152,7 +157,7 @@ void fragment(){ float f = pow(1.0 - abs(dot(normalize(NORMAL), normalize(VIEW))
                     if (pin == null) s = MapData.CountryAt(w);
                 }
                 if (!ReferenceEquals(s, _hover)) { _hover = s; Hovered?.Invoke(s); }
-                _hud.Text = _pinText ?? (s != null ? HoverText?.Invoke(s) ?? s.Name : null); _hud.Mouse = _mouse; _hud.QueueRedraw();
+                _hud.Set(_pinText ?? (s != null ? HoverText?.Invoke(s) ?? s.Name : null), _mouse);
             }
         }
     }
@@ -195,20 +200,6 @@ void fragment(){ float f = pow(1.0 - abs(dot(normalize(NORMAL), normalize(VIEW))
         {
             for (int lon = -180; lon <= 180; lon += 30) DrawLine(new Vector2(lon, -90), new Vector2(lon, 90), new Color(1, 1, 1, 0.07f), 0.18f);
             for (int lat = -60; lat <= 60; lat += 30) DrawLine(new Vector2(-180, -lat), new Vector2(180, -lat), new Color(1, 1, 1, 0.07f), 0.18f);
-        }
-    }
-
-    partial class Hud : Control
-    {
-        public string? Text; public Vector2 Mouse;
-        public override void _Draw()
-        {
-            if (Text == null) return;
-            var font = ThemeDB.FallbackFont; int fs = Mathf.RoundToInt(13 * Pal.TextScale);
-            var lines = Text.Split('\n'); float w = lines.Max(l => font.GetStringSize(l, HorizontalAlignment.Left, -1, fs).X) + 16, h = lines.Length * (fs + 4) + 10;
-            var pos = Mouse + new Vector2(16, 16); if (pos.X + w > Size.X) pos.X = Mouse.X - w - 12; if (pos.Y + h > Size.Y) pos.Y = Mouse.Y - h - 12;
-            DrawRect(new Rect2(pos, new Vector2(w, h)), new Color(Pal.PanelHi, 0.96f)); DrawRect(new Rect2(pos, new Vector2(w, h)), Pal.Accent, false, 1);
-            for (int i = 0; i < lines.Length; i++) DrawString(font, pos + new Vector2(8, 5 + (i + 1) * (fs + 4) - 4), lines[i], HorizontalAlignment.Left, -1, fs, i == 0 ? Pal.Text : Pal.Dim);
         }
     }
 }

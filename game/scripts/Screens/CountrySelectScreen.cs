@@ -19,6 +19,10 @@ public partial class CountrySelectScreen : Control
     LineEdit _search = new();
     OptionButton _region = new();
     Button _start = new();
+    readonly PanelContainer _spot = new();
+    readonly Emblem _emblem = new();
+    readonly Label _hiddenNote = UI.Dim("Selected country is hidden by the current filter.", 12);
+    readonly VBoxContainer _spotBody = new();
 
     public override void _Ready()
     {
@@ -31,12 +35,19 @@ public partial class CountrySelectScreen : Control
         var body = UI.HBox(16); body.SizeFlagsVertical = SizeFlags.ExpandFill; root.AddChild(body);
 
         // ---- left: filters + table ----
-        var left = UI.VBox(10); left.SizeFlagsHorizontal = SizeFlags.ExpandFill; left.SizeFlagsStretchRatio = 1.7f; body.AddChild(left);
+        var left = UI.VBox(10); left.SizeFlagsHorizontal = SizeFlags.ExpandFill; left.SizeFlagsStretchRatio = 1.5f; body.AddChild(left);
+
+        // spotlight: the selected country, pinned above the browse list (the full data stays on the right)
+        _spot.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelHi, 12, Pal.Accent, 2, 14));
+        _spotBody.AddThemeConstantOverride("separation", 4); _spotBody.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        _spot.AddChild(UI.HBox(16, _emblem, _spotBody));
+        left.AddChild(_spot);
+
         _search.PlaceholderText = "Search countries…"; _search.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-        _search.TextChanged += _ => _table.Refresh();
+        _search.TextChanged += _ => OnFilterChanged();
         _region.AddItem("All regions");
         foreach (var r in _roster.Select(c => c.Region).Distinct().OrderBy(x => x)) _region.AddItem(r);
-        _region.ItemSelected += _ => _table.Refresh();
+        _region.ItemSelected += _ => OnFilterChanged();
         left.AddChild(UI.HBox(8, _search, _region));
 
         _table.Columns = new List<Column>
@@ -57,6 +68,7 @@ public partial class CountrySelectScreen : Control
             return _search.Text.Length == 0 || c.Name.Contains(_search.Text, StringComparison.OrdinalIgnoreCase) || c.Id.Contains(_search.Text, StringComparison.OrdinalIgnoreCase);
         };
         _table.SizeFlagsVertical = SizeFlags.ExpandFill;
+        _table.RowKey = o => ((CountryState)o).Id;
         _table.RowSelected += o => Select((CountryState)o);
         left.AddChild(_table);
         _table.SetRows(_roster.Cast<object>());
@@ -71,8 +83,26 @@ public partial class CountrySelectScreen : Control
         _start = UI.Btn("Start as this country →", Start, true, 260); _start.Disabled = true;
         right.AddChild(UI.HBox(10, UI.Lbl("Difficulty", 14, Pal.Dim), _diff, UI.Spacer(0, 0, true), _start));
 
-        Select(_roster.First(c => c.Id == "GBR"));
         _table.Select(_roster.First(c => c.Id == "GBR"));
+    }
+
+    void OnFilterChanged()
+    {
+        _table.Refresh();
+        UpdateHiddenNote();
+    }
+
+    void UpdateHiddenNote() => _hiddenNote.Visible = _sel != null && !_table.View.Any(r => ((CountryState)r).Id == _sel.Id);
+
+    public override void _UnhandledKeyInput(InputEvent e)
+    {
+        if (e is not InputEventKey k || !k.Pressed) return;
+        if (k.Keycode == Key.Down || k.Keycode == Key.Up)
+        {
+            if (_table.Step(k.Keycode == Key.Down ? 1 : -1) is { } next) _table.Select(next);
+            GetViewport().SetInputAsHandled();
+        }
+        else if ((k.Keycode == Key.Enter || k.Keycode == Key.KpEnter) && !_start.Disabled && GetViewport().GuiGetFocusOwner() == null) Start();
     }
 
     static string Stars(double d) => new string('★', (int)Math.Round(d)) + new string('☆', 5 - (int)Math.Round(d));
@@ -118,19 +148,60 @@ public partial class CountrySelectScreen : Control
     void Select(CountryState c)
     {
         _sel = c; _start.Disabled = false;
-        foreach (var ch in _detail.GetChildren()) ch.QueueFree();
+        BuildSpotlight(c);
+        UpdateHiddenNote();
+        BuildDetail(c);
+    }
+
+    void BuildSpotlight(CountryState c)
+    {
+        _emblem.Set(c.Id);
+        foreach (var ch in _spotBody.GetChildren()) { _spotBody.RemoveChild(ch); if (ch != _hiddenNote) ch.QueueFree(); }   // the note is reused
+        _spotBody.AddChild(UI.Lbl(c.Name, 28, Pal.Text, true));
+        var govCol = c.Gov == "democracy" ? Pal.Good : c.Gov == "autocracy" ? Pal.Bad : Pal.Warn;
+        var chips = UI.HBox(6, Cards.Chip(c.Archetype.ToUpper(), Pal.Accent), Cards.Chip(c.Gov.ToUpper(), govCol), Cards.Chip(c.Region.ToUpper(), Pal.Faint), Cards.Chip(c.Currency, Pal.Faint));
+        _spotBody.AddChild(chips);
+        var stats = new GridContainer { Columns = 4 }; stats.AddThemeConstantOverride("h_separation", 22); stats.AddThemeConstantOverride("v_separation", 0);
+        void Stat(string k, string v, Color? col = null) { stats.AddChild(UI.VBox(0, UI.Dim(k, 11), UI.Lbl(v, 17, col ?? Pal.Text, true))); }
+        Stat("GDP", Money.Gbp(c.GdpUsdBn)); Stat("Inflation", UI.Pct(c.Inflation, 1), c.Inflation > 0.08 ? Pal.Bad : null);
+        Stat("Public debt", UI.Pct(c.DebtToGdp, 0), c.DebtToGdp > 1.0 ? Pal.Bad : null); Stat("Approval", UI.Pct(c.Approval, 0));
+        _spotBody.AddChild(stats);
+        _spotBody.AddChild(UI.Lbl($"Difficulty {Stars(Rating(c))}", 13, Pal.Warn, true));
+        var (good, bad) = Profile(c);
+        if (good.Count > 0) _spotBody.AddChild(Brief("▲ " + good[0], Pal.Good));
+        if (bad.Count > 0) _spotBody.AddChild(Brief("▼ " + bad[0], Pal.Bad));
+        _spotBody.AddChild(_hiddenNote);
+    }
+
+    static Label Brief(string text, Color col)
+    {
+        var l = UI.Lbl(text, 12, col); l.ClipText = true; l.CustomMinimumSize = new Vector2(10, 0); l.SizeFlagsHorizontal = SizeFlags.ExpandFill; return l;
+    }
+
+    void BuildDetail(CountryState c)
+    {
+        foreach (var ch in _detail.GetChildren()) { _detail.RemoveChild(ch); ch.QueueFree(); }
         _detail.AddChild(UI.Lbl(c.Name, 30, Pal.Text, true));
         _detail.AddChild(UI.Dim($"{c.Region} · {c.Archetype} economy · {c.Gov} · {c.Currency}", 14));
-        var grid = new GridContainer { Columns = 4 }; grid.AddThemeConstantOverride("h_separation", 18); grid.AddThemeConstantOverride("v_separation", 6);
-        void Stat(string k, string v) { grid.AddChild(UI.Dim(k)); grid.AddChild(UI.Lbl(v, 15, Pal.Text, true)); }
-        Stat("GDP", Money.Gbp(c.GdpUsdBn)); Stat("Population", $"{c.Pop:0.#}m");
-        Stat("GDP per head", $"${c.GdpPerCapitaUsd:N0}"); Stat("Real growth trend", UI.Pct(c.GrowthTrend, 1));
-        Stat("Inflation", UI.Pct(c.Inflation, 1)); Stat("Unemployment", UI.Pct(c.Unemp, 1));
-        Stat("Policy rate", UI.Pct(c.PolicyRate, 2)); Stat("10y yield", UI.Pct(c.Yield10, 2));
-        Stat("Public debt", UI.Pct(c.DebtToGdp, 0)); Stat("Deficit", UI.Pct(c.Deficit0Share, 1));
-        Stat("Tax revenue", UI.Pct(SocietyRevenue(c), 0)); Stat("Current account", UI.Pct(c.CaToGdp, 1));
-        Stat("Gini", $"{c.Gini:0.00}"); Stat("Approval", UI.Pct(c.Approval, 0));
-        _detail.AddChild(grid);
+
+        void Group(string title, params (string k, string v)[] rows)
+        {
+            _detail.AddChild(UI.Lbl(title, 13, Pal.Accent, true));
+            var grid = new GridContainer { Columns = 4 }; grid.AddThemeConstantOverride("h_separation", 18); grid.AddThemeConstantOverride("v_separation", 6);
+            foreach (var (k, v) in rows) { grid.AddChild(UI.Dim(k)); grid.AddChild(UI.Lbl(v, 15, Pal.Text, true)); }
+            _detail.AddChild(grid);
+        }
+        Group("ECONOMY", ("GDP", Money.Gbp(c.GdpUsdBn)), ("Population", $"{c.Pop:0.#}m"), ("GDP per head", $"${c.GdpPerCapitaUsd:N0}"), ("Real growth trend", UI.Pct(c.GrowthTrend, 1)),
+              ("Inflation", UI.Pct(c.Inflation, 1)), ("Unemployment", UI.Pct(c.Unemp, 1)));
+        Group("FISCAL AND MONETARY", ("Policy rate", UI.Pct(c.PolicyRate, 2)), ("10y yield", UI.Pct(c.Yield10, 2)), ("Public debt", UI.Pct(c.DebtToGdp, 0)), ("Deficit", UI.Pct(c.Deficit0Share, 1)),
+              ("Tax revenue", UI.Pct(SocietyRevenue(c), 0)));
+        Group("EXTERNAL AND SOCIETY", ("Current account", UI.Pct(c.CaToGdp, 1)), ("Gini", $"{c.Gini:0.00}"), ("Approval", UI.Pct(c.Approval, 0)), ("Over 65s", UI.Pct(c.Old, 0)));
+
+        var mix = new StackBar { CustomMinimumSize = new Vector2(200, 70) }; mix.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        var names = Enum.GetNames<Sector>(); double tot = c.SectorVa.Sum();
+        mix.Format = v => UI.Pct(v / Math.Max(1e-9, tot), 0);
+        mix.Set(names.Select((n, i) => new Seg { Label = n, Value = c.SectorVa[i], Color = Pal.Series[i % Pal.Series.Length] }), "Economic structure (value added)");
+        _detail.AddChild(mix);
         _detail.AddChild(UI.Sep());
         var (good, bad) = Profile(c);
         if (good.Count > 0) { _detail.AddChild(UI.Lbl("Strengths", 15, Pal.Good, true)); foreach (var g in good) _detail.AddChild(UI.Lbl("• " + g, 14, Pal.Text, false, HorizontalAlignment.Left, true)); }

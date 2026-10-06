@@ -43,7 +43,7 @@ public partial class PoliciesView : View
         if (sig == _lastSig) return; _lastSig = sig;
         foreach (var ch in _chips.GetChildren().ToList()) ch.QueueFree();
         var cats = new[] { "all" }.Concat(PolicyCatalog.Policies.Select(p => p.Category).Distinct()).ToList();
-        foreach (var k in cats) { string kk = k; _chips.AddChild(UI.Btn(char.ToUpper(k[0]) + k[1..], () => { _cat = kk; _lastSig = -1; Refresh(); }, k == _cat)); }
+        foreach (var k in cats) { string kk = k; _chips.AddChild(UI.Chip(char.ToUpper(k[0]) + k[1..], k == _cat, () => { _cat = kk; _lastSig = -1; Refresh(); })); }
         foreach (var ch in _list.GetChildren().ToList()) ch.QueueFree();
         foreach (var def in PolicyCatalog.Policies.Where(p => _cat == "all" || p.Category == _cat).OrderBy(p => p.Category).ThenBy(p => p.Pc)) _list.AddChild(Card(c, def));
     }

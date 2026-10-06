@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+* Country select: the chosen country is spotlighted in a card above the list (silhouette, tags, headline stats, difficulty, top strengths and challenges); the right panel shows the full grouped data. A country hidden by the filters stays spotlighted, and Up/Down/Enter work in the list.
+* Consistent interaction states across the UI: hover, selected, selected-and-hovered, pressed and keyboard focus are distinct, so the current page, row, chip and tile are always marked and the item under the cursor gets a further cue (fixes highlights that never rendered on flat buttons).
+* Map: the hover tooltip now draws above the country polygons and the minimap; hovered countries get an outline and a pointer cursor.
+* Keys: Tab / Shift+Tab move keyboard focus; Ctrl+Tab, PageDown and PageUp change page.
+
 ## 1.0.0-rc1
 * Deterministic C# simulation core: 28 countries, six-sector macro model, fiscal, monetary, trade, demography, society and environment.
 * Command pattern, 40 policies, 15 projects, advisers, Monte-Carlo fan charts and what-if previews.

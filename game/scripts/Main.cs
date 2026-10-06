@@ -17,6 +17,11 @@ public partial class Main : Control
         {
             Diagnostics.Startup($"Godot {Engine.GetVersionInfo()["string"]} · {OS.GetName()} · {DisplayServer.GetName()} · {RenderingServer.GetVideoAdapterName()} · {RenderingServer.GetVideoAdapterApiVersion()}");
             Settings.Load(); Diagnostics.Install();
+            // keyboard focus ring behaves like :focus-visible: a mouse click never leaves a lingering ring on a button
+            GetViewport().GuiFocusChanged += c =>
+            {
+                if (c is BaseButton && Input.IsMouseButtonPressed(MouseButton.Left)) c.CallDeferred(Control.MethodName.ReleaseFocus);
+            };
             Theme = AppTheme.Build();
             SetAnchorsPreset(LayoutPreset.FullRect);
             var bg = new ColorRect { Color = Pal.Bg };

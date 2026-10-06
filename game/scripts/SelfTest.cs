@@ -25,7 +25,7 @@ public partial class SelfTest : Node
 
         try
         {
-            await UiFlow(main);
+            await UiFlow(main, shots);
             main.ShowMainMenu(); await Frames(3); Shot(shots, "00_menu");
             main.ShowCountrySelect(); await Frames(4); Shot(shots, "01_select");
             main.ShowScenarios(); await Frames(3); Shot(shots, "02_scenarios");
@@ -54,6 +54,7 @@ public partial class SelfTest : Node
                 {
                     var mv = (EconGame.Views.WorldMapView)shell.Current!; shell.DismissModal(); await Frames(10); Shot(shots, "map_world");
                     mv.Select("USA"); await Frames(10); Shot(shots, "map_usa");
+                    if (mv.ScreenPosOf("USA") is Vector2 up) { await Hover(up + new Vector2(60, 40)); await Frames(3); Shot(shots, "map_usa_tooltip"); await Hover(new Vector2(5, 5)); }
                     mv.ShowRegionsDemo(); await Frames(10); Shot(shots, "map_usa_regions");
                     mv.Select("DEU"); await Frames(10);
                     mv.SetMode(1); await Frames(30); Shot(shots, "globe_deu");
@@ -94,6 +95,11 @@ public partial class SelfTest : Node
     }
     static bool HasLabel(Node n, string text) => n is Label l ? l.Text == text : n.GetChildren().Any(c => HasLabel(c, text));
 
+    async System.Threading.Tasks.Task Hover(Vector2 p)
+    {
+        GetViewport().PushInput(new InputEventMouseMotion { Position = p, GlobalPosition = p }, true); await Frames(3);
+    }
+
     async System.Threading.Tasks.Task Click(Vector2 p)
     {
         foreach (bool down in new[] { true, false })
@@ -109,20 +115,30 @@ public partial class SelfTest : Node
     }
 
     /// <summary>Drives the real UI with synthetic mouse and keyboard events: menu, country pick, start, shortcuts, map click.</summary>
-    async System.Threading.Tasks.Task UiFlow(Main main)
+    async System.Threading.Tasks.Task UiFlow(Main main, string shots)
     {
         main.ShowMainMenu(); await Frames(4);
         var play = FindButton(main, b => b.Text.StartsWith("New game")) ?? throw new Exception("no New game button");
         await Click(play.GlobalPosition + play.Size / 2); await Frames(6);
         var row = FindButton(main, b => HasLabel(b, "Germany")) ?? throw new Exception("country list has no Germany row");
         await Click(row.GlobalPosition + row.Size / 2); await Frames(4);
+        if (!row.ButtonPressed || row.Flat) throw new Exception("selected country row is not in the selected state");
+        var hov = FindButton(main, b => HasLabel(b, "France")) ?? throw new Exception("country list has no France row");
+        await Hover(hov.GlobalPosition + hov.Size / 2); Shot(shots, "01b_select_hover");
         var start = FindButton(main, b => b.Text.StartsWith("Start as")) ?? throw new Exception("no Start button");
         if (start.Disabled) throw new Exception("Start disabled after picking a country");
         await Click(start.GlobalPosition + start.Size / 2); await Frames(8);
         if (!Game.Running || Game.Player.Id != "DEU") throw new Exception("UI flow did not start Germany");
         var shell = main.GetChildren().OfType<GameShell>().First();
-        await Key(Godot.Key.Tab); await Frames(3);
-        if (shell.CurrentName != "Budget") throw new Exception("Tab did not advance the page (" + shell.CurrentName + ")");
+        await Key(Godot.Key.Pagedown); await Frames(3);
+        if (shell.CurrentName != "Budget") throw new Exception("PageDown did not advance the page (" + shell.CurrentName + ")");
+        var budgetNav = FindButton(shell, b => b.Text == "Budget") ?? throw new Exception("no Budget nav button");
+        if (!budgetNav.ButtonPressed || budgetNav.Flat) throw new Exception("current page is not shown as selected in the navigation");
+        var dashNav = FindButton(shell, b => b.Text == "Dashboard")!;
+        if (dashNav.ButtonPressed) throw new Exception("previous page is still shown as selected");
+        await Hover(dashNav.GlobalPosition + dashNav.Size / 2); await Frames(3); Shot(shots, "03b_nav_hover");
+        await Hover(budgetNav.GlobalPosition + budgetNav.Size / 2); await Frames(3); Shot(shots, "03c_nav_selected_hover");
+        await Hover(new Vector2(900, 700)); await Frames(2);
         await Key(Godot.Key.Space); await Frames(2);
         if (Game.Speed == 0) throw new Exception("Space did not start the clock");
         await Key(Godot.Key.Space); await Frames(2);

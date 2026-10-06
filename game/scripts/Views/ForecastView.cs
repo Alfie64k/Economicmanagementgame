@@ -34,7 +34,7 @@ public partial class ForecastView : View
         foreach (var ch in _chips.GetChildren().ToList()) ch.QueueFree();
         foreach (var m in new[] { "growth", "inflation", "unemployment", "debt", "deficit", "approval", "policyRate", "yield" })
         {
-            string mm = m; _chips.AddChild(UI.Btn(m == "policyRate" ? "Policy rate" : m == "yield" ? "10y yield" : char.ToUpper(m[0]) + m[1..], () => { _metric = mm; Draw(); }, m == _metric));
+            string mm = m; _chips.AddChild(UI.Chip(m == "policyRate" ? "Policy rate" : m == "yield" ? "10y yield" : char.ToUpper(m[0]) + m[1..], m == _metric, () => { _metric = mm; Draw(); }));
         }
         Draw();
     }

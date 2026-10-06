@@ -21,6 +21,16 @@ public static class Pal
     public static Color Bad => ColourBlind ? new Color("E69F00") : new Color("E5604F");
     public static readonly Color Warn = new("E0B13A");
 
+    // interaction-state tokens (see StateStyles): none depends on the colour-blind palette, and every state also
+    // carries a non-colour cue (edge bar, outline, ring, weight)
+    public static readonly Color Hover = PanelHi;
+    public static readonly Color HoverEdge = Faint;
+    public static readonly Color SelFill = Panel.Lerp(Accent, 0.20f);
+    public static readonly Color SelFillHover = Panel.Lerp(Accent, 0.32f);
+    public static readonly Color SelBar = Accent;
+    public static readonly Color Press = Accent.Darkened(0.45f);
+    public static readonly Color FocusRing = Text;
+
     public static readonly Color[] Series =
     {
         new("56B4E9"), new("E69F00"), new("009E73"), new("F0E442"), new("0072B2"), new("D55E00"), new("CC79A7"), new("B4BDC8"),

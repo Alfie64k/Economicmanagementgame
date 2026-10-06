@@ -244,7 +244,8 @@ public partial class WorldMapView : View
             foreach (var r in stats.Take(10))
             {
                 string rid = r.Def.Id;
-                var b = new Button { Text = $"{r.Def.Name}   {UI.Pct(r.GdpShare, 1)}  ·  {r.GdpPerHeadRel:0.00}×  ·  u {UI.Pct(r.Unemployment, 1)}", Flat = true, Alignment = HorizontalAlignment.Left, FocusMode = FocusModeEnum.None };
+                var b = new Button { Text = $"{r.Def.Name}   {UI.Pct(r.GdpShare, 1)}  ·  {r.GdpPerHeadRel:0.00}×  ·  u {UI.Pct(r.Unemployment, 1)}", Alignment = HorizontalAlignment.Left, FocusMode = FocusModeEnum.All, ThemeTypeVariation = EconGame.Ui.StateStyles.ListRow, ToggleMode = true, MouseDefaultCursorShape = CursorShape.PointingHand };
+                b.SetPressedNoSignal(rid == _regionFocus);
                 b.AddThemeFontSizeOverride("font_size", 12); b.Pressed += () => { _regionFocus = rid; _sig = -1; Refresh(); };
                 list.AddChild(b);
             }

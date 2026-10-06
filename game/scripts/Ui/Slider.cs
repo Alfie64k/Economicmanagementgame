@@ -10,7 +10,7 @@ public partial class AppSlider : Control
 
     public double Min, Max = 1, Step = 0.01, Value, Baseline = double.NaN;
     public Func<double, string> Format = v => v.ToString("0.00");
-    bool _drag, _hover;
+    bool _drag, _hover, _mouseFocus;
 
     public AppSlider() { CustomMinimumSize = new Vector2(180, 30); FocusMode = FocusModeEnum.All; MouseFilter = MouseFilterEnum.Stop; }
 
@@ -34,20 +34,28 @@ public partial class AppSlider : Control
         float trackL = 8, trackW = Size.X - 16 - 78;
         if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Left)
         {
-            _drag = mb.Pressed; if (mb.Pressed) { GrabFocus(); Set(mb.Position.X); }
+            _drag = mb.Pressed; if (mb.Pressed) { _mouseFocus = true; GrabFocus(); Set(mb.Position.X); }
         }
-        else if (e is InputEventMouseMotion mm) { _hover = true; if (_drag) Set(mm.Position.X); QueueRedraw(); }
+        else if (e is InputEventMouseMotion mm) { if (_drag) Set(mm.Position.X); }
         else if (e is InputEventKey k && k.Pressed)
         {
-            if (k.Keycode == Key.Left) { SetValue(Value - Step, true); AcceptEvent(); }
-            if (k.Keycode == Key.Right) { SetValue(Value + Step, true); AcceptEvent(); }
+            _mouseFocus = false;
+            double mult = k.ShiftPressed ? 10 : 1;
+            if (k.Keycode is Key.Left or Key.Down) { SetValue(Value - Step * mult, true); AcceptEvent(); }
+            else if (k.Keycode is Key.Right or Key.Up) { SetValue(Value + Step * mult, true); AcceptEvent(); }
+            else if (k.Keycode == Key.Pagedown) { SetValue(Value - Step * 10, true); AcceptEvent(); }
+            else if (k.Keycode == Key.Pageup) { SetValue(Value + Step * 10, true); AcceptEvent(); }
+            else if (k.Keycode == Key.Home) { SetValue(Min, true); AcceptEvent(); }
+            else if (k.Keycode == Key.End) { SetValue(Max, true); AcceptEvent(); }
         }
         void Set(float x) => SetValue(Min + Mathf.Clamp((x - trackL) / trackW, 0, 1) * (Max - Min), true);
     }
 
     public override void _Notification(int what)
     {
-        if (what == NotificationMouseExit) { _hover = false; QueueRedraw(); }
+        if (what == NotificationMouseEnter) { _hover = true; QueueRedraw(); }
+        else if (what == NotificationMouseExit) { _hover = false; QueueRedraw(); }
+        else if (what == NotificationFocusEnter || what == NotificationFocusExit) { if (what == NotificationFocusExit) _mouseFocus = false; QueueRedraw(); }
     }
 
     public override void _Draw()
@@ -62,7 +70,10 @@ public partial class AppSlider : Control
             float bx = trackL + (float)((Baseline - Min) / (Max - Min)) * trackW;
             DrawLine(new Vector2(bx, cy - 9), new Vector2(bx, cy + 9), Pal.Dim, 2);
         }
-        DrawCircle(new Vector2(hx, cy), _hover || _drag || HasFocus() ? 9 : 7, Pal.Accent);
+        bool focus = HasFocus() && !_mouseFocus;
+        DrawCircle(new Vector2(hx, cy), _drag ? 10 : _hover ? 9 : 7, _drag ? Pal.Accent.Lightened(0.2f) : Pal.Accent);
+        if (_hover && !_drag) DrawArc(new Vector2(hx, cy), 9, 0, Mathf.Tau, 24, new Color(Pal.Text, 0.6f), 1);
+        if (focus) { DrawRect(new Rect2(trackL - 3, cy - 8, trackW + 6, 16), Pal.FocusRing, false, 2); }
         bool changed = !double.IsNaN(Baseline) && Math.Abs(Value - Baseline) > Step / 2;
         DrawString(font, new Vector2(Size.X - 72, cy + 5), Format(Value), HorizontalAlignment.Right, 70, fs, changed ? Pal.Warn : Pal.Text);
     }

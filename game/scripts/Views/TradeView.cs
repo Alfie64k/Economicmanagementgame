@@ -45,6 +45,7 @@ public partial class TradeView : View
             new() { Title = "Sanctions", Width = 80, Text = o => ((Partner)o).Mine.Sanction ? "by me" : ((Partner)o).Theirs.Sanction ? "on me" : "–", Key = o => 0 },
         };
         var tabCard = UI.Card(_table); page.AddChild(tabCard);
+        _table.RowKey = o => ((Partner)o).C.Id;
         _table.RowSelected += o => { _sel = ((Partner)o).C; BuildActions(); };
         _actions.AddThemeConstantOverride("separation", 8);
         page.AddChild(UI.Card(_actions));
@@ -76,7 +77,9 @@ public partial class TradeView : View
         for (int j = 0; j < w.Countries.Count; j++)
             if (j != me) rows.Add(new Partner(w.Countries[j], w.Trade.W.Length > me ? w.Trade.W[me][j] : 0, WorldEngine.Rel(w, c.Id, w.Countries[j].Id), WorldEngine.Rel(w, w.Countries[j].Id, c.Id)));
         _table.SetRows(rows.OrderByDescending(r => ((Partner)r).Weight));
-        if (_sel == null) { var first = (Partner)rows.OrderByDescending(r => ((Partner)r).Weight).First(); _sel = first.C; _table.Selected = _table.View.FirstOrDefault(); }
+        if (_sel == null) { var first = (Partner)rows.OrderByDescending(r => ((Partner)r).Weight).First(); _sel = first.C; }
+        var current = rows.Cast<Partner>().FirstOrDefault(r => r.C.Id == _sel.Id);
+        if (current != null) _table.SelectQuiet(current);
         BuildActions();
     }
 

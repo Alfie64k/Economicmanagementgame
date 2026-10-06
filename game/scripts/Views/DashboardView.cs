@@ -101,11 +101,12 @@ public partial class DashboardView : View
         });
 
         // why panel
+        foreach (var kv in _tiles) kv.Value.Selected = kv.Key == _whyMetric;
         foreach (var ch in _chips.GetChildren()) ch.QueueFree();
         foreach (var m in Explain.Metrics)
         {
             string mm = m;
-            var b = UI.Btn(char.ToUpper(m[0]) + m[1..], () => { _whyMetric = mm; Refresh(); }, m == _whyMetric);
+            var b = UI.Chip(char.ToUpper(m[0]) + m[1..], m == _whyMetric, () => { _whyMetric = mm; Refresh(); });
             _chips.AddChild(b);
         }
         var ex = Explain.Why(c, _whyMetric);

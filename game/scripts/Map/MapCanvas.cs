@@ -37,6 +37,7 @@ public partial class MapCanvas : Control, IMapSurface
     Shape? _hover; bool _drag; Vector2 _dragStart, _dragOffset; bool _moved;
     Vector2 _mouse;
     Minimap _mini = new();
+    readonly MapTip _tip = new();   // keep LAST in the child order so it paints above the map layer and the minimap
     string? _pinText;
 
     public MapCanvas()
@@ -44,6 +45,7 @@ public partial class MapCanvas : Control, IMapSurface
         ClipContents = true; MouseFilter = MouseFilterEnum.Stop; FocusMode = FocusModeEnum.Click;
         AddChild(Layer); AddChild(_mini);
         _mini.Owner2 = this;
+        AddChild(_tip);
     }
 
     public override void _Ready() { Resized += () => { if (!_userMoved) Fit(); }; }
@@ -109,15 +111,15 @@ public partial class MapCanvas : Control, IMapSurface
         else if (e is InputEventMouseMotion mm)
         {
             _mouse = mm.Position;
-            if (_drag && (mm.Position - _dragStart).Length() > 3) { _moved = true; _userMoved = true; Offset = _dragOffset + (mm.Position - _dragStart); Apply(); }
+            if (_drag && (mm.Position - _dragStart).Length() > 3) { _moved = true; _userMoved = true; Offset = _dragOffset + (mm.Position - _dragStart); _hover = null; Layer.SetHover(null); _tip.Set(null, _mouse); Apply(); }
             else if (!_drag)
             {
                 var w = ToWorld(mm.Position);
                 var pin = Layer.PinAt(w, 10);
                 _pinText = pin?.Text;
                 var s = pin == null ? CountryAt(w) : null;
-                if (!ReferenceEquals(s, _hover)) { _hover = s; Hovered?.Invoke(s); }
-                QueueRedraw();
+                if (!ReferenceEquals(s, _hover)) { _hover = s; Layer.SetHover(s?.Id); MouseDefaultCursorShape = s != null || pin != null ? CursorShape.PointingHand : CursorShape.Arrow; Hovered?.Invoke(s); }
+                _tip.Set(_pinText ?? (_hover != null ? HoverText?.Invoke(_hover) ?? _hover.Name : null), _mouse);
             }
         }
     }
@@ -128,16 +130,11 @@ public partial class MapCanvas : Control, IMapSurface
         // graticule
         for (int lon = -180; lon <= 180; lon += 30) DrawLine(Offset + new Vector2(lon, -90) * Zoom, Offset + new Vector2(lon, 90) * Zoom, new Color(1, 1, 1, 0.04f), 1);
         for (int lat = -60; lat <= 60; lat += 30) DrawLine(Offset + new Vector2(-180, -lat) * Zoom, Offset + new Vector2(180, -lat) * Zoom, new Color(1, 1, 1, 0.04f), 1);
-        string? txt = _pinText ?? (_hover != null ? HoverText?.Invoke(_hover) ?? _hover.Name : null);
-        if (txt != null)
-        {
-            var font = ThemeDB.FallbackFont; int fs = Mathf.RoundToInt(13 * Pal.TextScale);
-            var lines = txt.Split('\n'); float w = lines.Max(l => font.GetStringSize(l, HorizontalAlignment.Left, -1, fs).X) + 16, h = lines.Length * (fs + 4) + 10;
-            var pos = _mouse + new Vector2(16, 16); if (pos.X + w > Size.X) pos.X = _mouse.X - w - 12; if (pos.Y + h > Size.Y) pos.Y = _mouse.Y - h - 12;
-            DrawRect(new Rect2(pos, new Vector2(w, h)), new Color(Pal.PanelHi, 0.96f));
-            DrawRect(new Rect2(pos, new Vector2(w, h)), Pal.Accent, false, 1);
-            for (int i = 0; i < lines.Length; i++) DrawString(font, pos + new Vector2(8, 5 + (i + 1) * (fs + 4) - 4), lines[i], HorizontalAlignment.Left, -1, fs, i == 0 ? Pal.Text : Pal.Dim);
-        }
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationMouseExit) { _hover = null; _pinText = null; Layer.SetHover(null); _tip.Set(null, _mouse); }
     }
 
     partial class Minimap : Control

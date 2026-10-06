@@ -49,7 +49,8 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 |---|---|
 | Space | Pause / resume |
 | 1 – 4 | Speed (1 = slowest) |
-| Tab | Next page |
+| Ctrl+Tab or PageDown / PageUp | Next / previous page |
+| Tab / Shift+Tab | Move keyboard focus (Enter or Space activates) |
 | Esc | Menu (save, load, quit) |
 | F1 | Help |
 | Map: drag / wheel / click | Pan / zoom / select country |

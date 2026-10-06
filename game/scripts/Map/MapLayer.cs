@@ -15,7 +15,8 @@ public partial class MapLayer : Node2D
     sealed class Drawn { public Shape S = null!; public List<Polygon2D> Fills = new(); public List<Line2D> Lines = new(); }
     readonly Dictionary<string, Drawn> _countries = new();
     readonly List<Drawn> _regions = new();
-    readonly Node2D _countryRoot = new(), _regionRoot = new(), _hiRoot = new();
+    readonly Node2D _countryRoot = new(), _regionRoot = new(), _hoverRoot = new(), _hiRoot = new();
+    string? _hoverId;
     readonly FlowPin _overlay = new();
     float _zoom = 1;
     public static readonly Color Unsimulated = new("1E2833");
@@ -23,7 +24,7 @@ public partial class MapLayer : Node2D
     public override void _Ready()
     {
         MapData.EnsureLoaded();
-        AddChild(_countryRoot); AddChild(_regionRoot); AddChild(_hiRoot); AddChild(_overlay);
+        AddChild(_countryRoot); AddChild(_regionRoot); AddChild(_hoverRoot); AddChild(_hiRoot); AddChild(_overlay);
         foreach (var s in MapData.Countries)
         {
             var d = new Drawn { S = s };
@@ -49,6 +50,7 @@ public partial class MapLayer : Node2D
         foreach (var d in _countries.Values) foreach (var l in d.Lines) l.Width = w;
         foreach (var d in _regions) foreach (var l in d.Lines) l.Width = 0.7f / zoom;
         foreach (var l in _hiRoot.GetChildren().OfType<Line2D>()) l.Width = 2.2f / zoom;
+        foreach (var l in _hoverRoot.GetChildren().OfType<Line2D>()) l.Width = 1.6f / zoom;
         _overlay.Zoom = zoom; _overlay.QueueRedraw();
     }
 
@@ -58,6 +60,17 @@ public partial class MapLayer : Node2D
         if (id == null || !_countries.TryGetValue(id, out var d)) return;
         foreach (var poly in d.S.Polys)
             _hiRoot.AddChild(new Line2D { Points = poly.Append(poly[0]).ToArray(), Width = 2.2f / _zoom, DefaultColor = color, Antialiased = true, JointMode = Line2D.LineJointMode.Round });
+    }
+
+    /// <summary>Pointer-over outline: lighter and thinner than the selection outline so the two stay distinguishable.</summary>
+    public void SetHover(string? id)
+    {
+        if (id == _hoverId) return;
+        _hoverId = id;
+        foreach (var c in _hoverRoot.GetChildren()) c.QueueFree();
+        if (id == null || !_countries.TryGetValue(id, out var d)) return;
+        foreach (var poly in d.S.Polys)
+            _hoverRoot.AddChild(new Line2D { Points = poly.Append(poly[0]).ToArray(), Width = 1.6f / _zoom, DefaultColor = new Color(Pal.Text, 0.75f), Antialiased = true, JointMode = Line2D.LineJointMode.Round });
     }
 
     /// <summary>Show a country's regions on top of the national polygon, coloured by the given function (null = hide regions).</summary>

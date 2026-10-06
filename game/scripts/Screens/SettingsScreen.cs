@@ -35,7 +35,7 @@ public partial class SettingsScreen : Control
         crash.Toggled += on => Diagnostics.CrashLog = on; box.AddChild(crash);
         box.AddChild(UI.HBox(10, UI.Btn("Copy feedback report to clipboard", Diagnostics.CopyReport), UI.Dim("Paste it into an issue or email; contains no personal data.", 12)));
         root.AddChild(UI.Card(box));
-        root.AddChild(UI.Dim("Keyboard: Space pause · 1-4 speed · Tab next view · Esc menu", 13));
+        root.AddChild(UI.Dim("Keyboard: Space pause · 1-4 speed · Ctrl+Tab or PageUp/PageDown change view · Tab moves focus · Esc menu", 13));
     }
 
     static Control Row(string label, Control c) { var l = UI.Lbl(label, 15, Pal.Dim); l.CustomMinimumSize = new Vector2(180, 0); c.SizeFlagsHorizontal = SizeFlags.ExpandFill; return UI.HBox(12, l, c); }

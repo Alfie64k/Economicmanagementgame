@@ -10,16 +10,35 @@ public partial class KpiTile : PanelContainer
     readonly Spark _spark = new() { CustomMinimumSize = new Vector2(70, 30) };
     public Func<string>? Explain;
     public event Action? Clicked;
+    bool _hover, _selected;
+
+    /// <summary>Marks the tile as the active choice (for example the metric the "why" panel explains).</summary>
+    public bool Selected { get => _selected; set { if (_selected == value) return; _selected = value; ApplyStyle(); } }
+
+    void ApplyStyle() => AddThemeStyleboxOverride("panel", StateStyles.Tile(_hover, _selected));
+
+    public override void _Draw()
+    {
+        if (HasFocus()) DrawStyleBox(StateStyles.FocusBox(), new Rect2(Vector2.Zero, Size));
+    }
+
+    public override void _GuiInput(InputEvent e)
+    {
+        if (e is InputEventKey k && k.Pressed && !k.Echo && (k.Keycode == Key.Enter || k.Keycode == Key.KpEnter || k.Keycode == Key.Space)) { Clicked?.Invoke(); AcceptEvent(); }
+    }
 
     public KpiTile(string title)
     {
-        AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.Panel, 10, Pal.Border, 1, 12));
+        ApplyStyle();
+        FocusMode = FocusModeEnum.All; MouseDefaultCursorShape = CursorShape.PointingHand;
+        FocusEntered += QueueRedraw; FocusExited += QueueRedraw;
         CustomMinimumSize = new Vector2(150, 0);
         _title = UI.Dim(title, 12); _value = UI.Lbl("-", 24, Pal.Text, true); _delta = UI.Lbl("", 12, Pal.Dim);
         var row = UI.HBox(6, UI.VBox(0, _value, _delta), UI.Spacer(0, 0, true), _spark);
         AddChild(UI.VBox(2, _title, row));
         MouseFilter = MouseFilterEnum.Stop;
-        MouseEntered += () => { if (Explain != null) TooltipText = Explain(); };
+        MouseEntered += () => { _hover = true; ApplyStyle(); if (Explain != null) TooltipText = Explain(); };
+        MouseExited += () => { _hover = false; ApplyStyle(); };
         GuiInput += e => { if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left) Clicked?.Invoke(); };
     }
 

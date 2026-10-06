@@ -17,6 +17,7 @@ public partial class GameShell : Control
     readonly List<(string name, Func<View> make)> _pages = new();
     readonly Dictionary<string, View> _cache = new();
     readonly Dictionary<string, Button> _navBtns = new();
+    readonly ButtonGroup _navGroup = new();
     View? _current; string _currentName = "";
     Control _pageHost = new();
     Label _date = new(), _country = new(), _pcLabel = new(), _score = new(), _alert = new();
@@ -24,6 +25,7 @@ public partial class GameShell : Control
     readonly Dictionary<int, Button> _speedBtns = new();
     VBoxContainer _feed = new();
     string _feedFilter = "all";
+    readonly Dictionary<string, Button> _feedChips = new();
     double _acc, _uiAcc; bool _dirty = true; int _feedCount = -1;
     Control? _modal;
     readonly VBoxContainer _toasts = new();
@@ -82,7 +84,7 @@ public partial class GameShell : Control
         string[] icons = { "II", "1×", "2×", "3×", "4×" };
         for (int i = 0; i < icons.Length; i++)
         {
-            int sp = i; var b = UI.Btn(icons[i], () => SetSpeed(sp), false, 44); _speedBtns[i] = b; speeds.AddChild(b);
+            int sp = i; var b = UI.Chip(icons[i], false, () => SetSpeed(sp)); b.CustomMinimumSize = new Vector2(44, 0); _speedBtns[i] = b; speeds.AddChild(b);
             b.TooltipText = i == 0 ? "Pause (Space)" : $"Speed {i} (key {i})";
         }
         h.AddChild(speeds);
@@ -107,9 +109,8 @@ public partial class GameShell : Control
         foreach (var (name, _) in _pages)
         {
             string n = name;
-            var b = new Button { Text = name, Alignment = HorizontalAlignment.Left, FocusMode = FocusModeEnum.None, Flat = true };
-            b.AddThemeFontSizeOverride("font_size", Mathf.RoundToInt(16 * Pal.TextScale));
-            b.Pressed += () => Navigate(n);
+            var b = new Button { Text = name, Alignment = HorizontalAlignment.Left, FocusMode = FocusModeEnum.All, ThemeTypeVariation = StateStyles.NavItem, ToggleMode = true, ButtonGroup = _navGroup, MouseDefaultCursorShape = CursorShape.PointingHand };
+            b.Pressed += () => { if (_currentName != n) Navigate(n); };
             _navBtns[name] = b; v.AddChild(b);
         }
         v.AddChild(UI.Spacer(0, 0, true));
@@ -126,7 +127,13 @@ public partial class GameShell : Control
         var chips = UI.HBox(4);
         foreach (var (key, label) in new[] { ("all", "All"), ("advisor", "Advisers"), ("event", "Events"), ("policy", "Policy") })
         {
-            string k = key; chips.AddChild(UI.Btn(label, () => { _feedFilter = k; UpdateFeed(true); }));
+            string k = key; Button chip = null!;
+            chip = UI.Chip(label, k == _feedFilter, () =>
+            {
+                _feedFilter = k; UpdateFeed(true);
+                foreach (var c in _feedChips) c.Value.SetPressedNoSignal(c.Key == k);
+            });
+            _feedChips[k] = chip; chips.AddChild(chip);
         }
         v.AddChild(chips);
         _feed.AddThemeConstantOverride("separation", 6);
@@ -145,11 +152,13 @@ public partial class GameShell : Control
         foreach (var kv in _navBtns)
         {
             bool sel = kv.Key == name;
-            kv.Value.AddThemeStyleboxOverride("normal", AppTheme.Box(sel ? Pal.PanelHi : new Color(0, 0, 0, 0), 7, sel ? Pal.Accent : null, sel ? 1 : 0, 10));
-            kv.Value.AddThemeColorOverride("font_color", sel ? Colors.White : Pal.Dim);
+            kv.Value.SetPressedNoSignal(sel);          // the group does not unpress siblings for programmatic changes
+            if (sel) kv.Value.AddThemeFontOverride("font", UI.Bold); else kv.Value.RemoveThemeFontOverride("font");
         }
         view.Refresh();
     }
+
+    void CyclePage(int dir) { int i = _pages.FindIndex(p => p.name == _currentName); Navigate(_pages[(i + dir + _pages.Count) % _pages.Count].name); }
 
     public void MarkDirty() => _dirty = true;
 
@@ -158,7 +167,7 @@ public partial class GameShell : Control
 
     void SetSpeed(int s)
     {
-        if (Game.World.Decisions.Count > 0 || Game.World.GameOver) return;
+        if (Game.World.Decisions.Count > 0 || Game.World.GameOver) { UpdateTop(); return; }
         Game.Speed = s; UpdateTop();
     }
 
@@ -182,7 +191,8 @@ public partial class GameShell : Control
         if (e is not InputEventKey k || !k.Pressed || _modal != null) return;
         if (k.Keycode == Key.Space) SetSpeed(Game.Speed == 0 ? Math.Max(1, Settings.DefaultSpeed) : 0);
         else if (k.Keycode >= Key.Key1 && k.Keycode <= Key.Key4) SetSpeed((int)k.Keycode - (int)Key.Key0);
-        else if (k.Keycode == Key.Tab) { int i = _pages.FindIndex(p => p.name == _currentName); Navigate(_pages[(i + 1) % _pages.Count].name); }
+        else if (k.Keycode == Key.Pagedown || (k.Keycode == Key.Tab && k.CtrlPressed && !k.ShiftPressed)) CyclePage(1);
+        else if (k.Keycode == Key.Pageup || (k.Keycode == Key.Tab && k.CtrlPressed && k.ShiftPressed)) CyclePage(-1);
         else if (k.Keycode == Key.Escape) ShowMenu();
         else if (k.Keycode == Key.F1) ShowHelp();
     }
@@ -195,8 +205,7 @@ public partial class GameShell : Control
         _date.Text = $"{mn[w.MonthOfYear - 1]} {w.Year}" + (Game.Scenario != null ? $"  ·  {Math.Max(0, Game.Scenario.Years * 12 - w.Month) / 12}y left" : "");
         foreach (var kv in _speedBtns)
         {
-            bool on = kv.Key == Game.Speed;
-            kv.Value.AddThemeStyleboxOverride("normal", AppTheme.Box(on ? Pal.Accent.Darkened(0.3f) : Pal.PanelAlt, 7, on ? Pal.Accent : Pal.Border, 1, 8));
+            kv.Value.SetPressedNoSignal(kv.Key == Game.Speed);
         }
         _pc.Value = c.PoliticalCapital; _pcLabel.Text = $"Political capital  {c.PoliticalCapital:0}/100";
         var sc = Scorer.Compute(w, c); _score.Text = $"{sc.Grade} {sc.Total:0}";
@@ -318,7 +327,7 @@ public partial class GameShell : Control
         box.AddChild(UI.H1("How to play"));
         foreach (var line in new[]
         {
-            "Space — pause / resume · 1-4 — game speed · Tab — next page · Esc — menu · F1 — this help",
+            "Space — pause / resume · 1-4 — game speed · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help",
             "Dashboard: click a headline tile to see why it moved. Hover for a quick explanation.",
             "Budget: drag sliders to draft changes, preview five years ahead, then enact. Cuts cost more political capital than rises.",
             "Policies and Investment: reforms and projects take years; the legislature may refuse and projects can overrun.",

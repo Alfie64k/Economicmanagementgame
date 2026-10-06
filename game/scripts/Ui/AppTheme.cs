@@ -24,12 +24,20 @@ public static class AppTheme
             t.SetStylebox("hover", name, Pad(Box(Pal.PanelHi, 7, Pal.Accent, 1), 14, 8));
             t.SetStylebox("pressed", name, Pad(Box(Pal.Accent.Darkened(0.45f), 7, Pal.Accent, 1), 14, 8));
             t.SetStylebox("disabled", name, Pad(Box(Pal.Panel, 7, Pal.Border, 1), 14, 8));
-            t.SetStylebox("focus", name, Pad(Box(new Color(0, 0, 0, 0), 7, Pal.Accent, 2), 14, 8));
+            var fr = Box(new Color(0, 0, 0, 0), 7, Pal.FocusRing, 2); fr.DrawCenter = false;
+            t.SetStylebox("focus", name, Pad(fr, 14, 8));
             t.SetColor("font_color", name, Pal.Text);
             t.SetColor("font_hover_color", name, Colors.White);
             t.SetColor("font_pressed_color", name, Colors.White);
             t.SetColor("font_disabled_color", name, Pal.Faint);
         }
+        StateStyles.Row(t, StateStyles.NavItem);
+        StateStyles.Row(t, StateStyles.ListRow, 8, 8, 4, 4);
+        StateStyles.ChipStyle(t, StateStyles.Chip);
+        StateStyles.PrimaryStyle(t, StateStyles.Primary);
+        StateStyles.HeaderStyle(t, StateStyles.ColumnHeader);
+        t.SetFontSize("font_size", StateStyles.NavItem, Mathf.RoundToInt(16 * Pal.TextScale));
+
         t.SetStylebox("normal", "CheckBox", new StyleBoxEmpty());
         t.SetColor("font_color", "CheckBox", Pal.Text);
 

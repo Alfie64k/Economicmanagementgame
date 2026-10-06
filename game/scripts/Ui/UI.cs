@@ -79,12 +79,18 @@ public static class UI
 
     public static Button Btn(string text, Action? onPress = null, bool accent = false, int minW = 0)
     {
-        var b = new Button { Text = text, CustomMinimumSize = new Vector2(minW, 0), FocusMode = Control.FocusModeEnum.None };
-        if (accent)
-        {
-            b.AddThemeStyleboxOverride("normal", AppTheme.Box(Pal.Accent.Darkened(0.25f), 7, Pal.Accent, 1, 10));
-            b.AddThemeStyleboxOverride("hover", AppTheme.Box(Pal.Accent.Darkened(0.05f), 7, Pal.Accent.Lightened(0.3f), 1, 10));
-        }
+        var b = new Button { Text = text, CustomMinimumSize = new Vector2(minW, 0), FocusMode = Control.FocusModeEnum.All, MouseDefaultCursorShape = Control.CursorShape.PointingHand };
+        if (accent) b.ThemeTypeVariation = StateStyles.Primary;
+        b.Pressed += EconGame.Audio.Sfx.Click;
+        if (onPress != null) b.Pressed += onPress;
+        return b;
+    }
+
+    /// <summary>Toggle chip with a selected state (filters, metric pickers). The caller keeps the selection and calls SetPressedNoSignal.</summary>
+    public static Button Chip(string text, bool selected, Action? onPress = null)
+    {
+        var b = new Button { Text = text, ToggleMode = true, FocusMode = Control.FocusModeEnum.All, MouseDefaultCursorShape = Control.CursorShape.PointingHand, ThemeTypeVariation = StateStyles.Chip };
+        b.SetPressedNoSignal(selected);
         b.Pressed += EconGame.Audio.Sfx.Click;
         if (onPress != null) b.Pressed += onPress;
         return b;
