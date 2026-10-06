@@ -32,10 +32,24 @@ jobs:
         run: |
           mkdir -p build/linux build/windows build/macos
           "$GODOT" --headless --import || true
-          "$GODOT" --headless --export-release "Linux" build/linux/EconomicGame.x86_64
-          "$GODOT" --headless --export-release "Windows Desktop" build/windows/EconomicGame.exe
-          "$GODOT" --headless --export-release "macOS" build/macos/EconomicGame.zip
-          ls -R build
+          for target in "Linux|build/linux/EconomicGame.x86_64" "Windows Desktop|build/windows/EconomicGame.exe" "macOS|build/macos/EconomicGame.zip"; do
+            preset="${target%%|*}"; out="${target##*|}"
+            "$GODOT" --headless --export-release "$preset" "$out" 2>&1 | grep -v savepack | tee "export-$$.log"
+            # Godot exits 0 even when the C# assembly could not be exported, which yields a build that crashes on launch
+            if grep -qE "ERROR:|no solution file" "export-$$.log"; then echo "::error::export of $preset reported errors"; exit 1; fi
+          done
+          test -d build/linux/data_EconomicGame_linuxbsd_x86_64 || { echo "::error::Linux export has no .NET assemblies"; exit 1; }
+          test -d build/windows/data_EconomicGame_windows_x86_64 || { echo "::error::Windows export has no .NET assemblies"; exit 1; }
+          ls -R build | head -40
+      - name: Smoke-test the exported Linux build
+        working-directory: game/build/linux
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libgl1-mesa-dri libasound2t64 libxcursor1 libxinerama1 libxi6 libxrandr2 libfontconfig1 || true
+          chmod +x EconomicGame.x86_64
+          timeout 180 xvfb-run -a -s "-screen 0 1600x900x24" ./EconomicGame.x86_64 --rendering-driver opengl3 -- --selftest 2>&1 | tee smoke.log || true
+          grep -q "SELFTEST OK" smoke.log && grep -q "UIFLOW OK" smoke.log
+          rm -f smoke.log
       - uses: actions/upload-artifact@v4
         with:
           name: builds

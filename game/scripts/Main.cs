@@ -13,16 +13,39 @@ public partial class Main : Control
     public override void _Ready()
     {
         Instance = this;
-        Settings.Load(); Diagnostics.Install();
-        Theme = AppTheme.Build();
-        SetAnchorsPreset(LayoutPreset.FullRect);
-        var bg = new ColorRect { Color = Pal.Bg };
+        try
+        {
+            Diagnostics.Startup($"Godot {Engine.GetVersionInfo()["string"]} · {OS.GetName()} · {DisplayServer.GetName()} · {RenderingServer.GetVideoAdapterName()} · {RenderingServer.GetVideoAdapterApiVersion()}");
+            Settings.Load(); Diagnostics.Install();
+            Theme = AppTheme.Build();
+            SetAnchorsPreset(LayoutPreset.FullRect);
+            var bg = new ColorRect { Color = Pal.Bg };
+            bg.SetAnchorsPreset(LayoutPreset.FullRect);
+            AddChild(bg);
+            Game.Changed += () => { };
+            var args = OS.GetCmdlineUserArgs();
+            if (System.Array.IndexOf(args, "--selftest") >= 0) { AddChild(new SelfTest(args)); return; }
+            ShowMainMenu();
+            Diagnostics.Startup("main menu shown");
+        }
+        catch (System.Exception e)
+        {
+            Diagnostics.Startup("STARTUP FAILED: " + e);
+            GD.PrintErr("Startup failed: " + e);
+            ShowStartupError(e);
+        }
+    }
+
+    /// <summary>Plain-control error page so a startup failure is visible instead of the window silently closing.</summary>
+    void ShowStartupError(System.Exception e)
+    {
+        var bg = new ColorRect { Color = new Color(0.08f, 0.1f, 0.12f) };
         bg.SetAnchorsPreset(LayoutPreset.FullRect);
         AddChild(bg);
-        Game.Changed += () => { };
-        var args = OS.GetCmdlineUserArgs();
-        if (System.Array.IndexOf(args, "--selftest") >= 0) { AddChild(new SelfTest(args)); return; }
-        ShowMainMenu();
+        var l = new Label { Text = "The game failed to start.\n\n" + e + "\n\nLog: " + ProjectSettings.GlobalizePath("user://startup.log"), AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        l.SetAnchorsPreset(LayoutPreset.FullRect);
+        l.OffsetLeft = 24; l.OffsetTop = 24; l.OffsetRight = -24; l.OffsetBottom = -24;
+        AddChild(l);
     }
 
     public void Show(Control screen)

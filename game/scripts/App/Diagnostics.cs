@@ -17,6 +17,19 @@ public static class Diagnostics
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Write("unhandled", e.ExceptionObject?.ToString() ?? "?");
     }
 
+    /// <summary>Always-on, local-only startup trace (not opt-in: it is written once at launch and only helps diagnose a failed start).</summary>
+    public static void Startup(string text)
+    {
+        try
+        {
+            const string path = "user://startup.log";
+            using var f = FileAccess.Open(path, FileAccess.FileExists(path) ? FileAccess.ModeFlags.ReadWrite : FileAccess.ModeFlags.Write);
+            if (f == null) return;
+            f.SeekEnd(); f.StoreLine($"[{Time.GetDatetimeStringFromSystem()}] {text}");
+        }
+        catch { /* logging must never be the thing that breaks startup */ }
+    }
+
     public static void Write(string kind, string text)
     {
         if (!CrashLog) return;

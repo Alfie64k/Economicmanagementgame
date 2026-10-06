@@ -9,7 +9,7 @@ The game is a Godot 4.3 **.NET** project on top of a pure C# simulation. You nee
 
 ## Option A — pre-built download
 
-The `Release` GitHub Actions workflow (run manually from the Actions tab, or by pushing a `v*` tag) builds Windows, Linux and macOS exports; it completes successfully, but the exported binaries have not been run on real hardware. Open the repository's **Actions → Release → latest run → Artifacts → `builds`**, download, unzip and run `EconomicGame.exe` (Windows), `EconomicGame.x86_64` (Linux) or the `.app` inside the zip (macOS). These builds are unsigned: Windows SmartScreen and macOS Gatekeeper will warn (macOS: right-click → Open).
+The `Release` GitHub Actions workflow (run manually from the Actions tab, or by pushing a `v*` tag) builds Windows, Linux and macOS exports; it completes successfully, but the exported binaries have not been run on real hardware. Open the repository's **Actions → Release → latest run → Artifacts → `builds`**, download, **unzip the whole archive** (do not run from inside the zip viewer) and run `EconomicGame.exe` (Windows), `EconomicGame.x86_64` (Linux) or the `.app` inside the zip (macOS). Keep the `.exe`/`.x86_64`, its `.pck` and the `data_EconomicGame_*` folder together in one directory; the .NET runtime is bundled, so no separate install is needed. These builds are unsigned: Windows SmartScreen and macOS Gatekeeper will warn (macOS: right-click → Open).
 
 ## Option B — run from source
 
@@ -34,6 +34,8 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 ```
 
 ## Troubleshooting
+
+* **Window opens then closes with no message** — run `EconomicGame.console.exe` (Windows) or the binary from a terminal to see the error, and check `%APPDATA%\Godot\app_userdata\Economic Management Game\logs\godot.log` (Linux: `~/.local/share/godot/app_userdata/Economic Management Game/logs/`, macOS: `~/Library/Application Support/Godot/app_userdata/Economic Management Game/logs/`). A startup trace is also written to `startup.log` in the same folder, and a startup exception is shown on screen.
 
 * **"Could not find .NET" / blank C# build** — you downloaded the standard Godot build. Get the .NET edition.
 * **Build errors on first open** — run `dotnet build game/EconomicGame.csproj` once from a terminal and read the error; .NET 8 SDK must be on `PATH`.
