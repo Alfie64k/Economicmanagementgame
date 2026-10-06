@@ -22,6 +22,7 @@ public partial class SelfTest : Node
         string country = Arg("--country", "GBR");
         int months = int.Parse(Arg("--months", "30"));
         var main = Main.Instance!;
+
         try
         {
             main.ShowMainMenu(); await Frames(3); Shot(shots, "00_menu");
@@ -35,7 +36,20 @@ public partial class SelfTest : Node
             int n = 3;
             foreach (var page in new[] { "Dashboard", "Budget", "Monetary", "Policies", "Investment", "Sectors", "Trade", "Society", "Forecast", "World map", "Report" })
             {
-                shell.Navigate(page); await Frames(6); Shot(shots, $"{n++:00}_{page.Replace(' ', '_').ToLower()}");
+                shell.Navigate(page); await Frames(6);
+                if (page == "Budget")
+                {
+                    var c = Game.Player;
+                    Sim.Core.Model.Tax t = Sim.Core.Model.Tax.Income;
+                    EconGame.App.Draft.Set(t, c.TaxRate[(int)t] * 1.1, c.TaxRate[(int)t]);
+                    EconGame.App.Draft.Set(Sim.Core.Model.BudgetLine.Infrastructure, c.Budget[(int)Sim.Core.Model.BudgetLine.Infrastructure] + 0.01, c.Budget[(int)Sim.Core.Model.BudgetLine.Infrastructure]);
+                    ((EconGame.Views.BudgetView)shell.Current!).RunPreview(); await Frames(120);
+                }
+                if (page == "Policies") { Game.Player.PoliticalCapital = 100; Game.Player.Coalition = 1; Game.Sim!.Execute(Sim.Core.Model.Command.Enact(Game.Player.Id, "rnd_tax_credits")); Game.Sim.Execute(Sim.Core.Model.Command.Enact(Game.Player.Id, "labour_flex")); await Frames(4); }
+                if (page == "Investment") { Game.Player.PoliticalCapital = 100; Game.Sim!.Execute(Sim.Core.Model.Command.StartProject(Game.Player.Id, "broadband")); Game.Sim.Execute(Sim.Core.Model.Command.StartProject(Game.Player.Id, "hsr")); Game.Sim.Execute(Sim.Core.Model.Command.SetSubsidy(Game.Player.Id, Sim.Core.Model.Sector.Manufacturing, 0.03)); for (int k = 0; k < 14; k++) Game.Step(); await Frames(5); }
+                if (page == "Forecast") { ((EconGame.Views.ForecastView)shell.Current!).RunNow(); await Frames(180); }
+                if (page == "Trade") { Game.Sim!.Execute(Sim.Core.Model.Command.Tariff(Game.Player.Id, "DEU", 0.1)); for (int k = 0; k < 12; k++) Game.Step(); await Frames(6); }
+                Shot(shots, $"{n++:00}_{page.Replace(' ', '_').ToLower()}");
             }
             GD.Print("SELFTEST OK");
         }

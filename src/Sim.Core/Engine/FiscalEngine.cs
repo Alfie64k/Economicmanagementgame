@@ -8,10 +8,14 @@ public static class FiscalEngine
     public const double IncomeBaseShare = 0.65, CorpBaseShare = 0.25, PayrollBaseShare = 0.50;
     static readonly double[] Elasticity = { 0.80, 0.70, 0.90, 0.80, 0.60 }; // revenue elasticity to the statutory rate (Laffer-style concavity)
 
-    public static double TaxRevenueReal(CountryState c, Tax t, double gdp, double cons, double imports)
+    public static double TaxRevenueReal(CountryState c, Tax t, double gdp, double cons, double imports) =>
+        TaxRevenueAt(c, t, c.TaxRate[(int)t], gdp, cons, imports);
+
+    /// <summary>Real revenue the tax would raise at a hypothetical rate (used for draft budgets in the UI).</summary>
+    public static double TaxRevenueAt(CountryState c, Tax t, double rate, double gdp, double cons, double imports)
     {
         int i = (int)t;
-        double r = c.TaxRate[i], r0 = Math.Max(1e-4, c.TaxRate0[i]);
+        double r = rate, r0 = Math.Max(1e-4, c.TaxRate0[i]);
         double rr = Math.Max(0.0, r);
         double eff = r0 * Math.Pow(rr / r0, Elasticity[i]);
         double baseAmt = t switch

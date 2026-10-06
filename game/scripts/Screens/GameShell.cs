@@ -53,6 +53,7 @@ public partial class GameShell : Control
 
         Game.DecisionPending += ShowDecision;
         Game.Ended += ShowEnd;
+        Game.Ticked += MarkDirty; Game.Changed += MarkDirty;
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
         Navigate("Dashboard");
         UpdateTop(); UpdateFeed(true);
@@ -60,7 +61,7 @@ public partial class GameShell : Control
         if (Game.Scenario != null) ShowBriefing();
     }
 
-    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; }
+    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; }
 
     // ---------------- layout ----------------
     Control BuildTopBar()

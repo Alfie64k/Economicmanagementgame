@@ -155,3 +155,37 @@ public class ScoringTests
         Assert.True(rep.BestByArchetype.Values.Distinct().Count() >= 2, "different archetypes should favour different strategies");
     }
 }
+
+public class RegionTests
+{
+    [Fact]
+    public void Regions_reconcile_to_the_national_economy()
+    {
+        var sim = Simulation.New("USA", 1, false); sim.World.Events = false; sim.Run(24);
+        foreach (var id in new[] { "USA", "CHN", "IND", "BRA", "RUS", "CAN", "AUS", "IDN", "ZAF" })
+        {
+            var c = sim.World.Find(id)!;
+            Assert.True(Sim.Core.Regions.Regions.Has(id), id);
+            var r = Sim.Core.Regions.Regions.Compute(c);
+            Assert.True(r.Count >= 9, id);
+            Assert.InRange(r.Sum(x => x.PopShare), 0.999, 1.001);
+            Assert.InRange(r.Sum(x => x.GdpShare), 0.999, 1.001);
+            Assert.InRange(r.Sum(x => x.Gdp) / c.SectorVa.Sum(), 0.999, 1.001);
+            Assert.All(r, x => Assert.InRange(x.Unemployment, 0.005, 0.5));
+        }
+        Assert.Empty(Sim.Core.Regions.Regions.Compute(sim.World.Find("GBR")!));
+    }
+
+    [Fact]
+    public void Regional_output_moves_with_the_national_sector_mix()
+    {
+        var sim = Simulation.New("USA", 1, false); sim.World.Events = false; sim.Run(12);
+        var c = sim.World.Player;
+        var before = Sim.Core.Regions.Regions.Compute(c).ToDictionary(r => r.Def.Id, r => r.GdpShare);
+        c.SectorVa[(int)Sector.Energy] *= 2.0;
+        var after = Sim.Core.Regions.Regions.Compute(c);
+        Assert.Contains(after, r => Math.Abs(r.GdpShare - before[r.Def.Id]) > 1e-4);
+        var again = Sim.Core.Regions.Regions.Compute(c);
+        Assert.Equal(after.Select(r => r.Gdp), again.Select(r => r.Gdp)); // deterministic
+    }
+}

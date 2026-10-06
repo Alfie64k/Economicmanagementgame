@@ -29,24 +29,33 @@ public static class Forecaster
         "gdp" => c.Gdp, _ => throw new ArgumentException("metric " + metric),
     };
 
-    public static Simulation Clone(Simulation sim)
+    /// <summary>Compact JSON copy of the world (history and logs omitted). Take it on the main thread, then hand it to a worker.</summary>
+    public static string Snapshot(Simulation sim)
     {
         var w = sim.World; var h = w.History; var log = w.Log; var cl = w.CommandLog;
         w.History = new(); w.Log = new(); w.CommandLog = new();
-        string json = sim.Save();
-        w.History = h; w.Log = log; w.CommandLog = cl;
-        var c = Simulation.Load(json); c.World.RecordHistory = false;
+        try { return sim.Save(); }
+        finally { w.History = h; w.Log = log; w.CommandLog = cl; }
+    }
+
+    public static Simulation FromSnapshot(string json)
+    {
+        var c = Simulation.Load(json); c.World.RecordHistory = false; c.World.Advisors = false;
         return c;
     }
 
-    public static List<FanSeries> FanChart(Simulation sim, int months, int paths = 30, ulong seed = 12345, string[]? metrics = null)
+    public static Simulation Clone(Simulation sim) => FromSnapshot(Snapshot(sim));
+
+    public static List<FanSeries> FanChart(Simulation sim, int months, int paths = 30, ulong seed = 12345, string[]? metrics = null) => FanChart(Snapshot(sim), months, paths, seed, metrics);
+
+    public static List<FanSeries> FanChart(string snapshot, int months, int paths = 30, ulong seed = 12345, string[]? metrics = null)
     {
         metrics ??= Metrics;
         var data = metrics.ToDictionary(m => m, m => new double[months][]);
         foreach (var m in metrics) for (int t = 0; t < months; t++) data[m][t] = new double[paths];
         for (int p = 0; p < paths; p++)
         {
-            var s = Clone(sim); var w = s.World;
+            var s = FromSnapshot(snapshot); var w = s.World;
             w.Stochastic = true;
             w.WorldRng = new Rng(Rng.Mix(seed + (ulong)p, "world"));
             for (int i = 0; i < w.Countries.Count; i++) w.CountryRng[i] = new Rng(Rng.Mix(seed + (ulong)p, w.Countries[i].Id));
@@ -70,10 +79,12 @@ public static class Forecaster
     }
 
     /// <summary>Deterministic comparison of "carry on" vs "apply these commands now" for the player's country.</summary>
-    public static List<PreviewSeries> Preview(Simulation sim, IEnumerable<Command> commands, int months, string[]? metrics = null)
+    public static List<PreviewSeries> Preview(Simulation sim, IEnumerable<Command> commands, int months, string[]? metrics = null) => Preview(Snapshot(sim), commands, months, metrics);
+
+    public static List<PreviewSeries> Preview(string snapshot, IEnumerable<Command> commands, int months, string[]? metrics = null)
     {
         metrics ??= Metrics;
-        var a = Clone(sim); var b = Clone(sim);
+        var a = FromSnapshot(snapshot); var b = FromSnapshot(snapshot);
         a.World.Stochastic = false; b.World.Stochastic = false;
         foreach (var cmd in commands) b.Execute(cmd);
         var res = metrics.Select(m => new PreviewSeries { Metric = m, Baseline = new double[months], WithPolicy = new double[months] }).ToList();
