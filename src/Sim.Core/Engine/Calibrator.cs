@@ -173,6 +173,10 @@ public static class Calibrator
 
         c.PotLag = y0; c.Deficit0Share = d.Fiscal.Deficit; c.LastVatRate = c.TaxRate[(int)Tax.Consumption]; c.LastTariffRate = c.TaxRate[(int)Tax.Tariff];
         c.LabourShare0 = c.LabourShare.ToArray(); c.Renewables0 = c.Renewables; c.Pop0 = c.Pop;
+        c.Style = d.Archetype == "resource" ? "resource"
+                : (d.Demand.Exp >= 0.30 && d.Sectors.Manuf >= 0.18 && d.Archetype != "advanced") || d.Id is "DEU" or "KOR" ? "exportled"
+                : d.Macro.CbIndependence < 0.35 || (d.Gov == "hybrid" && d.Archetype != "advanced") ? "populist"
+                : "technocrat";
         c.Status = "ok";
         for (int i = 0; i < 12; i++) c.GdpRing[i] = y0 * Math.Exp(-g * (11 - i) / 12.0);
         FiscalEngine.AnchorSpread(c, d.Macro.Yield10);

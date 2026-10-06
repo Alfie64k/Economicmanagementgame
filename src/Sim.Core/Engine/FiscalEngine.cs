@@ -34,7 +34,7 @@ public static class FiscalEngine
         r += 0.15 * Math.Max(0, c.Inflation - 0.05);
         r += 0.03 * (1 - c.Stability) + 0.01 * c.Corruption;
         r += 0.004 * Math.Max(0, 4 - c.Reserves);
-        r += c.Mod("risk");
+        r += c.Mod("risk") + c.ContagionRisk;
         return r;
     }
 
@@ -57,7 +57,7 @@ public static class FiscalEngine
         double revReal = 0;
         for (int t = 0; t < Dim.Taxes; t++) revReal += TaxRevenueReal(c, (Tax)t, c.Gdp, c.Cons, c.Imports);
         double resRev = c.ResourceRev0Share * c.Gdp * g.OilIdx * (1 - 0.25 * Math.Min(1, c.CarbonPrice / 200));
-        revReal += resRev + c.OtherRevShare * c.Gdp + c.Mod("revenue") * c.Gdp;
+        revReal += resRev + c.OtherRevShare * c.Gdp + c.Mod("revenue") * c.Gdp + 0.7 * c.ImportTariffExtra * c.Imports;
 
         // ---- spending ----
         double socialReal = SocialReal(c);

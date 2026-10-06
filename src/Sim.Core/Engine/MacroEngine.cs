@@ -129,7 +129,7 @@ public static class MacroEngine
         c.Exports = c.X0 * wd * Math.Pow(1 / c.Rer, 0.9) * Math.Pow(c.Potential / c.Potential0, 1.0)
                     * (1 - 0.8 * c.TariffRetaliation) * (1 + c.Mod("export")) + tot;
         double absorption = c.Cons + c.InvPriv + c.GovCons + c.GovInv + c.Exports;
-        double tar = c.TaxRate[(int)Tax.Tariff], tar0 = c.TaxRate0[(int)Tax.Tariff];
+        double tar = c.EffTariff, tar0 = c.TaxRate0[(int)Tax.Tariff];
         c.Imports = c.M0 * Math.Pow(absorption / c.AbsorptionBase, 1.0) * (1 + 1.0 * Maths.Clamp(c.Gap, -0.1, 0.1)) * Math.Pow(c.Rer, 0.8)
                     * Math.Pow((1 + tar) / (1 + tar0), -0.8) * (1 + c.Mod("import"));
 
@@ -206,8 +206,8 @@ public static class MacroEngine
         c.InflInst += (Maths.Clamp(target, -0.05, 3.0) - c.InflInst) * 0.20;
 
         double dVat = c.TaxRate[(int)Tax.Consumption] - c.LastVatRate;
-        double dTar = c.TaxRate[(int)Tax.Tariff] - c.LastTariffRate;
-        c.LastVatRate = c.TaxRate[(int)Tax.Consumption]; c.LastTariffRate = c.TaxRate[(int)Tax.Tariff];
+        double dTar = c.EffTariff - c.LastTariffRate;
+        c.LastVatRate = c.TaxRate[(int)Tax.Consumption]; c.LastTariffRate = c.EffTariff;
         double jump = 0.7 * dVat + 0.3 * dTar * (c.Imports / Math.Max(1e-9, c.Gdp));
         double P = c.PriceLevel * Math.Pow(1 + c.InflInst, dt) * (1 + jump);
         int slot = c.Tick % 12;

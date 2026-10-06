@@ -81,6 +81,73 @@ public static class CommandProcessor
                     double v = Maths.Clamp(cmd.Value, 0, 0.15);
                     return Spend(10, $"{s} subsidy {v:P1} of value added", () => c.SectorSubsidy[(int)s] = v);
                 }
+            case "tradedeal":
+                {
+                    var p = w.Find(cmd.Id);
+                    if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown partner");
+                    if (WorldEngine.Rel(w, c.Id, p.Id).Deal) return CommandResult.Fail("Already have a trade agreement");
+                    double cost = Math.Round(15 * pcMult, 1);
+                    if (c.PoliticalCapital < cost) return CommandResult.Fail($"Not enough political capital ({c.PoliticalCapital:F0} of {cost:F0} needed)", cost);
+                    if (dryRun) return CommandResult.Pass($"Would cost {cost:F0} political capital", cost);
+                    c.PoliticalCapital -= cost;
+                    bool sameBloc = c.Bloc != "none" && c.Bloc == p.Bloc;
+                    var ab = WorldEngine.Rel(w, c.Id, p.Id); var ba = WorldEngine.Rel(w, p.Id, c.Id);
+                    double accept = Maths.Clamp(0.35 + (sameBloc ? 0.3 : 0) + (c.Region == p.Region ? 0.1 : 0) + (c.Democracy > 0.5 && p.Democracy > 0.5 ? 0.1 : 0)
+                                                - (ab.ExtraTariff > 0 || ba.ExtraTariff > 0 ? 0.4 : 0) - (ab.Sanction || ba.Sanction ? 0.6 : 0), 0.05, 0.9);
+                    if (p.Id != w.PlayerId && !w.CountryRng[w.Countries.IndexOf(p)].Chance(accept))
+                    {
+                        c.PoliticalCapital += cost * 0.5;
+                        return CommandResult.Fail($"{p.Name} declined a trade agreement ({accept:P0} chance of acceptance)", cost * 0.5);
+                    }
+                    ab.Deal = ba.Deal = true; ab.DealStart = ba.DealStart = w.Month;
+                    return CommandResult.Pass($"Trade agreement signed with {p.Name}", cost);
+                }
+            case "tariff":
+                {
+                    var p = w.Find(cmd.Id);
+                    if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown partner");
+                    double v = Maths.Clamp(cmd.Value, 0, 0.5);
+                    var r = WorldEngine.Rel(w, c.Id, p.Id);
+                    return Spend(10 + 100 * Math.Abs(v - r.ExtraTariff), $"Extra tariff on {p.Name}: {v:P0}", () => r.ExtraTariff = v);
+                }
+            case "sanction":
+                {
+                    var p = w.Find(cmd.Id);
+                    if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown target");
+                    bool on = cmd.Value > 0;
+                    var r = WorldEngine.Rel(w, c.Id, p.Id);
+                    return Spend(on ? 20 : 5, on ? $"Sanctions imposed on {p.Name}" : $"Sanctions on {p.Name} lifted", () => r.Sanction = on);
+                }
+            case "alliance":
+                {
+                    var p = w.Find(cmd.Id);
+                    if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown partner");
+                    var ab = WorldEngine.Rel(w, c.Id, p.Id); var ba = WorldEngine.Rel(w, p.Id, c.Id);
+                    if (ab.Alliance) return CommandResult.Fail("Already allied");
+                    double accept = Maths.Clamp(0.25 + (c.Region == p.Region ? 0.2 : 0) + (c.Gov == p.Gov ? 0.2 : -0.1) + (ab.Deal ? 0.2 : 0) - (ab.Sanction || ba.Sanction ? 0.8 : 0), 0.02, 0.9);
+                    double cost = Math.Round(25 * pcMult, 1);
+                    if (c.PoliticalCapital < cost) return CommandResult.Fail($"Not enough political capital ({c.PoliticalCapital:F0} of {cost:F0} needed)", cost);
+                    if (dryRun) return CommandResult.Pass($"Would cost {cost:F0} political capital", cost);
+                    c.PoliticalCapital -= cost;
+                    if (p.Id != w.PlayerId && !w.CountryRng[w.Countries.IndexOf(p)].Chance(accept))
+                    { c.PoliticalCapital += cost * 0.5; return CommandResult.Fail($"{p.Name} declined an alliance ({accept:P0})", cost * 0.5); }
+                    ab.Alliance = ba.Alliance = true;
+                    return CommandResult.Pass($"Alliance formed with {p.Name}", cost);
+                }
+            case "aid":
+                {
+                    var p = w.Find(cmd.Id);
+                    if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown recipient");
+                    double v = Maths.Clamp(cmd.Value, 0.0005, 0.02);
+                    return Spend(5 + 400 * v, $"Aid of {v:P2} of GDP sent to {p.Name}", () =>
+                    {
+                        c.OtherRevenue -= v * c.GdpNominal * 6;
+                        double usd = v * c.GdpUsdBn;
+                        p.OtherRevenue += usd * p.Fx * 6;
+                        p.Approval = Maths.Clamp(p.Approval + Math.Min(0.03, usd / Math.Max(1, p.GdpUsdBn) * 2), 0.02, 0.98);
+                        c.Approval = Maths.Clamp(c.Approval - 5 * v, 0.02, 0.98);
+                    });
+                }
             case "enact": return Enact(w, c, idx, cmd.Id, dryRun, pcMult);
             case "repeal":
                 {

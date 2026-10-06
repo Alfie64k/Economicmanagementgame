@@ -30,11 +30,12 @@ public sealed class Simulation
         var w = World;
         ProcessQueue();
         GlobalEngine.Step(w, Dt);
+        WorldEngine.Step(w);
         foreach (var c in w.Countries) PolicyEngine.Step(w, c);
         for (int i = 0; i < w.Countries.Count; i++)
         {
             var c = w.Countries[i];
-            if (c.Id != w.PlayerId || c.Autopilot) PolicyAgent.Step(c, w.Global, w.CountryRng[i]);
+            if (c.Id != w.PlayerId || c.Autopilot) PolicyAgent.Step(c, w.Global, w.CountryRng[i], w);
         }
         for (int i = 0; i < w.Countries.Count; i++)
             MacroEngine.Step(w.Countries[i], w.Global, Dt, w.CountryRng[i], w.Stochastic);

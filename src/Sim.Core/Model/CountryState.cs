@@ -110,6 +110,8 @@ public sealed class CountryState
     public double Debt;               // nominal LCU bn
     public double Revenue, Spending, Interest, PrimaryBalance, Deficit; // nominal flows, annualised
     public double ForeignDebtShare = 0.2;
+    public double ImportTariffExtra, ContagionRisk, TradeRevenueExtra;
+    public string Style = "technocrat";
     public double OtherRevenue;       // one-offs (privatisation etc.), nominal, annualised
     public double MinWageRatio = 0.5, MinWageRatio0 = 0.5;
 
@@ -148,6 +150,7 @@ public sealed class CountryState
 
     /// <summary>Rise in sovereign risk premium above its (slowly normalising) baseline.</summary>
     [JsonIgnore] public double RiskPremium => Spread - SpreadBase;
+    [JsonIgnore] public double EffTariff => TaxRate[(int)Tax.Tariff] + ImportTariffExtra;
     [JsonIgnore] public double GdpNominal => Gdp * PriceLevel;
     [JsonIgnore] public double DebtToGdp => Debt / Math.Max(1e-9, GdpNominal);
     [JsonIgnore] public double GdpUsdBn => GdpNominal / Fx;

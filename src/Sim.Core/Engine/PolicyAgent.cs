@@ -9,7 +9,7 @@ namespace Sim.Core.Engine;
 /// </summary>
 public static class PolicyAgent
 {
-    public static void Step(CountryState c, GlobalState g, Rng rng)
+    public static void Step(CountryState c, GlobalState g, Rng rng, World? w = null)
     {
         double ceiling = Math.Max(0.60, c.DebtGdp0 + 0.15);
         double debt = c.DebtToGdp, def = c.DeficitToGdp;
@@ -33,6 +33,21 @@ public static class PolicyAgent
             for (int t = 0; t < Dim.Taxes; t++)
                 c.TaxRate[t] += Maths.Clamp(c.TaxRate0[t] - c.TaxRate[t], -0.0002, 0.0002) * 0.5;
         }
+        // style-specific behaviour
+        switch (c.Style)
+        {
+            case "populist" when c.Approval < 0.35 && pressure < 0.6:
+                c.Budget[(int)BudgetLine.Social] = Math.Min(c.Budget0[(int)BudgetLine.Social] * 1.4, c.Budget[(int)BudgetLine.Social] + 0.0001);
+                c.TaxRate[(int)Tax.Consumption] = Math.Max(c.TaxRate0[(int)Tax.Consumption] * 0.7, c.TaxRate[(int)Tax.Consumption] - 0.0002);
+                break;
+            case "exportled":
+                c.SectorSubsidy[(int)Sector.Manufacturing] = Math.Max(c.SectorSubsidy[(int)Sector.Manufacturing], 0.02);
+                break;
+            case "resource" when g.OilIdx > 1.2 && pressure < 0:
+                c.Budget[(int)BudgetLine.Admin] = Math.Max(c.Budget0[(int)BudgetLine.Admin] * 0.9, c.Budget[(int)BudgetLine.Admin] - 0.00005); // save part of the windfall
+                break;
+        }
+        if (w != null) AiReformer.Step(w, c);
         // keep spending lines from drifting below baseline in good times
         for (int l = 0; l < Dim.Lines; l++)
             if (l != (int)BudgetLine.Social) c.Budget[l] += Maths.Clamp(c.Budget0[l] - c.Budget[l], -0.0001, 0.0001) * (pressure < 0 ? 1 : 0);

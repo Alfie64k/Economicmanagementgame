@@ -29,6 +29,8 @@ public sealed class World
     public List<LogEntry> Log = new();
     public List<LoggedCommand> CommandLog = new();
     public Dictionary<string, int> AdvisorLast = new();
+    public TradeMatrix Trade = new();
+    public Dictionary<string, Relation> Relations = new();   // keyed "A>B" (directional)
     public List<Command> Queue = new();      // commands waiting for the next tick boundary
 
     public int Year => StartYear + Month / 12;
@@ -74,5 +76,26 @@ public sealed class Command
     public static Command CancelProject(string country, int index) => new() { Type = "cancelproject", Country = country, Value = index };
     public static Command SetSubsidy(string country, Sector s, double share) => new() { Type = "subsidy", Country = country, Id = s.ToString(), Value = share };
     public static Command SetCarbon(string country, double price) => new() { Type = "carbon", Country = country, Value = price };
+    public static Command TradeDeal(string country, string partner) => new() { Type = "tradedeal", Country = country, Id = partner };
+    public static Command Tariff(string country, string partner, double extra) => new() { Type = "tariff", Country = country, Id = partner, Value = extra };
+    public static Command Sanction(string country, string target, bool on) => new() { Type = "sanction", Country = country, Id = target, Value = on ? 1 : 0 };
+    public static Command Alliance(string country, string partner) => new() { Type = "alliance", Country = country, Id = partner };
+    public static Command Aid(string country, string recipient, double shareOfGdp) => new() { Type = "aid", Country = country, Id = recipient, Value = shareOfGdp };
     public static Command Autopilot(string country, bool on) => new() { Type = "autopilot", Country = country, Id = on ? "on" : "off" };
+}
+
+/// <summary>Bilateral trade intensity weights (gravity model). W[i][j] = share of i's exports sold to j; the remainder goes to the rest of the world.</summary>
+public sealed class TradeMatrix
+{
+    public double[][] W = Array.Empty<double[]>();
+    public double[] RowShare = Array.Empty<double>();
+    public double[] CrisisScore = Array.Empty<double>();
+}
+
+/// <summary>Directional relation of country A toward country B. Deals and alliances are written to both directions.</summary>
+public sealed class Relation
+{
+    public bool Deal, Alliance, Sanction;
+    public int DealStart;
+    public double ExtraTariff;   // additional tariff A levies on B's goods
 }
