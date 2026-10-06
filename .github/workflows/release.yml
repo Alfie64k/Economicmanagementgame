@@ -3,24 +3,39 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+env:
+  GODOT_VERSION: "4.3"
 jobs:
   export:
     runs-on: ubuntu-latest
-    container: barichello/godot-ci:mono-4.3
     steps:
       - uses: actions/checkout@v4
-      - name: Install export templates
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Install Godot (.NET) and export templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          mv /root/.local/share/godot/export_templates/4.3.stable.mono ~/.local/share/godot/export_templates/ || true
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64.zip"
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz"
+          unzip -q godot.zip -d "$RUNNER_TEMP/godot"
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          unzip -q templates.tpz -d "$RUNNER_TEMP/tpl"
+          mv "$RUNNER_TEMP/tpl/templates" "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono"
+          dir="$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64"
+          chmod +x "$dir/Godot_v${GODOT_VERSION}-stable_mono_linux.x86_64"
+          echo "GODOT=$dir/Godot_v${GODOT_VERSION}-stable_mono_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Build C# solution
+        run: dotnet build game/EconomicGame.csproj -c Release --nologo -v q
       - name: Export
         working-directory: game
         run: |
           mkdir -p build/linux build/windows build/macos
-          godot --headless --import || true
-          godot --headless --export-release "Linux" build/linux/EconomicGame.x86_64
-          godot --headless --export-release "Windows Desktop" build/windows/EconomicGame.exe
-          godot --headless --export-release "macOS" build/macos/EconomicGame.zip
+          "$GODOT" --headless --import || true
+          "$GODOT" --headless --export-release "Linux" build/linux/EconomicGame.x86_64
+          "$GODOT" --headless --export-release "Windows Desktop" build/windows/EconomicGame.exe
+          "$GODOT" --headless --export-release "macOS" build/macos/EconomicGame.zip
+          ls -R build
       - uses: actions/upload-artifact@v4
         with:
           name: builds
