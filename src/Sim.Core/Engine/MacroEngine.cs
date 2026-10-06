@@ -14,12 +14,12 @@ public static class MacroEngine
         double shockS = stochastic ? rng.Normal() * 0.0015 : 0;
         RampModifiers(c);
         TaxCodeEngine.Step(c);
-        if (w.EconomicDepth) ShadowEngine.Step(c, dt);
+        if (w.EconomicDepth && w.ShadowEconomy) ShadowEngine.Step(c, dt);
         Demography.Step(c, dt);
         PublicAssets(c, dt);
         Supply(c, g, dt, shockS);
         Demand(c, g, dt, shockD);
-        Labour(c, dt);
+        Labour(c, dt, w.EconomicDepth && w.LabourMarket);
         Prices(c, g, dt);
         Rates(c, g, dt);
         Sectors(c, dt);
@@ -101,7 +101,9 @@ public static class MacroEngine
         double incTax = FiscalEngine.TaxRevenueReal(c, Tax.Income, c.Gdp, c.Cons, c.Imports);
         double payTax = FiscalEngine.TaxRevenueReal(c, Tax.Payroll, c.Gdp, c.Cons, c.Imports);
         double interestReal = c.Debt * c.AvgDebtCost / P;
-        double yd = c.HhIncomeShare * c.Gdp - incTax - payTax + FiscalEngine.SocialReal(c) + 0.7 * interestReal + TaxCodeEngine.MpcAdj(c);
+        // wage-led demand: income shifted between profits and wages changes household spending (zero while labour's share is at its start)
+        double yd = c.HhIncomeShare * c.Gdp - incTax - payTax + FiscalEngine.SocialReal(c) + 0.7 * interestReal + TaxCodeEngine.MpcAdj(c)
+                    + LabourMarketEngine.ShareDemand * (c.LabourIncomeShare - c.LabourIncomeShare0) * c.Gdp;
 
         double s = c.SavingsRate0 + 0.35 * Maths.Clamp(c.RealRate - c.RealRate0, -0.05, 0.05) + 0.20 * c.Unrest + c.Mod("savings");
         c.SavingsRate = Maths.Clamp(s, 0.0, 0.6);
@@ -166,23 +168,25 @@ public static class MacroEngine
         return Maths.Clamp(a, 0.05, 3.0);
     }
 
-    static void Labour(CountryState c, double dt)
+    static void Labour(CountryState c, double dt, bool depth)
     {
         double target = c.NairU - 0.5 * c.Gap;
         c.Unemp += (Maths.Clamp(target, 0.01, 0.45) - c.Unemp) * 0.10;
+        if (depth) LabourMarketEngine.Scar(c, dt);      // long-term unemployment from prolonged slack (separate state, added to the natural rate below)
         // natural rate: policy-driven plus slow hysteresis
         c.NairUBase += (c.Unemp - c.NairU) * 0.02 * dt;
         c.NairUBase = Maths.Clamp(c.NairUBase, c.Unemp0 - 0.02, c.Unemp0 + 0.08);
         double pay = c.TaxRate[(int)Tax.Payroll] - c.TaxRate0[(int)Tax.Payroll];
         c.NairuParts[0] = c.NairUBase; c.NairuParts[1] = 0.25 * (c.MinWageRatio - c.MinWageRatio0); c.NairuParts[2] = 0.15 * pay;
         c.NairuParts[3] = -0.03 * Math.Log(c.HumanCapital); c.NairuParts[4] = c.Mod("nairu") + TaxCodeEngine.NairuAdj(c);
-        c.NairU = Maths.Clamp(c.NairuParts.Sum(), 0.01, 0.45);
+        c.NairU = Maths.Clamp(c.NairuParts.Sum() + c.NairuHyst, 0.01, 0.45);
 
         // wage dynamics (real wage index tracks productivity and labour-market tightness)
         double prodG = c.Potential > 0 ? Math.Log(c.Potential / Math.Max(1e-9, c.PotLag)) / Math.Max(dt, 1e-9) : 0;
         c.PotLag = c.Potential;
         double realG = Maths.Clamp(prodG, -0.1, 0.1) + 0.4 * (c.NairU - c.Unemp);
         c.RealWageIdx *= Math.Exp(realG * dt);
+        if (depth) LabourMarketEngine.Bargain(c, dt);   // price shocks into wages and back into prices, real-wage gap, strike risk, labour share
 
         // sector labour reallocation toward higher marginal products (relative to start)
         double[] rel = new double[Dim.Sectors]; double avg = 0;
@@ -214,7 +218,8 @@ public static class MacroEngine
         // fiscal dominance: only when sovereign stress forces the central bank to monetise deficits
         double mon = (1 - c.CbIndependence) * Maths.Clamp((c.RiskPremium - 0.03) / 0.05, 0, 1) * 0.04;
         double target = c.InflExp + kappa * gapEff + costPush + fxPass + c.Mod("inflation") + mon
-                        + 0.01 * c.CarbonPrice / 100.0;
+                        + 0.01 * c.CarbonPrice / 100.0
+                        + c.WageSpiral;      // the wage-price spiral: bargained wage premia that firms pass into prices (zero unless a price shock has hit)
         c.InflDrivers[0] = c.InflExp; c.InflDrivers[1] = kappa * gapEff; c.InflDrivers[2] = costPush; c.InflDrivers[3] = fxPass; c.InflDrivers[4] = mon;
         c.InflDrivers[5] = c.Mod("inflation") + 0.01 * c.CarbonPrice / 100.0;
         c.InflInst += (Maths.Clamp(target, -0.05, 3.0) - c.InflInst) * 0.20;
@@ -235,11 +240,17 @@ public static class MacroEngine
         if (disciplined) c.Cred += 0.02 * dt;
         else if (mon > 0.001 || realRate < -0.03) c.Cred -= 0.06 * dt;
         c.Cred = Maths.Clamp(c.Cred, 0.05, 0.95);
-        double cred = c.Cred * Math.Exp(-2.0 * Math.Max(0, def0 - 0.06)) * Math.Clamp(1 + c.Mod("credibility"), 0.2, 1.5);
-        cred = Maths.Clamp(cred, 0.05, 0.98);
+        double cred = EffectiveCredibility(c, def0);
         c.InflExp += (cred * (c.InflTarget - c.InflExp) + (1 - cred) * (c.Inflation - c.InflExp)) * 0.05;
         c.InflExp += (c.InflTarget - c.InflExp) * 0.004;  // slow institutional learning toward the target
         c.InflExp = Maths.Clamp(c.InflExp, -0.02, 3.0);
+    }
+
+    /// <summary>How far expectations and wage claims are anchored: earned credibility, eroded by a deficit above 6% of GDP and moved by the "credibility" policy modifier.</summary>
+    public static double EffectiveCredibility(CountryState c, double deficitToGdp)
+    {
+        double cred = c.Cred * Math.Exp(-2.0 * Math.Max(0, deficitToGdp - 0.06)) * Math.Clamp(1 + c.Mod("credibility"), 0.2, 1.5);
+        return Maths.Clamp(cred, 0.05, 0.98);
     }
 
     /// <summary>Taylor-rule inflation response: 0.5 on the first 10pp of overshoot, 0.2 on the next 40pp (orthodox hike in high-inflation regimes).</summary>

@@ -24,7 +24,7 @@ public static class DepthFixture
     {
         var root = JsonNode.Parse(json)!.AsObject();
         root["Version"] = 2;
-        root.Remove("EconomicDepth");
+        foreach (var k in new[] { "EconomicDepth", "ShadowEconomy", "LabourMarket" }) root.Remove(k);
         foreach (var c in root["Countries"]!.AsArray().Append(root["Player"]))      // the player's state is also written under "Player"
             if (c is JsonObject o) foreach (var k in V3CountryFields) o.Remove(k);
         return root.ToJsonString();
@@ -49,22 +49,45 @@ public static class DepthFixture
     /// <summary>One shared 30-year stochastic world (seed 11, events on, 28 countries), run once for the bounds tests. Read only.</summary>
     public static Simulation ThirtyYears => Thirty.Value;
 
-    /// <summary>A world with only one country: nobody else moves, so the player's state depends on nothing but its own levers.</summary>
-    public static Simulation Solo(string id, ulong seed = 7, bool stochastic = false, bool depth = true)
+    /// <summary>Sets the version 3 switches: <paramref name="depth"/> is the master; <paramref name="shadow"/> and <paramref name="labour"/> pick the systems when it is on.</summary>
+    public static Simulation Switch(Simulation s, bool depth, bool shadow, bool labour)
     {
-        var roster = CountryLoader.LoadEmbedded().Where(d => d.Id == id).ToList();
-        var s = Simulation.New(id, seed, stochastic, roster);
-        s.World.EconomicDepth = depth;
-        if (!stochastic) s.World.Events = false;
+        s.World.EconomicDepth = depth; s.World.ShadowEconomy = shadow; s.World.LabourMarket = labour;
         return s;
     }
 
+    /// <summary>
+    /// A world with only one country: nobody else moves, so the player's state depends on nothing but its own levers. (It is not a calm economy: with no
+    /// trade partners the country sits in a deep slump, which is why shadow-only tests switch the labour block off.)
+    /// </summary>
+    public static Simulation Solo(string id, ulong seed = 7, bool stochastic = false, bool depth = true, bool shadow = true, bool labour = true)
+    {
+        var roster = CountryLoader.LoadEmbedded().Where(d => d.Id == id).ToList();
+        var s = Simulation.New(id, seed, stochastic, roster);
+        if (!stochastic) s.World.Events = false;
+        return Switch(s, depth, shadow, labour);
+    }
+
     /// <summary>A quiet deterministic game: no random shocks, no events, no advisers.</summary>
-    public static Simulation Quiet(string id = "GBR", ulong seed = 1, bool depth = true)
+    public static Simulation Quiet(string id = "GBR", ulong seed = 1, bool depth = true, bool shadow = true, bool labour = true)
     {
         var s = Simulation.New(id, seed, stochastic: false);
-        s.World.Events = false; s.World.Advisors = false; s.World.RecordHistory = false; s.World.EconomicDepth = depth;
-        return s;
+        s.World.Events = false; s.World.Advisors = false; s.World.RecordHistory = false;
+        return Switch(s, depth, shadow, labour);
+    }
+
+    /// <summary>
+    /// Fourteen economies that never leave their labour-market dead-bands in quiet play (verified over 30 years), as a world of their own: the
+    /// calibrated crisis economies (Argentina, Turkey, Ethiopia ...) have genuine slack from the first month, so scarring starts there by design.
+    /// </summary>
+    public static readonly string[] CalmEconomies = { "GBR", "USA", "DEU", "FRA", "KOR", "CHE", "AUS", "CAN", "NOR", "POL", "CHN", "SAU", "IDN", "VNM" };
+
+    public static Simulation QuietRoster(string[] ids, ulong seed = 1, bool depth = true, bool shadow = true, bool labour = true)
+    {
+        var roster = CountryLoader.LoadEmbedded().Where(d => ids.Contains(d.Id)).ToList();
+        var s = Simulation.New(ids[0], seed, stochastic: false, roster);
+        s.World.Events = false; s.World.Advisors = false; s.World.RecordHistory = false;
+        return Switch(s, depth, shadow, labour);
     }
 }
 
@@ -128,7 +151,7 @@ public class ShadowEconomyTests
     public void The_new_dynamics_are_invisible_while_no_lever_has_moved(string id)
     {
         // a country on its own, so nothing but its own levers can move it; the state hash must be bit-identical with the version 3 dynamics on or off
-        var on = DepthFixture.Solo(id, depth: true); var off = DepthFixture.Solo(id, depth: false);
+        var on = DepthFixture.Solo(id, depth: true, labour: false); var off = DepthFixture.Solo(id, depth: false);
         for (int i = 0; i < 96; i++)
         {
             on.Tick(); off.Tick();
@@ -147,7 +170,7 @@ public class ShadowEconomyTests
     {
         // AI governments do change their taxes, enforcement and policies in the default world, so their shadow shares do move; the drift must stay small.
         // Stated tolerance after 120 deterministic months, every country: GDP 0.5%, revenue 3%, debt 6%, unemployment 0.3pp, shadow share 2.6pp.
-        var on = DepthFixture.Quiet("GBR", 5, depth: true); var off = DepthFixture.Quiet("GBR", 5, depth: false);
+        var on = DepthFixture.Quiet("GBR", 5, depth: true, labour: false); var off = DepthFixture.Quiet("GBR", 5, depth: false);
         on.Run(120); off.Run(120);
         foreach (var (x, y) in on.World.Countries.Zip(off.World.Countries))
         {

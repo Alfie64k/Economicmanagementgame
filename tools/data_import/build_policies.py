@@ -51,7 +51,7 @@ policies = [
  P("housing_reform","Planning and housing supply reform","welfare","Liberalise planning rules to build more homes.",20,12,{"gini":-0.01,"approval":0.02,"invest":0.02},{"Housing":0.003}),
  P("capital_controls","Capital flow management","monetary","Curb hot money. Reduces crisis risk premia; deters FDI.",25,3,{"risk":-0.010,"fdi":-0.15,"approval":-0.01},group="capital"),
  P("wealth_tax","Annual wealth tax","fiscal","Levy on top fortunes. Reduces inequality, raises modest revenue, risks capital flight.",30,12,{"gini":-0.02,"invest":-0.03,"revenue":0.005,"approval":0.01,"fdi":-0.05},shock=0.01),
- P("tax_compliance","Digital tax compliance drive","fiscal","E-invoicing and data matching to shrink the informal economy and evasion.",15,12,{"revenue":0.002,"shadow":-0.10,"corruption":-0.002},{"Digital":0.001}),
+ P("tax_compliance","Digital tax compliance drive","fiscal","E-invoicing and data matching to shrink the informal economy and evasion.",15,12,{"revenue":0.006,"shadow":-0.10,"corruption":-0.002},{"Digital":0.001}),
  P("universal_healthcare","Universal healthcare expansion","welfare","Extend free care at point of use. Healthier workforce and happier voters; large permanent cost.",30,18,{"approval":0.04,"lifeexp":2.0},{"Health":0.015},shock=0.03),
  P("student_loans","Graduate tax and student finance","welfare","Shift higher education cost to graduates.",15,9,{"approval":-0.01,"tfp":0.0002},{"Education":-0.003}),
  P("inflation_targeting","Formal inflation-targeting regime","monetary","Publish a target and forecasts, accountability to parliament.",15,6,{"credibility":0.15}),

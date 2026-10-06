@@ -37,6 +37,7 @@ public static class Explain
                     var d = c.InflDrivers;
                     Add("pressures", "Inflation expectations", d[0]); Add("pressures", "Output gap", d[1]); Add("pressures", "Energy & food prices", d[2]);
                     Add("pressures", "Currency pass-through", d[3]); Add("pressures", "Monetisation of deficits", d[4]); Add("pressures", "Policy & carbon price", d[5]);
+                    Add("pressures", "Wage-price spiral", c.WageSpiral);
                     break;
                 }
             case "growth":
@@ -61,6 +62,7 @@ public static class Explain
                     var n = c.NairuParts;
                     Add("natural", "Structural base (incl. hysteresis)", n[0]); Add("natural", "Minimum wage", n[1]); Add("natural", "Payroll tax", n[2]);
                     Add("natural", "Skills (human capital)", n[3]); Add("natural", "Labour-market policy", n[4]);
+                    Add("natural", "Long-term unemployment (scarring)", c.NairuHyst);
                     Add("cyclical", "Demand shortfall / surplus", c.Unemp - c.NairU);
                     break;
                 }

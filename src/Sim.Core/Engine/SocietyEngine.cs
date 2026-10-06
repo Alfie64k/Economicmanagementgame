@@ -29,7 +29,8 @@ public static class SocietyEngine
             + TaxCodeEngine.GiniDelta(c)
             - 0.04 * idx(Asset.Education) - 0.02 * idx(Asset.Housing)
             + c.Mod("gini")
-            + ShadowEngine.GiniSlope * (c.Shadow - c.Shadow0);
+            + ShadowEngine.GiniSlope * (c.Shadow - c.Shadow0)
+            - LabourMarketEngine.ShareGini * (c.LabourIncomeShare - c.LabourIncomeShare0);
         c.Gini += (Maths.Clamp(giniTarget, 0.2, 0.65) - c.Gini) * 0.02 * dt * 12;
 
         // approval

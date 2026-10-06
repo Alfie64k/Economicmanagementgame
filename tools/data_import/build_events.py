@@ -2,8 +2,9 @@
 """Builds data/events.json: stochastic events, crises and decision popups.
 
 Conditions are lists of "metric op value" strings (all must hold). prob is per year.
-Effect kinds: level (one-off relative change), state (additive), mod (temporary modifier for `months`), global (world variable),
-imf (loan + conditionality), default (debt haircut), election (early election).
+Effect kinds: level (one-off relative change), state (additive; the key "wagecatchup" instead makes good that share of the real-wage shortfall),
+mod (temporary modifier for `months`), global (world variable), imf (loan + conditionality), default (debt haircut), election (early election).
+Metrics for conditions and probMods are listed in EventEngine.Metric (including "strike", the labour model's strike risk, and "shadow", the informal share).
 scale: none | vuln (poorer = worse) | health | infra | digital | defence (resilience: strong asset index softens the blow)
 """
 import json, pathlib
@@ -46,9 +47,11 @@ events = [
    effects=[fx("mod","inflation",0.015,12),fx("level","cons",-0.01,0,"vuln"),fx("state","unrest",0.05,0,"vuln"),fx("mod","export",-0.03,12)],
    choices=[dict(label="Emergency food subsidies (0.6% GDP)",cost=0.006,effects=[fx("state","approval",0.02),fx("mod","inflation",-0.01,12)]),
             dict(label="Let markets adjust",cost=0.0,effects=[fx("state","unrest",0.06)])],default=1),
- E("strike_wave","Strike wave","Unions walk out over pay and conditions.",prob=0.05,cond=["unemp<0.07","infl>0.03"],
+ # "strike" is the labour-market model's StrikeRisk (0 in a quiet economy, so the base probability is unchanged there): it rises when real wages have
+ # fallen behind and bargaining power is high. "wagecatchup" makes good that share of the real-wage shortfall (a no-op when workers are not behind).
+ E("strike_wave","Strike wave","Unions walk out over pay and conditions.",prob=0.05,cond=["unemp<0.07","infl>0.03"],probmods=[dict(metric="strike",ref=0.0,slope=4.0)],
    effects=[fx("mod","tfp",-0.002,6),fx("state","approval",-0.03),fx("mod","inflation",0.008,12)],
-   choices=[dict(label="Concede with a pay settlement",cost=0.003,effects=[fx("mod","inflation",0.006,12),fx("state","approval",0.04)]),
+   choices=[dict(label="Concede with a pay settlement",cost=0.003,effects=[fx("mod","inflation",0.006,12),fx("state","approval",0.04),fx("state","wagecatchup",0.6)]),
             dict(label="Hold the line",cost=0.0,effects=[fx("state","unrest",0.08),fx("state","approval",-0.02)])],default=0),
  E("corruption_scandal","Corruption scandal","A ministerial scandal dominates the headlines.",prob=0.06,cond=["corruption>0.25"],
    effects=[fx("state","approval",-0.07),fx("state","polcap",-12),fx("state","corruption",0.01),fx("mod","fdi",-0.05,12)],

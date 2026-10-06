@@ -28,6 +28,8 @@ public sealed class World
     /// "classic economy" baseline).
     /// </summary>
     public bool EconomicDepth = true;
+    /// <summary>Finer switches, only read while <see cref="EconomicDepth"/> is on: the informal-sector engine, and the labour block (wage bargaining, hysteresis, strikes, labour share). They let tests exercise one system on its own.</summary>
+    public bool ShadowEconomy = true, LabourMarket = true;
     public List<CountryState> Countries = new();
     public Rng[] CountryRng = Array.Empty<Rng>();
     public Rng WorldRng = new();
