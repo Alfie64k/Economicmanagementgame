@@ -1,0 +1,1990 @@
+[
+ {
+  "id": "USA",
+  "name": "United States",
+  "currency": "USD",
+  "region": "North America",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "USMCA",
+  "lat": 39.8,
+  "lon": -98.6,
+  "popM": 335,
+  "gdpLcuBn": 27360,
+  "usdFx": 1.0,
+  "sectors": {
+   "agri": 0.01,
+   "energy": 0.04,
+   "manuf": 0.11,
+   "services": 0.64,
+   "finance": 0.08,
+   "public": 0.12
+  },
+  "demand": {
+   "cons": 0.655,
+   "inv": 0.21,
+   "gov": 0.165,
+   "exp": 0.11,
+   "imp": 0.14
+  },
+  "fiscal": {
+   "revenue": 0.3,
+   "health": 0.03,
+   "education": 0.042,
+   "defence": 0.033,
+   "infra": 0.022,
+   "rnd": 0.006,
+   "deficit": 0.07,
+   "debt": 1.2,
+   "resourceRevenue": 0.01,
+   "foreignDebtShare": 0.25
+  },
+  "macro": {
+   "policyRate": 0.05,
+   "yield10": 0.042,
+   "inflation": 0.031,
+   "unemployment": 0.037,
+   "gini": 0.41,
+   "growthTrend": 0.02,
+   "currentAccount": -0.033,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.85
+  },
+  "demog": {
+   "young": 0.176,
+   "old": 0.171,
+   "fertility": 1.62,
+   "lifeExp": 78.5,
+   "participation": 0.74,
+   "migration": 3.0
+  },
+  "energy": {
+   "renewables": 0.22,
+   "emissionsMt": 4900,
+   "netExportGdp": 0.005
+  },
+  "politics": {
+   "democracy": 0.8,
+   "corruption": 0.3,
+   "approval": 0.42
+  }
+ },
+ {
+  "id": "GBR",
+  "name": "United Kingdom",
+  "currency": "GBP",
+  "region": "Europe",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 54.0,
+  "lon": -2.0,
+  "popM": 68.3,
+  "gdpLcuBn": 2690,
+  "usdFx": 0.8,
+  "sectors": {
+   "agri": 0.007,
+   "energy": 0.03,
+   "manuf": 0.09,
+   "services": 0.68,
+   "finance": 0.09,
+   "public": 0.103
+  },
+  "demand": {
+   "cons": 0.615,
+   "inv": 0.175,
+   "gov": 0.22,
+   "exp": 0.3,
+   "imp": 0.31
+  },
+  "fiscal": {
+   "revenue": 0.38,
+   "health": 0.075,
+   "education": 0.045,
+   "defence": 0.022,
+   "infra": 0.025,
+   "rnd": 0.006,
+   "deficit": 0.045,
+   "debt": 1.01,
+   "resourceRevenue": 0.01,
+   "foreignDebtShare": 0.28
+  },
+  "macro": {
+   "policyRate": 0.0525,
+   "yield10": 0.042,
+   "inflation": 0.035,
+   "unemployment": 0.042,
+   "gini": 0.35,
+   "growthTrend": 0.014,
+   "currentAccount": -0.03,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.85
+  },
+  "demog": {
+   "young": 0.17,
+   "old": 0.19,
+   "fertility": 1.56,
+   "lifeExp": 81.0,
+   "participation": 0.78,
+   "migration": 5.0
+  },
+  "energy": {
+   "renewables": 0.45,
+   "emissionsMt": 330,
+   "netExportGdp": -0.01
+  },
+  "politics": {
+   "democracy": 0.85,
+   "corruption": 0.22,
+   "approval": 0.3
+  }
+ },
+ {
+  "id": "DEU",
+  "name": "Germany",
+  "currency": "EUR",
+  "region": "Europe",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "EU",
+  "lat": 51.2,
+  "lon": 10.4,
+  "popM": 84.5,
+  "gdpLcuBn": 4120,
+  "usdFx": 0.92,
+  "sectors": {
+   "agri": 0.009,
+   "energy": 0.03,
+   "manuf": 0.185,
+   "services": 0.58,
+   "finance": 0.04,
+   "public": 0.156
+  },
+  "demand": {
+   "cons": 0.515,
+   "inv": 0.215,
+   "gov": 0.22,
+   "exp": 0.47,
+   "imp": 0.42
+  },
+  "fiscal": {
+   "revenue": 0.46,
+   "health": 0.075,
+   "education": 0.045,
+   "defence": 0.015,
+   "infra": 0.025,
+   "rnd": 0.008,
+   "deficit": 0.025,
+   "debt": 0.64,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.45
+  },
+  "macro": {
+   "policyRate": 0.045,
+   "yield10": 0.024,
+   "inflation": 0.03,
+   "unemployment": 0.031,
+   "gini": 0.3,
+   "growthTrend": 0.007,
+   "currentAccount": 0.062,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.14,
+   "old": 0.225,
+   "fertility": 1.35,
+   "lifeExp": 81.2,
+   "participation": 0.79,
+   "migration": 8.0
+  },
+  "energy": {
+   "renewables": 0.52,
+   "emissionsMt": 650,
+   "netExportGdp": -0.03
+  },
+  "politics": {
+   "democracy": 0.9,
+   "corruption": 0.2,
+   "approval": 0.25
+  }
+ },
+ {
+  "id": "FRA",
+  "name": "France",
+  "currency": "EUR",
+  "region": "Europe",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "EU",
+  "lat": 46.6,
+  "lon": 2.4,
+  "popM": 68.0,
+  "gdpLcuBn": 2800,
+  "usdFx": 0.92,
+  "sectors": {
+   "agri": 0.019,
+   "energy": 0.025,
+   "manuf": 0.095,
+   "services": 0.69,
+   "finance": 0.04,
+   "public": 0.131
+  },
+  "demand": {
+   "cons": 0.515,
+   "inv": 0.245,
+   "gov": 0.245,
+   "exp": 0.33,
+   "imp": 0.335
+  },
+  "fiscal": {
+   "revenue": 0.53,
+   "health": 0.08,
+   "education": 0.055,
+   "defence": 0.018,
+   "infra": 0.03,
+   "rnd": 0.008,
+   "deficit": 0.055,
+   "debt": 1.1,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.5
+  },
+  "macro": {
+   "policyRate": 0.045,
+   "yield10": 0.029,
+   "inflation": 0.037,
+   "unemployment": 0.073,
+   "gini": 0.31,
+   "growthTrend": 0.01,
+   "currentAccount": -0.009,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.17,
+   "old": 0.21,
+   "fertility": 1.8,
+   "lifeExp": 82.5,
+   "participation": 0.74,
+   "migration": 1.5
+  },
+  "energy": {
+   "renewables": 0.25,
+   "emissionsMt": 300,
+   "netExportGdp": -0.02
+  },
+  "politics": {
+   "democracy": 0.85,
+   "corruption": 0.28,
+   "approval": 0.25
+  }
+ },
+ {
+  "id": "JPN",
+  "name": "Japan",
+  "currency": "JPY",
+  "region": "Asia",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 36.2,
+  "lon": 138.3,
+  "popM": 124,
+  "gdpLcuBn": 590000,
+  "usdFx": 140,
+  "sectors": {
+   "agri": 0.01,
+   "energy": 0.02,
+   "manuf": 0.2,
+   "services": 0.62,
+   "finance": 0.06,
+   "public": 0.09
+  },
+  "demand": {
+   "cons": 0.55,
+   "inv": 0.26,
+   "gov": 0.22,
+   "exp": 0.21,
+   "imp": 0.24
+  },
+  "fiscal": {
+   "revenue": 0.37,
+   "health": 0.075,
+   "education": 0.035,
+   "defence": 0.012,
+   "infra": 0.03,
+   "rnd": 0.008,
+   "deficit": 0.06,
+   "debt": 2.55,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.1
+  },
+  "macro": {
+   "policyRate": 0.0,
+   "yield10": 0.007,
+   "inflation": 0.028,
+   "unemployment": 0.026,
+   "gini": 0.33,
+   "growthTrend": 0.004,
+   "currentAccount": 0.035,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.8
+  },
+  "demog": {
+   "young": 0.115,
+   "old": 0.3,
+   "fertility": 1.2,
+   "lifeExp": 84.5,
+   "participation": 0.8,
+   "migration": 1.5
+  },
+  "energy": {
+   "renewables": 0.22,
+   "emissionsMt": 1050,
+   "netExportGdp": -0.03
+  },
+  "politics": {
+   "democracy": 0.85,
+   "corruption": 0.25,
+   "approval": 0.35
+  }
+ },
+ {
+  "id": "CHN",
+  "name": "China",
+  "currency": "CNY",
+  "region": "Asia",
+  "archetype": "emerging",
+  "gov": "autocracy",
+  "fx": "managed",
+  "bloc": "none",
+  "lat": 35.9,
+  "lon": 104.2,
+  "popM": 1410,
+  "gdpLcuBn": 126000,
+  "usdFx": 7.1,
+  "sectors": {
+   "agri": 0.07,
+   "energy": 0.05,
+   "manuf": 0.27,
+   "services": 0.43,
+   "finance": 0.08,
+   "public": 0.1
+  },
+  "demand": {
+   "cons": 0.38,
+   "inv": 0.42,
+   "gov": 0.17,
+   "exp": 0.2,
+   "imp": 0.17
+  },
+  "fiscal": {
+   "revenue": 0.28,
+   "health": 0.03,
+   "education": 0.035,
+   "defence": 0.016,
+   "infra": 0.04,
+   "rnd": 0.007,
+   "deficit": 0.075,
+   "debt": 0.84,
+   "resourceRevenue": 0.03,
+   "foreignDebtShare": 0.02
+  },
+  "macro": {
+   "policyRate": 0.0345,
+   "yield10": 0.025,
+   "inflation": 0.002,
+   "unemployment": 0.052,
+   "gini": 0.38,
+   "growthTrend": 0.045,
+   "currentAccount": 0.015,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.6
+  },
+  "demog": {
+   "young": 0.17,
+   "old": 0.14,
+   "fertility": 1.1,
+   "lifeExp": 78.0,
+   "participation": 0.77,
+   "migration": -0.1
+  },
+  "energy": {
+   "renewables": 0.3,
+   "emissionsMt": 12000,
+   "netExportGdp": -0.02
+  },
+  "politics": {
+   "democracy": 0.05,
+   "corruption": 0.55,
+   "approval": 0.6
+  }
+ },
+ {
+  "id": "IND",
+  "name": "India",
+  "currency": "INR",
+  "region": "Asia",
+  "archetype": "emerging",
+  "gov": "hybrid",
+  "fx": "managed",
+  "bloc": "none",
+  "lat": 22.5,
+  "lon": 79.0,
+  "popM": 1430,
+  "gdpLcuBn": 295000,
+  "usdFx": 83,
+  "sectors": {
+   "agri": 0.17,
+   "energy": 0.04,
+   "manuf": 0.14,
+   "services": 0.46,
+   "finance": 0.07,
+   "public": 0.12
+  },
+  "demand": {
+   "cons": 0.57,
+   "inv": 0.31,
+   "gov": 0.14,
+   "exp": 0.22,
+   "imp": 0.24
+  },
+  "fiscal": {
+   "revenue": 0.2,
+   "health": 0.01,
+   "education": 0.03,
+   "defence": 0.02,
+   "infra": 0.035,
+   "rnd": 0.007,
+   "deficit": 0.088,
+   "debt": 0.82,
+   "resourceRevenue": 0.02,
+   "foreignDebtShare": 0.05
+  },
+  "macro": {
+   "policyRate": 0.065,
+   "yield10": 0.071,
+   "inflation": 0.054,
+   "unemployment": 0.07,
+   "gini": 0.35,
+   "growthTrend": 0.06,
+   "currentAccount": -0.01,
+   "inflationTarget": 0.04,
+   "cbIndependence": 0.6
+  },
+  "demog": {
+   "young": 0.25,
+   "old": 0.07,
+   "fertility": 2.0,
+   "lifeExp": 70.0,
+   "participation": 0.57,
+   "migration": 0.0
+  },
+  "energy": {
+   "renewables": 0.2,
+   "emissionsMt": 2900,
+   "netExportGdp": -0.025
+  },
+  "politics": {
+   "democracy": 0.6,
+   "corruption": 0.5,
+   "approval": 0.55
+  }
+ },
+ {
+  "id": "BRA",
+  "name": "Brazil",
+  "currency": "BRL",
+  "region": "South America",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": -10.0,
+  "lon": -52.0,
+  "popM": 216,
+  "gdpLcuBn": 10900,
+  "usdFx": 5.0,
+  "sectors": {
+   "agri": 0.065,
+   "energy": 0.06,
+   "manuf": 0.11,
+   "services": 0.56,
+   "finance": 0.07,
+   "public": 0.135
+  },
+  "demand": {
+   "cons": 0.6,
+   "inv": 0.17,
+   "gov": 0.2,
+   "exp": 0.18,
+   "imp": 0.15
+  },
+  "fiscal": {
+   "revenue": 0.33,
+   "health": 0.04,
+   "education": 0.05,
+   "defence": 0.013,
+   "infra": 0.02,
+   "rnd": 0.008,
+   "deficit": 0.08,
+   "debt": 0.74,
+   "resourceRevenue": 0.04,
+   "foreignDebtShare": 0.1
+  },
+  "macro": {
+   "policyRate": 0.1175,
+   "yield10": 0.115,
+   "inflation": 0.045,
+   "unemployment": 0.079,
+   "gini": 0.52,
+   "growthTrend": 0.018,
+   "currentAccount": -0.01,
+   "inflationTarget": 0.0375,
+   "cbIndependence": 0.7
+  },
+  "demog": {
+   "young": 0.2,
+   "old": 0.1,
+   "fertility": 1.65,
+   "lifeExp": 75.5,
+   "participation": 0.72,
+   "migration": 0.0
+  },
+  "energy": {
+   "renewables": 0.85,
+   "emissionsMt": 480,
+   "netExportGdp": 0.02
+  },
+  "politics": {
+   "democracy": 0.65,
+   "corruption": 0.55,
+   "approval": 0.38
+  }
+ },
+ {
+  "id": "RUS",
+  "name": "Russia",
+  "currency": "RUB",
+  "region": "Europe",
+  "archetype": "resource",
+  "gov": "autocracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 61.5,
+  "lon": 99.0,
+  "popM": 144,
+  "gdpLcuBn": 172000,
+  "usdFx": 85,
+  "sectors": {
+   "agri": 0.04,
+   "energy": 0.15,
+   "manuf": 0.14,
+   "services": 0.49,
+   "finance": 0.06,
+   "public": 0.12
+  },
+  "demand": {
+   "cons": 0.52,
+   "inv": 0.21,
+   "gov": 0.21,
+   "exp": 0.26,
+   "imp": 0.2
+  },
+  "fiscal": {
+   "revenue": 0.34,
+   "health": 0.035,
+   "education": 0.035,
+   "defence": 0.05,
+   "infra": 0.025,
+   "rnd": 0.006,
+   "deficit": 0.02,
+   "debt": 0.2,
+   "resourceRevenue": 0.25,
+   "foreignDebtShare": 0.02
+  },
+  "macro": {
+   "policyRate": 0.16,
+   "yield10": 0.12,
+   "inflation": 0.074,
+   "unemployment": 0.032,
+   "gini": 0.36,
+   "growthTrend": 0.01,
+   "currentAccount": 0.025,
+   "inflationTarget": 0.04,
+   "cbIndependence": 0.5
+  },
+  "demog": {
+   "young": 0.17,
+   "old": 0.17,
+   "fertility": 1.5,
+   "lifeExp": 73.0,
+   "participation": 0.78,
+   "migration": 1.0
+  },
+  "energy": {
+   "renewables": 0.2,
+   "emissionsMt": 1700,
+   "netExportGdp": 0.09
+  },
+  "politics": {
+   "democracy": 0.15,
+   "corruption": 0.6,
+   "approval": 0.6
+  }
+ },
+ {
+  "id": "SAU",
+  "name": "Saudi Arabia",
+  "currency": "SAR",
+  "region": "Middle East",
+  "archetype": "resource",
+  "gov": "autocracy",
+  "fx": "peg",
+  "bloc": "GCC",
+  "lat": 24.0,
+  "lon": 45.0,
+  "popM": 36,
+  "gdpLcuBn": 4000,
+  "usdFx": 3.75,
+  "sectors": {
+   "agri": 0.025,
+   "energy": 0.27,
+   "manuf": 0.13,
+   "services": 0.38,
+   "finance": 0.035,
+   "public": 0.16
+  },
+  "demand": {
+   "cons": 0.42,
+   "inv": 0.26,
+   "gov": 0.26,
+   "exp": 0.35,
+   "imp": 0.29
+  },
+  "fiscal": {
+   "revenue": 0.3,
+   "health": 0.045,
+   "education": 0.06,
+   "defence": 0.07,
+   "infra": 0.03,
+   "rnd": 0.005,
+   "deficit": 0.02,
+   "debt": 0.26,
+   "resourceRevenue": 0.65,
+   "foreignDebtShare": 0.3
+  },
+  "macro": {
+   "policyRate": 0.06,
+   "yield10": 0.058,
+   "inflation": 0.025,
+   "unemployment": 0.05,
+   "gini": 0.42,
+   "growthTrend": 0.035,
+   "currentAccount": 0.02,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.3
+  },
+  "demog": {
+   "young": 0.24,
+   "old": 0.04,
+   "fertility": 2.3,
+   "lifeExp": 77.5,
+   "participation": 0.58,
+   "migration": 6.0
+  },
+  "energy": {
+   "renewables": 0.01,
+   "emissionsMt": 680,
+   "netExportGdp": 0.25
+  },
+  "politics": {
+   "democracy": 0.1,
+   "corruption": 0.45,
+   "approval": 0.7
+  }
+ },
+ {
+  "id": "SGP",
+  "name": "Singapore",
+  "currency": "SGD",
+  "region": "Asia",
+  "archetype": "hub",
+  "gov": "hybrid",
+  "fx": "managed",
+  "bloc": "ASEAN",
+  "lat": 1.35,
+  "lon": 103.8,
+  "popM": 5.9,
+  "gdpLcuBn": 700,
+  "usdFx": 1.34,
+  "sectors": {
+   "agri": 0.001,
+   "energy": 0.01,
+   "manuf": 0.21,
+   "services": 0.53,
+   "finance": 0.14,
+   "public": 0.109
+  },
+  "demand": {
+   "cons": 0.395,
+   "inv": 0.26,
+   "gov": 0.125,
+   "exp": 1.8,
+   "imp": 1.58
+  },
+  "fiscal": {
+   "revenue": 0.18,
+   "health": 0.015,
+   "education": 0.022,
+   "defence": 0.028,
+   "infra": 0.02,
+   "rnd": 0.008,
+   "deficit": -0.005,
+   "debt": 0.8,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.05
+  },
+  "macro": {
+   "policyRate": 0.036,
+   "yield10": 0.03,
+   "inflation": 0.048,
+   "unemployment": 0.02,
+   "gini": 0.38,
+   "growthTrend": 0.025,
+   "currentAccount": 0.19,
+   "inflationTarget": 0.015,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.13,
+   "old": 0.17,
+   "fertility": 1.0,
+   "lifeExp": 83.5,
+   "participation": 0.82,
+   "migration": 9.0
+  },
+  "energy": {
+   "renewables": 0.02,
+   "emissionsMt": 50,
+   "netExportGdp": -0.02
+  },
+  "politics": {
+   "democracy": 0.45,
+   "corruption": 0.08,
+   "approval": 0.7
+  }
+ },
+ {
+  "id": "ARG",
+  "name": "Argentina",
+  "currency": "ARS",
+  "region": "South America",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "managed",
+  "bloc": "none",
+  "lat": -38.4,
+  "lon": -63.6,
+  "popM": 46,
+  "gdpLcuBn": 350000,
+  "usdFx": 820,
+  "sectors": {
+   "agri": 0.09,
+   "energy": 0.05,
+   "manuf": 0.17,
+   "services": 0.52,
+   "finance": 0.04,
+   "public": 0.13
+  },
+  "demand": {
+   "cons": 0.66,
+   "inv": 0.16,
+   "gov": 0.17,
+   "exp": 0.15,
+   "imp": 0.14
+  },
+  "fiscal": {
+   "revenue": 0.3,
+   "health": 0.03,
+   "education": 0.05,
+   "defence": 0.008,
+   "infra": 0.015,
+   "rnd": 0.007,
+   "deficit": 0.04,
+   "debt": 0.85,
+   "resourceRevenue": 0.01,
+   "foreignDebtShare": 0.5
+  },
+  "macro": {
+   "policyRate": 0.8,
+   "yield10": 0.5,
+   "inflation": 0.9,
+   "unemployment": 0.06,
+   "gini": 0.43,
+   "growthTrend": 0.02,
+   "currentAccount": -0.01,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.15
+  },
+  "demog": {
+   "young": 0.23,
+   "old": 0.12,
+   "fertility": 1.9,
+   "lifeExp": 76.0,
+   "participation": 0.7,
+   "migration": 0.5
+  },
+  "energy": {
+   "renewables": 0.12,
+   "emissionsMt": 190,
+   "netExportGdp": 0.0
+  },
+  "politics": {
+   "democracy": 0.75,
+   "corruption": 0.5,
+   "approval": 0.3
+  }
+ },
+ {
+  "id": "NGA",
+  "name": "Nigeria",
+  "currency": "NGN",
+  "region": "Africa",
+  "archetype": "resource",
+  "gov": "hybrid",
+  "fx": "managed",
+  "bloc": "none",
+  "lat": 9.1,
+  "lon": 8.7,
+  "popM": 224,
+  "gdpLcuBn": 270000,
+  "usdFx": 750,
+  "sectors": {
+   "agri": 0.22,
+   "energy": 0.07,
+   "manuf": 0.09,
+   "services": 0.5,
+   "finance": 0.04,
+   "public": 0.08
+  },
+  "demand": {
+   "cons": 0.78,
+   "inv": 0.17,
+   "gov": 0.06,
+   "exp": 0.12,
+   "imp": 0.13
+  },
+  "fiscal": {
+   "revenue": 0.09,
+   "health": 0.005,
+   "education": 0.01,
+   "defence": 0.005,
+   "infra": 0.01,
+   "rnd": 0.0005,
+   "deficit": 0.045,
+   "debt": 0.48,
+   "resourceRevenue": 0.45,
+   "foreignDebtShare": 0.45
+  },
+  "macro": {
+   "policyRate": 0.2,
+   "yield10": 0.17,
+   "inflation": 0.28,
+   "unemployment": 0.045,
+   "gini": 0.35,
+   "growthTrend": 0.03,
+   "currentAccount": 0.01,
+   "inflationTarget": 0.1,
+   "cbIndependence": 0.4
+  },
+  "demog": {
+   "young": 0.42,
+   "old": 0.03,
+   "fertility": 5.1,
+   "lifeExp": 54.0,
+   "participation": 0.58,
+   "migration": -0.2
+  },
+  "energy": {
+   "renewables": 0.18,
+   "emissionsMt": 120,
+   "netExportGdp": 0.08
+  },
+  "politics": {
+   "democracy": 0.45,
+   "corruption": 0.7,
+   "approval": 0.4
+  }
+ },
+ {
+  "id": "ZAF",
+  "name": "South Africa",
+  "currency": "ZAR",
+  "region": "Africa",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": -29.0,
+  "lon": 24.0,
+  "popM": 60,
+  "gdpLcuBn": 7030,
+  "usdFx": 18.5,
+  "sectors": {
+   "agri": 0.025,
+   "energy": 0.08,
+   "manuf": 0.12,
+   "services": 0.52,
+   "finance": 0.09,
+   "public": 0.165
+  },
+  "demand": {
+   "cons": 0.62,
+   "inv": 0.15,
+   "gov": 0.22,
+   "exp": 0.32,
+   "imp": 0.31
+  },
+  "fiscal": {
+   "revenue": 0.3,
+   "health": 0.045,
+   "education": 0.065,
+   "defence": 0.01,
+   "infra": 0.02,
+   "rnd": 0.008,
+   "deficit": 0.055,
+   "debt": 0.74,
+   "resourceRevenue": 0.05,
+   "foreignDebtShare": 0.2
+  },
+  "macro": {
+   "policyRate": 0.0825,
+   "yield10": 0.105,
+   "inflation": 0.052,
+   "unemployment": 0.32,
+   "gini": 0.63,
+   "growthTrend": 0.012,
+   "currentAccount": -0.025,
+   "inflationTarget": 0.045,
+   "cbIndependence": 0.75
+  },
+  "demog": {
+   "young": 0.28,
+   "old": 0.065,
+   "fertility": 2.2,
+   "lifeExp": 65.0,
+   "participation": 0.6,
+   "migration": 0.5
+  },
+  "energy": {
+   "renewables": 0.1,
+   "emissionsMt": 430,
+   "netExportGdp": -0.01
+  },
+  "politics": {
+   "democracy": 0.7,
+   "corruption": 0.55,
+   "approval": 0.35
+  }
+ },
+ {
+  "id": "MEX",
+  "name": "Mexico",
+  "currency": "MXN",
+  "region": "North America",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "USMCA",
+  "lat": 23.6,
+  "lon": -102.5,
+  "popM": 128,
+  "gdpLcuBn": 31700,
+  "usdFx": 17.7,
+  "sectors": {
+   "agri": 0.035,
+   "energy": 0.06,
+   "manuf": 0.2,
+   "services": 0.56,
+   "finance": 0.05,
+   "public": 0.095
+  },
+  "demand": {
+   "cons": 0.65,
+   "inv": 0.22,
+   "gov": 0.14,
+   "exp": 0.37,
+   "imp": 0.38
+  },
+  "fiscal": {
+   "revenue": 0.23,
+   "health": 0.025,
+   "education": 0.035,
+   "defence": 0.006,
+   "infra": 0.02,
+   "rnd": 0.003,
+   "deficit": 0.043,
+   "debt": 0.53,
+   "resourceRevenue": 0.12,
+   "foreignDebtShare": 0.3
+  },
+  "macro": {
+   "policyRate": 0.1125,
+   "yield10": 0.092,
+   "inflation": 0.045,
+   "unemployment": 0.027,
+   "gini": 0.45,
+   "growthTrend": 0.018,
+   "currentAccount": -0.012,
+   "inflationTarget": 0.03,
+   "cbIndependence": 0.8
+  },
+  "demog": {
+   "young": 0.24,
+   "old": 0.08,
+   "fertility": 1.8,
+   "lifeExp": 75.0,
+   "participation": 0.65,
+   "migration": -0.3
+  },
+  "energy": {
+   "renewables": 0.25,
+   "emissionsMt": 450,
+   "netExportGdp": 0.0
+  },
+  "politics": {
+   "democracy": 0.65,
+   "corruption": 0.62,
+   "approval": 0.5
+  }
+ },
+ {
+  "id": "IDN",
+  "name": "Indonesia",
+  "currency": "IDR",
+  "region": "Asia",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "ASEAN",
+  "lat": -2.5,
+  "lon": 118.0,
+  "popM": 277,
+  "gdpLcuBn": 20900000,
+  "usdFx": 15250,
+  "sectors": {
+   "agri": 0.12,
+   "energy": 0.1,
+   "manuf": 0.19,
+   "services": 0.43,
+   "finance": 0.05,
+   "public": 0.11
+  },
+  "demand": {
+   "cons": 0.58,
+   "inv": 0.29,
+   "gov": 0.11,
+   "exp": 0.22,
+   "imp": 0.2
+  },
+  "fiscal": {
+   "revenue": 0.145,
+   "health": 0.012,
+   "education": 0.025,
+   "defence": 0.007,
+   "infra": 0.03,
+   "rnd": 0.002,
+   "deficit": 0.021,
+   "debt": 0.39,
+   "resourceRevenue": 0.15,
+   "foreignDebtShare": 0.3
+  },
+  "macro": {
+   "policyRate": 0.06,
+   "yield10": 0.067,
+   "inflation": 0.026,
+   "unemployment": 0.052,
+   "gini": 0.38,
+   "growthTrend": 0.05,
+   "currentAccount": -0.001,
+   "inflationTarget": 0.025,
+   "cbIndependence": 0.7
+  },
+  "demog": {
+   "young": 0.25,
+   "old": 0.07,
+   "fertility": 2.15,
+   "lifeExp": 72.0,
+   "participation": 0.69,
+   "migration": -0.2
+  },
+  "energy": {
+   "renewables": 0.18,
+   "emissionsMt": 700,
+   "netExportGdp": 0.02
+  },
+  "politics": {
+   "democracy": 0.55,
+   "corruption": 0.62,
+   "approval": 0.6
+  }
+ },
+ {
+  "id": "TUR",
+  "name": "Turkey",
+  "currency": "TRY",
+  "region": "Europe",
+  "archetype": "emerging",
+  "gov": "hybrid",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 39.0,
+  "lon": 35.0,
+  "popM": 85,
+  "gdpLcuBn": 26500,
+  "usdFx": 23.8,
+  "sectors": {
+   "agri": 0.06,
+   "energy": 0.02,
+   "manuf": 0.19,
+   "services": 0.55,
+   "finance": 0.06,
+   "public": 0.12
+  },
+  "demand": {
+   "cons": 0.555,
+   "inv": 0.31,
+   "gov": 0.165,
+   "exp": 0.29,
+   "imp": 0.32
+  },
+  "fiscal": {
+   "revenue": 0.3,
+   "health": 0.03,
+   "education": 0.04,
+   "defence": 0.02,
+   "infra": 0.03,
+   "rnd": 0.006,
+   "deficit": 0.05,
+   "debt": 0.3,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.4
+  },
+  "macro": {
+   "policyRate": 0.45,
+   "yield10": 0.27,
+   "inflation": 0.6,
+   "unemployment": 0.09,
+   "gini": 0.42,
+   "growthTrend": 0.035,
+   "currentAccount": -0.04,
+   "inflationTarget": 0.05,
+   "cbIndependence": 0.25
+  },
+  "demog": {
+   "young": 0.23,
+   "old": 0.11,
+   "fertility": 1.65,
+   "lifeExp": 77.5,
+   "participation": 0.58,
+   "migration": 3.0
+  },
+  "energy": {
+   "renewables": 0.42,
+   "emissionsMt": 420,
+   "netExportGdp": -0.04
+  },
+  "politics": {
+   "democracy": 0.35,
+   "corruption": 0.55,
+   "approval": 0.35
+  }
+ },
+ {
+  "id": "KOR",
+  "name": "South Korea",
+  "currency": "KRW",
+  "region": "Asia",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 36.5,
+  "lon": 127.9,
+  "popM": 51.7,
+  "gdpLcuBn": 2320000,
+  "usdFx": 1305,
+  "sectors": {
+   "agri": 0.02,
+   "energy": 0.015,
+   "manuf": 0.27,
+   "services": 0.5,
+   "finance": 0.06,
+   "public": 0.135
+  },
+  "demand": {
+   "cons": 0.49,
+   "inv": 0.3,
+   "gov": 0.19,
+   "exp": 0.44,
+   "imp": 0.42
+  },
+  "fiscal": {
+   "revenue": 0.31,
+   "health": 0.045,
+   "education": 0.045,
+   "defence": 0.026,
+   "infra": 0.03,
+   "rnd": 0.01,
+   "deficit": 0.015,
+   "debt": 0.55,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.12
+  },
+  "macro": {
+   "policyRate": 0.035,
+   "yield10": 0.032,
+   "inflation": 0.036,
+   "unemployment": 0.027,
+   "gini": 0.33,
+   "growthTrend": 0.022,
+   "currentAccount": 0.018,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.85
+  },
+  "demog": {
+   "young": 0.11,
+   "old": 0.18,
+   "fertility": 0.8,
+   "lifeExp": 83.5,
+   "participation": 0.74,
+   "migration": 1.0
+  },
+  "energy": {
+   "renewables": 0.1,
+   "emissionsMt": 610,
+   "netExportGdp": -0.07
+  },
+  "politics": {
+   "democracy": 0.8,
+   "corruption": 0.35,
+   "approval": 0.3
+  }
+ },
+ {
+  "id": "AUS",
+  "name": "Australia",
+  "currency": "AUD",
+  "region": "Oceania",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": -25.3,
+  "lon": 133.8,
+  "popM": 26.5,
+  "gdpLcuBn": 2600,
+  "usdFx": 1.51,
+  "sectors": {
+   "agri": 0.025,
+   "energy": 0.11,
+   "manuf": 0.055,
+   "services": 0.585,
+   "finance": 0.08,
+   "public": 0.145
+  },
+  "demand": {
+   "cons": 0.44,
+   "inv": 0.26,
+   "gov": 0.27,
+   "exp": 0.25,
+   "imp": 0.22
+  },
+  "fiscal": {
+   "revenue": 0.36,
+   "health": 0.075,
+   "education": 0.05,
+   "defence": 0.02,
+   "infra": 0.03,
+   "rnd": 0.006,
+   "deficit": 0.015,
+   "debt": 0.36,
+   "resourceRevenue": 0.08,
+   "foreignDebtShare": 0.3
+  },
+  "macro": {
+   "policyRate": 0.0435,
+   "yield10": 0.04,
+   "inflation": 0.04,
+   "unemployment": 0.04,
+   "gini": 0.34,
+   "growthTrend": 0.02,
+   "currentAccount": 0.01,
+   "inflationTarget": 0.025,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.18,
+   "old": 0.17,
+   "fertility": 1.6,
+   "lifeExp": 83.3,
+   "participation": 0.78,
+   "migration": 9.0
+  },
+  "energy": {
+   "renewables": 0.38,
+   "emissionsMt": 380,
+   "netExportGdp": 0.05
+  },
+  "politics": {
+   "democracy": 0.9,
+   "corruption": 0.2,
+   "approval": 0.4
+  }
+ },
+ {
+  "id": "CAN",
+  "name": "Canada",
+  "currency": "CAD",
+  "region": "North America",
+  "archetype": "advanced",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "USMCA",
+  "lat": 56.1,
+  "lon": -106.3,
+  "popM": 40,
+  "gdpLcuBn": 2900,
+  "usdFx": 1.35,
+  "sectors": {
+   "agri": 0.017,
+   "energy": 0.08,
+   "manuf": 0.1,
+   "services": 0.6,
+   "finance": 0.075,
+   "public": 0.128
+  },
+  "demand": {
+   "cons": 0.525,
+   "inv": 0.23,
+   "gov": 0.245,
+   "exp": 0.33,
+   "imp": 0.33
+  },
+  "fiscal": {
+   "revenue": 0.4,
+   "health": 0.07,
+   "education": 0.05,
+   "defence": 0.013,
+   "infra": 0.03,
+   "rnd": 0.006,
+   "deficit": 0.015,
+   "debt": 1.05,
+   "resourceRevenue": 0.05,
+   "foreignDebtShare": 0.2
+  },
+  "macro": {
+   "policyRate": 0.05,
+   "yield10": 0.035,
+   "inflation": 0.032,
+   "unemployment": 0.058,
+   "gini": 0.31,
+   "growthTrend": 0.015,
+   "currentAccount": -0.01,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.16,
+   "old": 0.19,
+   "fertility": 1.33,
+   "lifeExp": 82.6,
+   "participation": 0.78,
+   "migration": 12.0
+  },
+  "energy": {
+   "renewables": 0.65,
+   "emissionsMt": 550,
+   "netExportGdp": 0.04
+  },
+  "politics": {
+   "democracy": 0.9,
+   "corruption": 0.12,
+   "approval": 0.4
+  }
+ },
+ {
+  "id": "EGY",
+  "name": "Egypt",
+  "currency": "EGP",
+  "region": "Africa",
+  "archetype": "emerging",
+  "gov": "autocracy",
+  "fx": "managed",
+  "bloc": "none",
+  "lat": 26.8,
+  "lon": 30.8,
+  "popM": 112,
+  "gdpLcuBn": 11000,
+  "usdFx": 31,
+  "sectors": {
+   "agri": 0.11,
+   "energy": 0.09,
+   "manuf": 0.15,
+   "services": 0.43,
+   "finance": 0.05,
+   "public": 0.17
+  },
+  "demand": {
+   "cons": 0.78,
+   "inv": 0.13,
+   "gov": 0.11,
+   "exp": 0.2,
+   "imp": 0.22
+  },
+  "fiscal": {
+   "revenue": 0.17,
+   "health": 0.01,
+   "education": 0.02,
+   "defence": 0.01,
+   "infra": 0.02,
+   "rnd": 0.0005,
+   "deficit": 0.07,
+   "debt": 0.88,
+   "resourceRevenue": 0.1,
+   "foreignDebtShare": 0.3
+  },
+  "macro": {
+   "policyRate": 0.2775,
+   "yield10": 0.27,
+   "inflation": 0.34,
+   "unemployment": 0.075,
+   "gini": 0.32,
+   "growthTrend": 0.04,
+   "currentAccount": -0.035,
+   "inflationTarget": 0.07,
+   "cbIndependence": 0.3
+  },
+  "demog": {
+   "young": 0.33,
+   "old": 0.05,
+   "fertility": 2.8,
+   "lifeExp": 70.5,
+   "participation": 0.47,
+   "migration": -0.2
+  },
+  "energy": {
+   "renewables": 0.1,
+   "emissionsMt": 250,
+   "netExportGdp": 0.0
+  },
+  "politics": {
+   "democracy": 0.15,
+   "corruption": 0.65,
+   "approval": 0.5
+  }
+ },
+ {
+  "id": "VNM",
+  "name": "Vietnam",
+  "currency": "VND",
+  "region": "Asia",
+  "archetype": "emerging",
+  "gov": "autocracy",
+  "fx": "managed",
+  "bloc": "ASEAN",
+  "lat": 16.0,
+  "lon": 106.0,
+  "popM": 99,
+  "gdpLcuBn": 10300000,
+  "usdFx": 24200,
+  "sectors": {
+   "agri": 0.12,
+   "energy": 0.06,
+   "manuf": 0.24,
+   "services": 0.4,
+   "finance": 0.05,
+   "public": 0.13
+  },
+  "demand": {
+   "cons": 0.56,
+   "inv": 0.32,
+   "gov": 0.13,
+   "exp": 0.85,
+   "imp": 0.86
+  },
+  "fiscal": {
+   "revenue": 0.19,
+   "health": 0.015,
+   "education": 0.035,
+   "defence": 0.015,
+   "infra": 0.03,
+   "rnd": 0.002,
+   "deficit": 0.035,
+   "debt": 0.37,
+   "resourceRevenue": 0.05,
+   "foreignDebtShare": 0.35
+  },
+  "macro": {
+   "policyRate": 0.045,
+   "yield10": 0.025,
+   "inflation": 0.037,
+   "unemployment": 0.022,
+   "gini": 0.36,
+   "growthTrend": 0.06,
+   "currentAccount": 0.04,
+   "inflationTarget": 0.04,
+   "cbIndependence": 0.5
+  },
+  "demog": {
+   "young": 0.24,
+   "old": 0.08,
+   "fertility": 1.95,
+   "lifeExp": 74.5,
+   "participation": 0.77,
+   "migration": 0.0
+  },
+  "energy": {
+   "renewables": 0.28,
+   "emissionsMt": 360,
+   "netExportGdp": 0.0
+  },
+  "politics": {
+   "democracy": 0.1,
+   "corruption": 0.55,
+   "approval": 0.7
+  }
+ },
+ {
+  "id": "POL",
+  "name": "Poland",
+  "currency": "PLN",
+  "region": "Europe",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "EU",
+  "lat": 52.0,
+  "lon": 19.1,
+  "popM": 37.7,
+  "gdpLcuBn": 3400,
+  "usdFx": 4.2,
+  "sectors": {
+   "agri": 0.025,
+   "energy": 0.04,
+   "manuf": 0.18,
+   "services": 0.56,
+   "finance": 0.04,
+   "public": 0.155
+  },
+  "demand": {
+   "cons": 0.59,
+   "inv": 0.18,
+   "gov": 0.21,
+   "exp": 0.56,
+   "imp": 0.54
+  },
+  "fiscal": {
+   "revenue": 0.42,
+   "health": 0.045,
+   "education": 0.05,
+   "defence": 0.04,
+   "infra": 0.03,
+   "rnd": 0.008,
+   "deficit": 0.055,
+   "debt": 0.49,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.35
+  },
+  "macro": {
+   "policyRate": 0.0575,
+   "yield10": 0.054,
+   "inflation": 0.05,
+   "unemployment": 0.029,
+   "gini": 0.27,
+   "growthTrend": 0.028,
+   "currentAccount": 0.016,
+   "inflationTarget": 0.025,
+   "cbIndependence": 0.7
+  },
+  "demog": {
+   "young": 0.15,
+   "old": 0.19,
+   "fertility": 1.3,
+   "lifeExp": 77.5,
+   "participation": 0.75,
+   "migration": 3.0
+  },
+  "energy": {
+   "renewables": 0.27,
+   "emissionsMt": 300,
+   "netExportGdp": -0.02
+  },
+  "politics": {
+   "democracy": 0.65,
+   "corruption": 0.38,
+   "approval": 0.35
+  }
+ },
+ {
+  "id": "CHL",
+  "name": "Chile",
+  "currency": "CLP",
+  "region": "South America",
+  "archetype": "emerging",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": -35.7,
+  "lon": -71.5,
+  "popM": 19.5,
+  "gdpLcuBn": 280000,
+  "usdFx": 840,
+  "sectors": {
+   "agri": 0.04,
+   "energy": 0.11,
+   "manuf": 0.09,
+   "services": 0.55,
+   "finance": 0.06,
+   "public": 0.15
+  },
+  "demand": {
+   "cons": 0.56,
+   "inv": 0.22,
+   "gov": 0.2,
+   "exp": 0.33,
+   "imp": 0.31
+  },
+  "fiscal": {
+   "revenue": 0.25,
+   "health": 0.045,
+   "education": 0.05,
+   "defence": 0.01,
+   "infra": 0.02,
+   "rnd": 0.004,
+   "deficit": 0.024,
+   "debt": 0.4,
+   "resourceRevenue": 0.12,
+   "foreignDebtShare": 0.35
+  },
+  "macro": {
+   "policyRate": 0.08,
+   "yield10": 0.055,
+   "inflation": 0.07,
+   "unemployment": 0.085,
+   "gini": 0.45,
+   "growthTrend": 0.022,
+   "currentAccount": -0.032,
+   "inflationTarget": 0.03,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.18,
+   "old": 0.13,
+   "fertility": 1.2,
+   "lifeExp": 80.5,
+   "participation": 0.65,
+   "migration": 4.0
+  },
+  "energy": {
+   "renewables": 0.55,
+   "emissionsMt": 85,
+   "netExportGdp": -0.02
+  },
+  "politics": {
+   "democracy": 0.8,
+   "corruption": 0.33,
+   "approval": 0.28
+  }
+ },
+ {
+  "id": "ETH",
+  "name": "Ethiopia",
+  "currency": "ETB",
+  "region": "Africa",
+  "archetype": "developing",
+  "gov": "hybrid",
+  "fx": "managed",
+  "bloc": "none",
+  "lat": 9.1,
+  "lon": 40.5,
+  "popM": 126,
+  "gdpLcuBn": 8600,
+  "usdFx": 55,
+  "sectors": {
+   "agri": 0.35,
+   "energy": 0.02,
+   "manuf": 0.07,
+   "services": 0.38,
+   "finance": 0.03,
+   "public": 0.15
+  },
+  "demand": {
+   "cons": 0.77,
+   "inv": 0.25,
+   "gov": 0.07,
+   "exp": 0.08,
+   "imp": 0.17
+  },
+  "fiscal": {
+   "revenue": 0.1,
+   "health": 0.006,
+   "education": 0.015,
+   "defence": 0.004,
+   "infra": 0.018,
+   "rnd": 0.0005,
+   "deficit": 0.03,
+   "debt": 0.55,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.6
+  },
+  "macro": {
+   "policyRate": 0.15,
+   "yield10": 0.17,
+   "inflation": 0.3,
+   "unemployment": 0.04,
+   "gini": 0.35,
+   "growthTrend": 0.06,
+   "currentAccount": -0.03,
+   "inflationTarget": 0.08,
+   "cbIndependence": 0.3
+  },
+  "demog": {
+   "young": 0.39,
+   "old": 0.03,
+   "fertility": 4.0,
+   "lifeExp": 67.0,
+   "participation": 0.78,
+   "migration": -0.1
+  },
+  "energy": {
+   "renewables": 0.9,
+   "emissionsMt": 12,
+   "netExportGdp": -0.03
+  },
+  "politics": {
+   "democracy": 0.2,
+   "corruption": 0.6,
+   "approval": 0.45
+  }
+ },
+ {
+  "id": "ARE",
+  "name": "United Arab Emirates",
+  "currency": "AED",
+  "region": "Middle East",
+  "archetype": "resource",
+  "gov": "autocracy",
+  "fx": "peg",
+  "bloc": "GCC",
+  "lat": 24.3,
+  "lon": 54.4,
+  "popM": 10,
+  "gdpLcuBn": 1800,
+  "usdFx": 3.67,
+  "sectors": {
+   "agri": 0.01,
+   "energy": 0.25,
+   "manuf": 0.09,
+   "services": 0.46,
+   "finance": 0.07,
+   "public": 0.12
+  },
+  "demand": {
+   "cons": 0.42,
+   "inv": 0.22,
+   "gov": 0.16,
+   "exp": 0.95,
+   "imp": 0.75
+  },
+  "fiscal": {
+   "revenue": 0.3,
+   "health": 0.02,
+   "education": 0.025,
+   "defence": 0.05,
+   "infra": 0.02,
+   "rnd": 0.008,
+   "deficit": -0.02,
+   "debt": 0.3,
+   "resourceRevenue": 0.35,
+   "foreignDebtShare": 0.3
+  },
+  "macro": {
+   "policyRate": 0.05,
+   "yield10": 0.045,
+   "inflation": 0.03,
+   "unemployment": 0.028,
+   "gini": 0.35,
+   "growthTrend": 0.035,
+   "currentAccount": 0.075,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.4
+  },
+  "demog": {
+   "young": 0.15,
+   "old": 0.02,
+   "fertility": 1.4,
+   "lifeExp": 79.0,
+   "participation": 0.88,
+   "migration": 25.0
+  },
+  "energy": {
+   "renewables": 0.08,
+   "emissionsMt": 170,
+   "netExportGdp": 0.2
+  },
+  "politics": {
+   "democracy": 0.2,
+   "corruption": 0.3,
+   "approval": 0.75
+  }
+ },
+ {
+  "id": "CHE",
+  "name": "Switzerland",
+  "currency": "CHF",
+  "region": "Europe",
+  "archetype": "hub",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 46.8,
+  "lon": 8.2,
+  "popM": 8.8,
+  "gdpLcuBn": 800,
+  "usdFx": 0.9,
+  "sectors": {
+   "agri": 0.007,
+   "energy": 0.01,
+   "manuf": 0.185,
+   "services": 0.58,
+   "finance": 0.095,
+   "public": 0.123
+  },
+  "demand": {
+   "cons": 0.485,
+   "inv": 0.24,
+   "gov": 0.125,
+   "exp": 0.7,
+   "imp": 0.55
+  },
+  "fiscal": {
+   "revenue": 0.33,
+   "health": 0.02,
+   "education": 0.045,
+   "defence": 0.007,
+   "infra": 0.02,
+   "rnd": 0.006,
+   "deficit": 0.0,
+   "debt": 0.38,
+   "resourceRevenue": 0.0,
+   "foreignDebtShare": 0.25
+  },
+  "macro": {
+   "policyRate": 0.0175,
+   "yield10": 0.01,
+   "inflation": 0.013,
+   "unemployment": 0.04,
+   "gini": 0.33,
+   "growthTrend": 0.012,
+   "currentAccount": 0.08,
+   "inflationTarget": 0.015,
+   "cbIndependence": 0.95
+  },
+  "demog": {
+   "young": 0.14,
+   "old": 0.2,
+   "fertility": 1.3,
+   "lifeExp": 84.0,
+   "participation": 0.84,
+   "migration": 9.0
+  },
+  "energy": {
+   "renewables": 0.72,
+   "emissionsMt": 38,
+   "netExportGdp": -0.02
+  },
+  "politics": {
+   "democracy": 0.95,
+   "corruption": 0.12,
+   "approval": 0.5
+  }
+ },
+ {
+  "id": "NOR",
+  "name": "Norway",
+  "currency": "NOK",
+  "region": "Europe",
+  "archetype": "resource",
+  "gov": "democracy",
+  "fx": "float",
+  "bloc": "none",
+  "lat": 61.0,
+  "lon": 8.5,
+  "popM": 5.5,
+  "gdpLcuBn": 5100,
+  "usdFx": 10.5,
+  "sectors": {
+   "agri": 0.015,
+   "energy": 0.2,
+   "manuf": 0.075,
+   "services": 0.54,
+   "finance": 0.03,
+   "public": 0.14
+  },
+  "demand": {
+   "cons": 0.4,
+   "inv": 0.24,
+   "gov": 0.24,
+   "exp": 0.55,
+   "imp": 0.43
+  },
+  "fiscal": {
+   "revenue": 0.55,
+   "health": 0.08,
+   "education": 0.06,
+   "defence": 0.018,
+   "infra": 0.03,
+   "rnd": 0.008,
+   "deficit": -0.02,
+   "debt": 0.4,
+   "resourceRevenue": 0.3,
+   "foreignDebtShare": 0.25
+  },
+  "macro": {
+   "policyRate": 0.045,
+   "yield10": 0.037,
+   "inflation": 0.045,
+   "unemployment": 0.036,
+   "gini": 0.27,
+   "growthTrend": 0.012,
+   "currentAccount": 0.15,
+   "inflationTarget": 0.02,
+   "cbIndependence": 0.9
+  },
+  "demog": {
+   "young": 0.16,
+   "old": 0.21,
+   "fertility": 1.4,
+   "lifeExp": 83.2,
+   "participation": 0.78,
+   "migration": 6.0
+  },
+  "energy": {
+   "renewables": 0.98,
+   "emissionsMt": 40,
+   "netExportGdp": 0.22
+  },
+  "politics": {
+   "democracy": 0.95,
+   "corruption": 0.1,
+   "approval": 0.45
+  }
+ }
+]

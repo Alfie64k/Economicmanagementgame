@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\data\countries.json" LogicalName="data/countries.json" />
+    <EmbeddedResource Include="..\..\data\policies.json" LogicalName="data/policies.json" />
+    <EmbeddedResource Include="..\..\data\events.json" LogicalName="data/events.json" />
+  </ItemGroup>
+
+</Project>
