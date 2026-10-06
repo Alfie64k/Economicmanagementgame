@@ -18,6 +18,7 @@ public sealed class World
     public string PlayerId = "";
     public bool Stochastic = true;
     public bool RecordHistory = true;
+    public bool Advisors = true;
     public List<CountryState> Countries = new();
     public Rng[] CountryRng = Array.Empty<Rng>();
     public Rng WorldRng = new();
@@ -26,6 +27,9 @@ public sealed class World
     public double WorldCycle;               // OU deviation in world demand growth
     public Dictionary<string, List<HistoryPoint>> History = new();
     public List<LogEntry> Log = new();
+    public List<LoggedCommand> CommandLog = new();
+    public Dictionary<string, int> AdvisorLast = new();
+    public List<Command> Queue = new();      // commands waiting for the next tick boundary
 
     public int Year => StartYear + Month / 12;
     public int MonthOfYear => Month % 12 + 1;
@@ -41,4 +45,34 @@ public sealed class LogEntry
     public string Country = "";
     public string Kind = "";    // news | policy | event | crisis | advisor
     public string Text = "";
+}
+
+public sealed class LoggedCommand
+{
+    public int Month;
+    public Command Cmd = new();
+    public bool Ok;
+    public string Message = "";
+}
+
+/// <summary>Serialisable player action. All state changes by the player go through these so games can be replayed from seed + log.</summary>
+public sealed class Command
+{
+    public string Type = "";
+    public string Country = "";
+    public string Id = "";
+    public double Value, Value2;
+
+    public static Command SetTax(string country, Tax t, double rate) => new() { Type = "tax", Country = country, Id = t.ToString(), Value = rate };
+    public static Command SetBudget(string country, BudgetLine l, double share) => new() { Type = "budget", Country = country, Id = l.ToString(), Value = share };
+    public static Command SetRate(string country, bool manual, double rate) => new() { Type = "rate", Country = country, Id = manual ? "Manual" : "Auto", Value = rate };
+    public static Command SetMinWage(string country, double ratio) => new() { Type = "minwage", Country = country, Value = ratio };
+    public static Command SetFxRegime(string country, FxRegime r) => new() { Type = "fxregime", Country = country, Id = r.ToString() };
+    public static Command Enact(string country, string policyId) => new() { Type = "enact", Country = country, Id = policyId };
+    public static Command Repeal(string country, string policyId) => new() { Type = "repeal", Country = country, Id = policyId };
+    public static Command StartProject(string country, string projectId, double scale = 1.0) => new() { Type = "project", Country = country, Id = projectId, Value = scale };
+    public static Command CancelProject(string country, int index) => new() { Type = "cancelproject", Country = country, Value = index };
+    public static Command SetSubsidy(string country, Sector s, double share) => new() { Type = "subsidy", Country = country, Id = s.ToString(), Value = share };
+    public static Command SetCarbon(string country, double price) => new() { Type = "carbon", Country = country, Value = price };
+    public static Command Autopilot(string country, bool on) => new() { Type = "autopilot", Country = country, Id = on ? "on" : "off" };
 }

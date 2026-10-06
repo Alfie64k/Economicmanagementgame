@@ -2,6 +2,32 @@ using System.Text.Json.Serialization;
 
 namespace Sim.Core.Model;
 
+/// <summary>A policy the government has enacted (possibly still waiting to take effect).</summary>
+public sealed class ActivePolicy
+{
+    public string Id = "";
+    public int EnactedMonth, ActivationMonth;
+    public bool Active;
+    public bool Failed;       // vote lost in the legislature
+}
+
+/// <summary>A public investment project in the build pipeline (or completed and being maintained).</summary>
+public sealed class Project
+{
+    public string Id = "", Asset = "";
+    public double Total;            // planned cost (real LCU)
+    public int PlannedMonths;
+    public double Overrun = 1.0;    // hidden cost multiplier
+    public double Delay = 1.0;      // hidden schedule multiplier
+    public double Elapsed;          // months
+    public double Spent;
+    public double Bonus, MaintRate;
+    public bool Done;
+    public int StartMonth;
+    public double ActualMonths => PlannedMonths * Delay;
+}
+
+
 /// <summary>
 /// Full dynamic state of one country. Real quantities are in base-year LCU billions (annualised flows),
 /// prices are an index (1.0 at start), debt is nominal LCU billions. Public fields so the whole thing serialises as-is.
@@ -109,6 +135,12 @@ public sealed class CountryState
     public bool InDefault;
     public int CrisisMonths;
     public string Status = "";
+
+    // ---- policies & projects ----
+    public List<ActivePolicy> Policies = new();
+    public List<Project> Projects = new();
+    public double[] AssetBoost = new double[Dim.Assets];   // permanent boost from completed projects
+    public double ProjectFlow, MaintFlow, SubsidyCost;     // annualised real flows
 
     // ---- policy modifiers (ramped), see PolicyCatalog ----
     public Dictionary<string, double> Mods = new();

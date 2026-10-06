@@ -44,7 +44,7 @@ public static class MacroEngine
         for (int a = 0; a < Dim.Assets; a++)
         {
             int l = (int)Dim.LineOf((Asset)a);
-            double target = c.Budget0[l] > 1e-6 ? c.Budget[l] / c.Budget0[l] * corr : 1.0;
+            double target = (c.Budget0[l] > 1e-6 ? c.Budget[l] / c.Budget0[l] * corr : 1.0) + c.AssetBoost[a];
             target = Maths.Clamp(target, 0.05, 4.0);
             c.AssetIdx[a] += (target - c.AssetIdx[a]) * AssetRate[a] * dt;
         }
@@ -119,6 +119,8 @@ public static class MacroEngine
             govInv += Dim.CapitalFraction[l] * amt;
             govCons += (1 - Dim.CapitalFraction[l]) * amt;
         }
+        govInv += c.ProjectFlow + c.MaintFlow;
+        govCons += c.SubsidyCost;
         c.GovCons = govCons; c.GovInv = govInv;
 
         // external demand

@@ -1,1 +1,1054 @@
-[]
+{
+ "policies": [
+  {
+   "id": "labour_flex",
+   "name": "Labour market flexibility",
+   "category": "labour",
+   "desc": "Easier hiring and firing, weaker employment protection. Lowers structural unemployment and lifts productivity but widens inequality.",
+   "pc": 25,
+   "delay": 6,
+   "mods": {
+    "nairu": -0.012,
+    "tfp": 0.001,
+    "gini": 0.012,
+    "approval": -0.03
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": -0.02,
+   "group": "labour_rules",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "union_rights",
+   "name": "Strengthen collective bargaining",
+   "category": "labour",
+   "desc": "Stronger unions and sectoral bargaining. Compresses wages and inequality at some cost to flexibility.",
+   "pc": 20,
+   "delay": 6,
+   "mods": {
+    "nairu": 0.006,
+    "gini": -0.015,
+    "tfp": -0.0005,
+    "approval": 0.02
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.01,
+   "group": "labour_rules",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "apprenticeships",
+   "name": "National apprenticeship scheme",
+   "category": "labour",
+   "desc": "Employer-linked skills programme: lower mismatch unemployment, higher productivity.",
+   "pc": 10,
+   "delay": 9,
+   "mods": {
+    "tfp": 0.0008,
+    "nairu": -0.004
+   },
+   "budget": {
+    "Education": 0.004
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "active_labour",
+   "name": "Active labour market programmes",
+   "category": "welfare",
+   "desc": "Job-search support and retraining.",
+   "pc": 12,
+   "delay": 6,
+   "mods": {
+    "nairu": -0.005,
+    "approval": 0.01
+   },
+   "budget": {
+    "Social": 0.004
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "fta_network",
+   "name": "Free-trade agreement network",
+   "category": "trade",
+   "desc": "Negotiate preferential access to major markets: exports, imports and FDI rise; import-competing sectors protest.",
+   "pc": 20,
+   "delay": 12,
+   "mods": {
+    "export": 0.06,
+    "import": 0.04,
+    "fdi": 0.05,
+    "approval": -0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "trade_stance",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "import_substitution",
+   "name": "Import-substitution strategy",
+   "category": "trade",
+   "desc": "Shelter domestic industry behind barriers. Short-run protection, long-run productivity drag and higher prices.",
+   "pc": 20,
+   "delay": 6,
+   "mods": {
+    "import": -0.08,
+    "export": -0.03,
+    "tfp": -0.001,
+    "inflation": 0.005,
+    "approval": 0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "trade_stance",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "export_credit",
+   "name": "Export credit agency",
+   "category": "trade",
+   "desc": "Subsidised export finance and trade missions.",
+   "pc": 10,
+   "delay": 6,
+   "mods": {
+    "export": 0.05
+   },
+   "budget": {
+    "Admin": 0.003
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "fdi_incentives",
+   "name": "FDI incentive package",
+   "category": "trade",
+   "desc": "Tax holidays and fast-track permitting for foreign investors.",
+   "pc": 15,
+   "delay": 4,
+   "mods": {
+    "fdi": 0.25,
+    "approval": -0.01,
+    "gini": 0.004
+   },
+   "budget": {
+    "Admin": 0.002
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "sez",
+   "name": "Special economic zones",
+   "category": "industrial",
+   "desc": "Zones with light-touch regulation and infrastructure; attract investment and cluster manufacturing.",
+   "pc": 18,
+   "delay": 12,
+   "mods": {
+    "fdi": 0.15,
+    "tfp": 0.0005,
+    "gini": 0.005
+   },
+   "budget": {
+    "Infrastructure": 0.003
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "anti_corruption",
+   "name": "Anti-corruption commission",
+   "category": "institutions",
+   "desc": "Independent prosecutors and transparency rules. Slow burn: reduces leakage, raises trust and FDI.",
+   "pc": 30,
+   "delay": 12,
+   "mods": {
+    "corruption": -0.006,
+    "approval": 0.02,
+    "fdi": 0.05,
+    "polcap": -0.2
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": -0.01,
+   "group": "",
+   "minDemocracy": 0.25,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "judicial_reform",
+   "name": "Judicial independence reform",
+   "category": "institutions",
+   "desc": "Stronger courts and contract enforcement. Boosts credibility and investment.",
+   "pc": 25,
+   "delay": 18,
+   "mods": {
+    "credibility": 0.1,
+    "fdi": 0.1,
+    "stability": 0.03,
+    "invest": 0.02
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.2,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "cb_independence",
+   "name": "Central bank independence",
+   "category": "monetary",
+   "desc": "Legislate operational independence and an inflation mandate. Anchors expectations; removes your ability to lean on policy.",
+   "pc": 25,
+   "delay": 6,
+   "mods": {
+    "credibility": 0.25,
+    "risk": -0.004
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "fiscal_rule",
+   "name": "Binding fiscal rule",
+   "category": "fiscal",
+   "desc": "Statutory debt/deficit rule with an independent fiscal council. Lowers risk premia, constrains discretion.",
+   "pc": 25,
+   "delay": 12,
+   "mods": {
+    "risk": -0.006,
+    "credibility": 0.08,
+    "approval": -0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "pension_age",
+   "name": "Raise retirement age",
+   "category": "welfare",
+   "desc": "Link retirement age to life expectancy. Raises participation and trims long-run pension costs; politically toxic.",
+   "pc": 35,
+   "delay": 12,
+   "mods": {
+    "participation": 0.02,
+    "approval": -0.05,
+    "unrest": 0.02
+   },
+   "budget": {
+    "Social": -0.005
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": -0.04,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "ubi",
+   "name": "Universal basic income",
+   "category": "welfare",
+   "desc": "Unconditional payment to all adults. Cuts inequality and boosts approval; expensive and mildly raises reservation wages.",
+   "pc": 30,
+   "delay": 12,
+   "mods": {
+    "gini": -0.04,
+    "nairu": 0.005,
+    "approval": 0.05,
+    "savings": -0.01
+   },
+   "budget": {
+    "Social": 0.04
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.03,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "childcare",
+   "name": "Universal childcare",
+   "category": "welfare",
+   "desc": "Subsidised childcare: higher female participation, slightly higher fertility.",
+   "pc": 15,
+   "delay": 12,
+   "mods": {
+    "fertility": 0.15,
+    "participation": 0.015,
+    "approval": 0.02
+   },
+   "budget": {
+    "Social": 0.005
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "open_immigration",
+   "name": "Skills-led immigration expansion",
+   "category": "immigration",
+   "desc": "Points-based system and higher quotas. Lifts labour supply and productivity; fiscal gains over time, short-run political friction.",
+   "pc": 25,
+   "delay": 6,
+   "mods": {
+    "migration": 0.8,
+    "tfp": 0.0005,
+    "gini": 0.003,
+    "approval": -0.03
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": -0.02,
+   "group": "immigration",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "restrict_immigration",
+   "name": "Tighter immigration controls",
+   "category": "immigration",
+   "desc": "Cut net migration. Popular with some voters; shrinks labour supply growth.",
+   "pc": 20,
+   "delay": 6,
+   "mods": {
+    "migration": -0.7,
+    "tfp": -0.0004,
+    "approval": 0.02
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.01,
+   "group": "immigration",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "carbon_tax_50",
+   "name": "Carbon price (50 per tonne)",
+   "category": "environment",
+   "desc": "Economy-wide carbon price at 50 USD/t. Cuts emissions and raises revenue; raises energy prices.",
+   "pc": 20,
+   "delay": 6,
+   "mods": {
+    "approval": -0.02,
+    "revenue": 0.004
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": 50,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "carbon",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "carbon_tax_100",
+   "name": "Carbon price (100 per tonne)",
+   "category": "environment",
+   "desc": "Aggressive carbon price at 100 USD/t.",
+   "pc": 30,
+   "delay": 6,
+   "mods": {
+    "approval": -0.04,
+    "revenue": 0.008,
+    "unrest": 0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": 100,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "carbon",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "renewables_subsidy",
+   "name": "Renewables feed-in tariffs",
+   "category": "environment",
+   "desc": "Guaranteed prices for wind and solar. Accelerates the energy transition.",
+   "pc": 15,
+   "delay": 6,
+   "mods": {
+    "renewables": 0.006
+   },
+   "budget": {
+    "Green": 0.004
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "nuclear_programme",
+   "name": "New nuclear programme",
+   "category": "environment",
+   "desc": "Fleet of reactors: reliable low-carbon baseload with long lead times and cost-overrun risk.",
+   "pc": 30,
+   "delay": 24,
+   "mods": {
+    "renewables": 0.003,
+    "emissions": -0.05
+   },
+   "budget": {
+    "Green": 0.003
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "fossil_subsidies",
+   "name": "Fuel price subsidies",
+   "category": "environment",
+   "desc": "Cap pump prices. Popular and anti-inflationary; fiscally costly and pollutive.",
+   "pc": 10,
+   "delay": 1,
+   "mods": {
+    "inflation": -0.004,
+    "emissions": 0.08,
+    "approval": 0.02
+   },
+   "budget": {
+    "Admin": 0.01
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.02,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "deregulation",
+   "name": "Broad deregulation",
+   "category": "industrial",
+   "desc": "Cut licensing and red tape. Lifts investment and productivity; weaker consumer and worker protections.",
+   "pc": 20,
+   "delay": 9,
+   "mods": {
+    "tfp": 0.0012,
+    "invest": 0.04,
+    "gini": 0.005,
+    "stability": -0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "competition_policy",
+   "name": "Competition authority",
+   "category": "industrial",
+   "desc": "Strengthen merger control and market opening.",
+   "pc": 12,
+   "delay": 12,
+   "mods": {
+    "tfp": 0.0008,
+    "inflation": -0.002,
+    "approval": 0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "privatisation",
+   "name": "Privatisation programme",
+   "category": "ownership",
+   "desc": "Sell state enterprises. One-off proceeds and efficiency gains; job losses and unrest risk.",
+   "pc": 30,
+   "delay": 9,
+   "mods": {
+    "tfp": 0.0008,
+    "unrest": 0.02,
+    "approval": -0.03,
+    "gini": 0.004
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.04,
+   "approvalShock": -0.03,
+   "group": "ownership",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "nationalise_strategic",
+   "name": "Nationalise strategic industries",
+   "category": "ownership",
+   "desc": "Take utilities and key industries into public hands. Control and jobs, at fiscal and efficiency cost.",
+   "pc": 30,
+   "delay": 9,
+   "mods": {
+    "tfp": -0.001,
+    "approval": 0.02,
+    "invest": -0.02,
+    "risk": 0.004
+   },
+   "budget": {
+    "Admin": 0.01
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": -0.03,
+   "approvalShock": 0.0,
+   "group": "ownership",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "industrial_manufacturing",
+   "name": "Manufacturing industrial strategy",
+   "category": "industrial",
+   "desc": "Targeted subsidies and procurement for manufacturing clusters.",
+   "pc": 20,
+   "delay": 9,
+   "mods": {
+    "tfp": 0.0003
+   },
+   "budget": {
+    "Admin": 0.004
+   },
+   "subsidy": {
+    "Manufacturing": 0.04
+   },
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "industrial_green",
+   "name": "Green industrial strategy",
+   "category": "industrial",
+   "desc": "Subsidies for clean-tech manufacturing and grid build-out.",
+   "pc": 20,
+   "delay": 9,
+   "mods": {
+    "tfp": 0.0003,
+    "renewables": 0.002
+   },
+   "budget": {
+    "Admin": 0.004
+   },
+   "subsidy": {
+    "Energy": 0.03
+   },
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "industrial_services",
+   "name": "Digital services strategy",
+   "category": "industrial",
+   "desc": "Support for software, fintech and business services exports.",
+   "pc": 15,
+   "delay": 9,
+   "mods": {
+    "tfp": 0.0004,
+    "export": 0.02
+   },
+   "budget": {
+    "Digital": 0.002
+   },
+   "subsidy": {
+    "Services": 0.02
+   },
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "agri_support",
+   "name": "Agricultural support scheme",
+   "category": "industrial",
+   "desc": "Price floors and input subsidies. Protects rural incomes; distorts markets.",
+   "pc": 12,
+   "delay": 6,
+   "mods": {
+    "approval": 0.01,
+    "tfp": -0.0002
+   },
+   "budget": {
+    "Admin": 0.005
+   },
+   "subsidy": {
+    "Agriculture": 0.05
+   },
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "rnd_tax_credits",
+   "name": "R&D tax credits",
+   "category": "industrial",
+   "desc": "Generous credits for private research.",
+   "pc": 12,
+   "delay": 6,
+   "mods": {
+    "tfp": 0.0008
+   },
+   "budget": {
+    "RnD": 0.003
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "housing_reform",
+   "name": "Planning and housing supply reform",
+   "category": "welfare",
+   "desc": "Liberalise planning rules to build more homes.",
+   "pc": 20,
+   "delay": 12,
+   "mods": {
+    "gini": -0.01,
+    "approval": 0.02,
+    "invest": 0.02
+   },
+   "budget": {
+    "Housing": 0.003
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "capital_controls",
+   "name": "Capital flow management",
+   "category": "monetary",
+   "desc": "Curb hot money. Reduces crisis risk premia; deters FDI.",
+   "pc": 25,
+   "delay": 3,
+   "mods": {
+    "risk": -0.01,
+    "fdi": -0.15,
+    "approval": -0.01
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "capital",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "wealth_tax",
+   "name": "Annual wealth tax",
+   "category": "fiscal",
+   "desc": "Levy on top fortunes. Reduces inequality, raises modest revenue, risks capital flight.",
+   "pc": 30,
+   "delay": 12,
+   "mods": {
+    "gini": -0.02,
+    "invest": -0.03,
+    "revenue": 0.005,
+    "approval": 0.01,
+    "fdi": -0.05
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.01,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "tax_compliance",
+   "name": "Digital tax compliance drive",
+   "category": "fiscal",
+   "desc": "E-invoicing and data matching to shrink the informal economy and evasion.",
+   "pc": 15,
+   "delay": 12,
+   "mods": {
+    "revenue": 0.006,
+    "corruption": -0.002
+   },
+   "budget": {
+    "Digital": 0.001
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "universal_healthcare",
+   "name": "Universal healthcare expansion",
+   "category": "welfare",
+   "desc": "Extend free care at point of use. Healthier workforce and happier voters; large permanent cost.",
+   "pc": 30,
+   "delay": 18,
+   "mods": {
+    "approval": 0.04,
+    "lifeexp": 2.0
+   },
+   "budget": {
+    "Health": 0.015
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.03,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "student_loans",
+   "name": "Graduate tax and student finance",
+   "category": "welfare",
+   "desc": "Shift higher education cost to graduates.",
+   "pc": 15,
+   "delay": 9,
+   "mods": {
+    "approval": -0.01,
+    "tfp": 0.0002
+   },
+   "budget": {
+    "Education": -0.003
+   },
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "inflation_targeting",
+   "name": "Formal inflation-targeting regime",
+   "category": "monetary",
+   "desc": "Publish a target and forecasts, accountability to parliament.",
+   "pc": 15,
+   "delay": 6,
+   "mods": {
+    "credibility": 0.15
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  },
+  {
+   "id": "sovereign_fund",
+   "name": "Sovereign wealth fund",
+   "category": "fiscal",
+   "desc": "Save part of resource windfalls abroad. Smooths booms and busts.",
+   "pc": 20,
+   "delay": 12,
+   "mods": {
+    "risk": -0.004,
+    "revenue": -0.002,
+    "credibility": 0.05
+   },
+   "budget": {},
+   "subsidy": {},
+   "carbon": null,
+   "oneOffRevenue": 0.0,
+   "approvalShock": 0.0,
+   "group": "",
+   "minDemocracy": 0.0,
+   "maxDemocracy": 1.0
+  }
+ ],
+ "projects": [
+  {
+   "id": "hsr",
+   "name": "High-speed rail network",
+   "asset": "Infrastructure",
+   "cost": 0.04,
+   "months": 84,
+   "bonus": 0.12,
+   "pc": 15,
+   "maint": 0.03,
+   "desc": "Flagship intercity rail. Long build, big overrun risk, large productivity payoff."
+  },
+  {
+   "id": "motorways",
+   "name": "Motorway and trunk-road programme",
+   "asset": "Infrastructure",
+   "cost": 0.02,
+   "months": 48,
+   "bonus": 0.07,
+   "pc": 8,
+   "maint": 0.04,
+   "desc": "Road capacity and freight corridors."
+  },
+  {
+   "id": "ports",
+   "name": "Ports and logistics hubs",
+   "asset": "Infrastructure",
+   "cost": 0.015,
+   "months": 48,
+   "bonus": 0.06,
+   "pc": 8,
+   "maint": 0.03,
+   "desc": "Deep-water ports and inland freight terminals; lifts trade capacity."
+  },
+  {
+   "id": "metro",
+   "name": "Urban metro systems",
+   "asset": "Infrastructure",
+   "cost": 0.015,
+   "months": 60,
+   "bonus": 0.05,
+   "pc": 10,
+   "maint": 0.04,
+   "desc": "City rail to raise labour-market pooling."
+  },
+  {
+   "id": "grid",
+   "name": "National grid modernisation",
+   "asset": "Green",
+   "cost": 0.02,
+   "months": 48,
+   "bonus": 0.12,
+   "pc": 10,
+   "maint": 0.03,
+   "desc": "Interconnectors, storage and smart grids that unlock renewables."
+  },
+  {
+   "id": "wind_solar",
+   "name": "Utility-scale wind and solar",
+   "asset": "Green",
+   "cost": 0.03,
+   "months": 48,
+   "bonus": 0.2,
+   "pc": 10,
+   "maint": 0.025,
+   "desc": "Large renewable build-out."
+  },
+  {
+   "id": "nuclear_plants",
+   "name": "Nuclear power stations",
+   "asset": "Green",
+   "cost": 0.05,
+   "months": 96,
+   "bonus": 0.15,
+   "pc": 20,
+   "maint": 0.03,
+   "desc": "Baseload low-carbon capacity; notorious overruns."
+  },
+  {
+   "id": "broadband",
+   "name": "National full-fibre broadband",
+   "asset": "Digital",
+   "cost": 0.015,
+   "months": 36,
+   "bonus": 0.15,
+   "pc": 8,
+   "maint": 0.04,
+   "desc": "Gigabit access for homes and firms."
+  },
+  {
+   "id": "datacentres",
+   "name": "Sovereign cloud and compute",
+   "asset": "Digital",
+   "cost": 0.01,
+   "months": 30,
+   "bonus": 0.1,
+   "pc": 8,
+   "maint": 0.05,
+   "desc": "Public compute capacity and data infrastructure."
+  },
+  {
+   "id": "schools",
+   "name": "School building programme",
+   "asset": "Education",
+   "cost": 0.02,
+   "months": 48,
+   "bonus": 0.1,
+   "pc": 8,
+   "maint": 0.03,
+   "desc": "New and refurbished schools."
+  },
+  {
+   "id": "universities",
+   "name": "University and technical colleges",
+   "asset": "Education",
+   "cost": 0.015,
+   "months": 48,
+   "bonus": 0.08,
+   "pc": 8,
+   "maint": 0.03,
+   "desc": "Capacity for higher and technical education."
+  },
+  {
+   "id": "hospitals",
+   "name": "Hospital building programme",
+   "asset": "Health",
+   "cost": 0.02,
+   "months": 48,
+   "bonus": 0.1,
+   "pc": 8,
+   "maint": 0.04,
+   "desc": "New hospitals and primary-care centres."
+  },
+  {
+   "id": "housing_estates",
+   "name": "Public housing estates",
+   "asset": "Housing",
+   "cost": 0.025,
+   "months": 48,
+   "bonus": 0.15,
+   "pc": 10,
+   "maint": 0.03,
+   "desc": "Affordable homes in high-demand areas."
+  },
+  {
+   "id": "research_campuses",
+   "name": "National research campuses",
+   "asset": "RnD",
+   "cost": 0.015,
+   "months": 48,
+   "bonus": 0.15,
+   "pc": 10,
+   "maint": 0.04,
+   "desc": "Flagship labs and science parks."
+  },
+  {
+   "id": "defence_procurement",
+   "name": "Defence modernisation",
+   "asset": "Defence",
+   "cost": 0.03,
+   "months": 60,
+   "bonus": 0.15,
+   "pc": 12,
+   "maint": 0.05,
+   "desc": "Capital equipment and bases."
+  }
+ ]
+}

@@ -49,7 +49,7 @@ public static class SocietyEngine
                          + 0.6 * Math.Max(0, c.Inflation - 0.10) + 0.6 * Math.Max(0, 0.4 - c.Approval) + c.Mod("unrest");
         c.Unrest += (Maths.Clamp(unrestT, 0, 1) - c.Unrest) * 0.08;
         double stabT = 0.45 + 0.35 * c.Approval + 0.15 * (1 - c.Corruption) + 0.1 * c.Democracy - 0.5 * c.Unrest
-                       + 0.05 * idx(Asset.Defence);
+                       + 0.05 * idx(Asset.Defence) + c.Mod("stability");
         double stabBase = c.Stability0;
         c.Stability += (Maths.Clamp(stabT, 0.05, 0.98) * 0.5 + stabBase * 0.5 - c.Stability) * 0.03;
 

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Sim.Core.Data;
 using Sim.Core.Model;
+using Sim.Core.Policy;
 using Sim.Core.Util;
 
 namespace Sim.Core.Engine;
@@ -27,7 +28,9 @@ public sealed class Simulation
     public void Tick()
     {
         var w = World;
+        ProcessQueue();
         GlobalEngine.Step(w, Dt);
+        foreach (var c in w.Countries) PolicyEngine.Step(w, c);
         for (int i = 0; i < w.Countries.Count; i++)
         {
             var c = w.Countries[i];
@@ -37,7 +40,35 @@ public sealed class Simulation
             MacroEngine.Step(w.Countries[i], w.Global, Dt, w.CountryRng[i], w.Stochastic);
         GlobalEngine.Climate(w, Dt);
         w.Month++;
-        if (w.RecordHistory && w.Month % 3 == 0) Record();
+        if (w.Month % 3 == 0)
+        {
+            if (w.RecordHistory) Record();
+            if (w.Advisors) Advisors.Post(w, w.Player);
+        }
+    }
+
+    /// <summary>Queue a player command; it is applied at the next tick boundary. Returns the dry-run price/validity now.</summary>
+    public CommandResult Submit(Command cmd)
+    {
+        var dry = CommandProcessor.Apply(World, cmd, dryRun: true);
+        if (dry.Ok) World.Queue.Add(cmd);
+        return dry;
+    }
+
+    /// <summary>Apply a command immediately (used by UI for instant feedback and by tests).</summary>
+    public CommandResult Execute(Command cmd)
+    {
+        var r = CommandProcessor.Apply(World, cmd);
+        World.CommandLog.Add(new LoggedCommand { Month = World.Month, Cmd = cmd, Ok = r.Ok, Message = r.Message });
+        World.Log.Add(new LogEntry { Month = World.Month, Country = cmd.Country, Kind = "policy", Text = r.Message });
+        return r;
+    }
+
+    void ProcessQueue()
+    {
+        if (World.Queue.Count == 0) return;
+        var q = World.Queue.ToList(); World.Queue.Clear();
+        foreach (var cmd in q) Execute(cmd);
     }
 
     public void Run(int months) { for (int i = 0; i < months; i++) Tick(); }
