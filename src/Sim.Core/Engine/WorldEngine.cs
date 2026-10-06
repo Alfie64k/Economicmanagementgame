@@ -93,8 +93,8 @@ public static class WorldEngine
         // ---- climate club: once the big emitters price carbon, a floor spreads to everyone (border-adjustment pressure) ----
         double totEm = cs.Sum(c => c.EmissionsMt), clubEm = 0, clubPrice = 0;
         foreach (var c in cs) if (c.CarbonPrice >= 50) { clubEm += c.EmissionsMt; clubPrice += c.CarbonPrice * c.EmissionsMt; }
-        double target = totEm > 0 && clubEm / totEm >= 0.5 ? 0.6 * clubPrice / clubEm : 0;
-        w.Global.GlobalCarbonPrice += (target - w.Global.GlobalCarbonPrice) * 0.05;
+        double clubTarget = totEm > 0 && clubEm / totEm >= 0.5 ? 0.6 * clubPrice / clubEm : 0;
+        w.Global.GlobalCarbonPrice += (clubTarget - w.Global.GlobalCarbonPrice) * 0.05;
 
         // ---- AI retaliation: answer tariffs and mirror sanctions ----
         for (int i = 0; i < n; i++)
