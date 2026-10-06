@@ -41,6 +41,7 @@ public static class CommandProcessor
                     if (!Enum.TryParse<Tax>(cmd.Id, out var t)) return CommandResult.Fail("Unknown tax");
                     double r0 = c.TaxRate[(int)t], r = Maths.Clamp(cmd.Value, 0, 0.9);
                     if (Math.Abs(r - r0) < 1e-9) return CommandResult.Pass("No change", 0);
+                    if (c.ImfAutopilot && r < r0) return CommandResult.Fail("Blocked by IMF programme conditionality: no tax cuts during the programme");
                     double cost = Math.Min(40, 4 + 30 * Math.Abs(r - r0) / Math.Max(0.05, c.TaxRate0[(int)t]));
                     return Spend(cost, $"{t} tax {(r > r0 ? "raised" : "cut")} to {Fmt.P(r, 1)}", () => c.TaxRate[(int)t] = r);
                 }
@@ -50,6 +51,7 @@ public static class CommandProcessor
                     double s0 = c.Budget[(int)l], s = Maths.Clamp(cmd.Value, 0, 0.6);
                     double d = s - s0;
                     if (Math.Abs(d) < 1e-9) return CommandResult.Pass("No change", 0);
+                    if (c.ImfAutopilot && d > 0) return CommandResult.Fail("Blocked by IMF programme conditionality: no spending increases during the programme");
                     double cost = Math.Min(40, 2 + 150 * Math.Abs(d) * (d < 0 ? 1.5 : 1.0));
                     return Spend(cost, $"{l} budget set to {Fmt.P(s, 2)} of GDP", () => c.Budget[(int)l] = s);
                 }

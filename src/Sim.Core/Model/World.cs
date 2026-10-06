@@ -35,6 +35,9 @@ public sealed class World
     public List<PendingDecision> Decisions = new();
     public List<EventRecord> EventHistory = new();
     public int NextDecisionId = 1;
+    public Difficulty Difficulty = Difficulty.Normal;
+    public double PcRegenMult = 1.0, EventSeverity = 1.0, EventFrequency = 1.0;
+    public string ScenarioId = "";
     public bool GameOver, GameOverOnLoss = false;
     public string GameOverReason = "";
     public Dictionary<string, Relation> Relations = new();   // keyed "A>B" (directional)
@@ -106,6 +109,8 @@ public sealed class Relation
     public int DealStart;
     public double ExtraTariff;   // additional tariff A levies on B's goods
 }
+
+public enum Difficulty { Sandbox, Easy, Normal, Hard }
 
 public sealed class ScheduledEvent { public int Month; public string EventId = "", Country = ""; }
 

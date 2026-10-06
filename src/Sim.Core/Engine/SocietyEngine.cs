@@ -13,7 +13,7 @@ public static class SocietyEngine
         return r / Math.Max(1e-9, c.Gdp);
     }
 
-    public static void Step(CountryState c, GlobalState g, double dt)
+    public static void Step(CountryState c, GlobalState g, double dt, World w)
     {
         double burden0 = c.Burden0 > 0 ? c.Burden0 : (c.Burden0 = TaxBurden(c));
         double burden = TaxBurden(c);
@@ -42,6 +42,11 @@ public static class SocietyEngine
             - 0.3 * (c.Corruption - c.Corruption0)
             - 0.5 * Math.Max(0, c.DebtToGdp - 1.2) * 0.1
             + c.Mod("approval");
+        var ad = c.ApprovalDrivers;
+        ad[0] = c.Approval0; ad[1] = 2.0 * (growth - 0.02); ad[2] = -1.5 * (c.Unemp - c.Unemp0); ad[3] = -1.2 * Math.Max(0, c.Inflation - 0.04);
+        ad[4] = -0.8 * (c.Gini - c.Gini0); ad[5] = -1.5 * (burden - c.Burden0);
+        ad[6] = 0.15 * idx(Asset.Health) + 0.10 * idx(Asset.Education) + 0.10 * idx(Asset.Housing) + 0.05 * idx(Asset.Infrastructure);
+        ad[7] = -0.3 * (c.Corruption - c.Corruption0); ad[8] = target - c.Approval0 - (ad[1] + ad[2] + ad[3] + ad[4] + ad[5] + ad[6] + ad[7]);
         c.Approval += (Maths.Clamp(target, 0.03, 0.95) - c.Approval) * 0.04;
 
         // unrest and stability
@@ -57,7 +62,7 @@ public static class SocietyEngine
         c.Corruption = Maths.Clamp(c.Corruption + dt * (c.Mod("corruption") - 0.002 * (c.Democracy - 0.5)), 0, 1);
 
         // political capital: regenerates with approval, capped
-        double regen = (1.2 + 2.2 * c.Approval + c.Mod("polcap")) * (c.Gov == "autocracy" ? 1.2 : 1.0);
+        double regen = (1.2 + 2.2 * c.Approval + c.Mod("polcap")) * (c.Gov == "autocracy" ? 1.2 : 1.0) * (c.Id == w.PlayerId ? w.PcRegenMult : 1.0);
         c.PoliticalCapital = Maths.Clamp(c.PoliticalCapital + regen, 0, 100) ;
         // note: regen is per month; spending happens when policies are enacted
     }

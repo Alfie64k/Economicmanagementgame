@@ -179,6 +179,8 @@ public static class Calibrator
                 : "technocrat";
         c.Status = "ok";
         for (int i = 0; i < 12; i++) c.GdpRing[i] = y0 * Math.Exp(-g * (11 - i) / 12.0);
+        c.Revenue = (d.Fiscal.Revenue) * y0; c.Spending = (d.Fiscal.Revenue + d.Fiscal.Deficit) * y0; c.Interest = interest0; c.Deficit = d.Fiscal.Deficit * y0;
+        for (int i = 0; i < 12; i++) c.CompRing[i] = MacroEngine.Snap(c);
         FiscalEngine.AnchorSpread(c, d.Macro.Yield10);
         return c;
     }

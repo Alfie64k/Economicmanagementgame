@@ -67,7 +67,7 @@ public static class EventEngine
             if (crisis != null && c.CrisisMonths >= 6 && !c.InDefault && c.ImfUntil < w.Month && Cooled(w, c, crisis)) { Trigger(w, c, crisis); c.CrisisMonths = 0; }
 
         // ---- random events (one RNG draw per pair keeps streams aligned) ----
-        double monthly(double annual) => 1 - Math.Pow(1 - Math.Min(0.999, annual), 1.0 / 12);
+        double monthly(double annual) => 1 - Math.Pow(1 - Math.Min(0.999, annual * w.EventFrequency), 1.0 / 12);
         foreach (var def in EventCatalog.Events)
         {
             if (def.Prob <= 0) continue;
@@ -181,6 +181,7 @@ public static class EventEngine
         foreach (var e in effects)
         {
             double v = e.Value * Resilience(c, e.Scale);
+            if (c.Id == w.PlayerId && e.Kind is "level" or "state" && e.Value < 0) v *= w.EventSeverity;
             switch (e.Kind)
             {
                 case "level":

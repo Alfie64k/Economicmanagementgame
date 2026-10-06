@@ -40,7 +40,7 @@ public sealed class Simulation
             if (c.Id != w.PlayerId || c.Autopilot) PolicyAgent.Step(c, w.Global, w.CountryRng[i], w);
         }
         for (int i = 0; i < w.Countries.Count; i++)
-            MacroEngine.Step(w.Countries[i], w.Global, Dt, w.CountryRng[i], w.Stochastic);
+            MacroEngine.Step(w.Countries[i], w.Global, Dt, w.CountryRng[i], w.Stochastic, w);
         GlobalEngine.Climate(w, Dt);
         w.Month++;
         if (w.Events) { EventEngine.Step(w); Politics.Step(w); }

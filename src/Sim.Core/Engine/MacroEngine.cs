@@ -8,7 +8,7 @@ public static class MacroEngine
 {
     static readonly double[] AssetRate = { 0.06, 0.04, 0.08, 0.10, 0.06, 0.04, 0.15, 0.07 }; // convergence speed of public asset indices per year
 
-    public static void Step(CountryState c, GlobalState g, double dt, Rng rng, bool stochastic)
+    public static void Step(CountryState c, GlobalState g, double dt, Rng rng, bool stochastic, World w)
     {
         double shockD = stochastic ? rng.Normal() * 0.004 : 0;
         double shockS = stochastic ? rng.Normal() * 0.0015 : 0;
@@ -23,11 +23,22 @@ public static class MacroEngine
         Sectors(c, dt);
         FiscalEngine.Step(c, g, dt);
         External(c, g, dt);
-        SocietyEngine.Step(c, g, dt);
+        SocietyEngine.Step(c, g, dt, w);
         Environment(c, g, dt);
         Bound(c);
+        RecordSnap(c);
         c.Tick++;
     }
+
+    public static CompSnap Snap(CountryState c) => new()
+    {
+        Cons = c.Cons, InvPriv = c.InvPriv, GovCons = c.GovCons, GovInv = c.GovInv, Exports = c.Exports, Imports = c.Imports, Gdp = c.Gdp, Potential = c.Potential,
+        Revenue = c.Revenue, Spending = c.Spending, Interest = c.Interest, GdpNom = c.GdpNominal, Capital = c.K.Sum(),
+        LabourEff = c.Pop * c.Working * c.Participation * (1 - c.NairU) * c.HumanCapital, Tfp = c.Tfp.Average(), Debt = c.Debt,
+        Approval = c.Approval, Unemp = c.Unemp, Inflation = c.Inflation, Gini = c.Gini,
+    };
+
+    static void RecordSnap(CountryState c) => c.CompRing[c.Tick % 12] = Snap(c);
 
     static void RampModifiers(CountryState c)
     {
@@ -161,8 +172,9 @@ public static class MacroEngine
         c.NairUBase += (c.Unemp - c.NairU) * 0.02 * dt;
         c.NairUBase = Maths.Clamp(c.NairUBase, c.Unemp0 - 0.02, c.Unemp0 + 0.08);
         double pay = c.TaxRate[(int)Tax.Payroll] - c.TaxRate0[(int)Tax.Payroll];
-        c.NairU = Maths.Clamp(c.NairUBase + 0.25 * (c.MinWageRatio - c.MinWageRatio0) + 0.15 * pay
-                              - 0.03 * Math.Log(c.HumanCapital) + c.Mod("nairu"), 0.01, 0.45);
+        c.NairuParts[0] = c.NairUBase; c.NairuParts[1] = 0.25 * (c.MinWageRatio - c.MinWageRatio0); c.NairuParts[2] = 0.15 * pay;
+        c.NairuParts[3] = -0.03 * Math.Log(c.HumanCapital); c.NairuParts[4] = c.Mod("nairu");
+        c.NairU = Maths.Clamp(c.NairuParts.Sum(), 0.01, 0.45);
 
         // wage dynamics (real wage index tracks productivity and labour-market tightness)
         double prodG = c.Potential > 0 ? Math.Log(c.Potential / Math.Max(1e-9, c.PotLag)) / Math.Max(dt, 1e-9) : 0;

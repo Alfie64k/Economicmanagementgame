@@ -1,6 +1,7 @@
 using Sim.Core.Data;
 using Sim.Core.Engine;
 using Sim.Core.Model;
+using Sim.Core.Policy;
 
 static class Program
 {
@@ -48,6 +49,40 @@ static class Program
                     Console.WriteLine(sim.World.GameOver ? "GAME OVER: " + sim.World.GameOverReason : "alive");
                     foreach (var l in sim.World.Log.Where(l => l.Kind is "news" or "crisis").Take(25)) Console.WriteLine($"{l.Month / 12 + 2024}.{l.Month % 12 + 1:D2} [{l.Country}] {l.Text}");
                     return 0;
+                }
+            case "reckless":
+                {
+                    var sim = Simulation.New(country, seed, !det);
+                    sim.World.RecordHistory = false; sim.World.Advisors = false;
+                    var c = sim.World.Player;
+                    Console.WriteLine("year   gdp$bn  gr%  infl%  u%   rate%  y10%  debt%  def%  fx      appr  gini  ca%  gap%  nairu");
+                    for (int y = 0; y <= years; y++)
+                    {
+                        Console.WriteLine(Row(sim.World.Year, c));
+                        if (y == years) break;
+                        c.PoliticalCapital = 100;
+                        sim.Execute(Command.SetTax(c.Id, Tax.Consumption, c.TaxRate[(int)Tax.Consumption] * 0.8));
+                        sim.Execute(Command.SetTax(c.Id, Tax.Income, c.TaxRate[(int)Tax.Income] * 0.85));
+                        sim.Execute(Command.SetBudget(c.Id, BudgetLine.Social, c.Budget[(int)BudgetLine.Social] + 0.01));
+                        sim.Run(12);
+                        foreach (var d in sim.World.Decisions.ToList()) sim.Resolve(d.Id, d.DefaultChoice);
+                    }
+                    return 0;
+                }
+            case "balance":
+                {
+                    int seeds = Arg(args, "--seeds", 3);
+                    var countries = (ArgS(args, "--countries", "USA,GBR,DEU,JPN,CHN,IND,BRA,NGA,SAU,SGP,TUR,ETH,KOR,MEX,POL,RUS")).Split(',');
+                    var res = Sim.Core.Scoring.Balance.Matrix(countries, seeds, years);
+                    var rep = Sim.Core.Scoring.Balance.Analyse(res);
+                    var strategies = Sim.Core.Scoring.Balance.Strategies.Select(x => x.Name).ToList();
+                    Console.WriteLine($"{"archetype",-12}" + string.Join("", strategies.Select(x => $"{x,14}")) + "   best");
+                    foreach (var kv in rep.MeanByArchetype)
+                        Console.WriteLine($"{kv.Key,-12}" + string.Join("", strategies.Select(x => $"{kv.Value[x],14:F1}")) + $"   {rep.BestByArchetype[kv.Key]}");
+                    Console.WriteLine($"{"overall",-12}" + string.Join("", strategies.Select(x => $"{rep.Overall[x],14:F1}")));
+                    Console.WriteLine($"runaway rate {rep.RunawayRate:P1}");
+                    foreach (var f in rep.Findings) Console.WriteLine("FINDING: " + f);
+                    return rep.Findings.Count == 0 ? 0 : 4;
                 }
             case "trace":
                 {

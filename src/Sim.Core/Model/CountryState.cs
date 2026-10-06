@@ -2,6 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace Sim.Core.Model;
 
+/// <summary>Snapshot of key aggregates for year-on-year attribution ("why did this change?").</summary>
+public sealed class CompSnap
+{
+    public double Cons, InvPriv, GovCons, GovInv, Exports, Imports, Gdp, Potential, Revenue, Spending, Interest, GdpNom, Capital, LabourEff, Tfp, Debt, Approval, Unemp, Inflation, Gini;
+}
+
 /// <summary>A temporary policy-style modifier created by an event; removed when it expires.</summary>
 public sealed class TimedMod { public string Key = ""; public double Value; public int ExpireMonth; public string Source = ""; }
 
@@ -137,6 +143,9 @@ public sealed class CountryState
     public double EnergyNet0;
 
     // ---- crises / status ----
+    public CompSnap[] CompRing = new CompSnap[12];
+    public double[] ApprovalDrivers = new double[9];   // base, growth, unemployment, inflation, inequality, taxes, services, corruption, other
+    public double[] NairuParts = new double[5];        // base, minimum wage, payroll tax, human capital, policy
     public bool InDefault;
     public int DefaultUntil, ImfUntil, ElectionTerm = 48;
     public bool ImfAutopilot;

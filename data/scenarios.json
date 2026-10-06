@@ -1,0 +1,492 @@
+{
+ "scenarios": [
+  {
+   "id": "tut_budget",
+   "name": "1. Your First Budget",
+   "kind": "tutorial",
+   "country": "GBR",
+   "years": 3,
+   "difficulty": "Easy",
+   "description": "You are the new UK Chancellor. Learn the budget screen: bring the deficit down without tipping the economy into recession.",
+   "goals": [
+    {
+     "label": "Deficit below 4.5% of GDP",
+     "metric": "deficit",
+     "op": "<",
+     "value": 0.045,
+     "byMonth": 36,
+     "weight": 1.0
+    },
+    {
+     "label": "Unemployment below 5.2%",
+     "metric": "unemp",
+     "op": "<",
+     "value": 0.052,
+     "byMonth": 36,
+     "weight": 1.0
+    },
+    {
+     "label": "Approval above 30%",
+     "metric": "approval",
+     "op": ">",
+     "value": 0.3,
+     "byMonth": 36,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [
+    {
+     "month": 0,
+     "text": "Open Budget and compare revenue with spending. Taxes and spending lines take effect immediately but cost political capital."
+    },
+    {
+     "month": 3,
+     "text": "Check the advisors: the Finance Minister and Social Policy Minister will disagree. You decide."
+    },
+    {
+     "month": 12,
+     "text": "Open Forecast to preview the effect of a change before you commit to it."
+    }
+   ],
+   "unlock": null
+  },
+  {
+   "id": "tut_inflation",
+   "name": "2. Taming Inflation",
+   "kind": "tutorial",
+   "country": "GBR",
+   "years": 4,
+   "difficulty": "Easy",
+   "description": "A cost-of-living shock has pushed inflation toward 9%. Use monetary and fiscal policy to bring it back to target without a deep slump.",
+   "goals": [
+    {
+     "label": "Inflation below 3.5%",
+     "metric": "infl",
+     "op": "<",
+     "value": 0.035,
+     "byMonth": 48,
+     "weight": 1.0
+    },
+    {
+     "label": "Unemployment below 7%",
+     "metric": "unemp",
+     "op": "<",
+     "value": 0.07,
+     "byMonth": 48,
+     "weight": 1.0
+    }
+   ],
+   "setup": [
+    {
+     "kind": "mod",
+     "key": "inflation",
+     "value": 0.05,
+     "months": 30,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.05,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "events": [
+    {
+     "id": "oil_supply_shock",
+     "month": 0,
+     "country": false
+    }
+   ],
+   "hints": [
+    {
+     "month": 0,
+     "text": "The central bank follows a rule by default. Pin the policy rate manually in Monetary Policy if you disagree, at a political-capital cost."
+    },
+    {
+     "month": 6,
+     "text": "Expectations matter: credibility policies such as central-bank independence slow the spiral."
+    }
+   ],
+   "unlock": "tut_budget"
+  },
+  {
+   "id": "tut_invest",
+   "name": "3. Investing for Growth",
+   "kind": "tutorial",
+   "country": "IND",
+   "years": 15,
+   "difficulty": "Normal",
+   "description": "India has a young workforce and a huge infrastructure gap. Allocate public investment and run projects to sustain high growth.",
+   "goals": [
+    {
+     "label": "Real GDP per head x1.9",
+     "metric": "gdppc",
+     "op": ">",
+     "value": 1.9,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Debt below 100% of GDP",
+     "metric": "debt",
+     "op": "<",
+     "value": 1.0,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Approval above 40%",
+     "metric": "approval",
+     "op": ">",
+     "value": 0.4,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [
+    {
+     "month": 0,
+     "text": "Open Investment: projects add permanent capital-quality boosts but cost money for years and can overrun."
+    },
+    {
+     "month": 12,
+     "text": "Education and infrastructure compound slowly; R&D pays off most when the economy is already productive."
+    }
+   ],
+   "unlock": "tut_inflation"
+  },
+  {
+   "id": "hist_gfc",
+   "name": "Financial Crisis (UK)",
+   "kind": "historical",
+   "country": "GBR",
+   "years": 8,
+   "difficulty": "Normal",
+   "description": "A credit boom turns to bust. Stabilise the banks, protect jobs and avoid a sovereign scare.",
+   "goals": [
+    {
+     "label": "Unemployment below 9% after 5 years",
+     "metric": "unemp",
+     "op": "<",
+     "value": 0.09,
+     "byMonth": 60,
+     "weight": 1.0
+    },
+    {
+     "label": "Debt below 130% of GDP",
+     "metric": "debt",
+     "op": "<",
+     "value": 1.3,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "No sovereign default",
+     "metric": "default",
+     "op": "<",
+     "value": 0.5,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [
+    {
+     "id": "global_financial_crisis",
+     "month": 0,
+     "country": false
+    },
+    {
+     "id": "banking_crisis",
+     "month": 1,
+     "country": true
+    }
+   ],
+   "hints": [],
+   "unlock": "tut_invest"
+  },
+  {
+   "id": "hist_inflation_wave",
+   "name": "Post-Pandemic Inflation Wave (USA)",
+   "kind": "historical",
+   "country": "USA",
+   "years": 6,
+   "difficulty": "Normal",
+   "description": "Supply chains snap, demand surges and energy spikes. Land the economy softly.",
+   "goals": [
+    {
+     "label": "Inflation below 3.5% by year 4",
+     "metric": "infl",
+     "op": "<",
+     "value": 0.035,
+     "byMonth": 48,
+     "weight": 1.0
+    },
+    {
+     "label": "Unemployment below 5.5%",
+     "metric": "unemp",
+     "op": "<",
+     "value": 0.055,
+     "byMonth": 72,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [
+    {
+     "id": "pandemic",
+     "month": 0,
+     "country": false
+    }
+   ],
+   "hints": [],
+   "unlock": "hist_gfc"
+  },
+  {
+   "id": "hist_oil_crash",
+   "name": "Oil Crash (Saudi Arabia)",
+   "kind": "historical",
+   "country": "SAU",
+   "years": 8,
+   "difficulty": "Normal",
+   "description": "Crude collapses. Diversify and keep the peg without exhausting the fiscal buffers.",
+   "goals": [
+    {
+     "label": "Deficit below 6% of GDP",
+     "metric": "deficit",
+     "op": "<",
+     "value": 0.06,
+     "byMonth": 60,
+     "weight": 1.0
+    },
+    {
+     "label": "Approval above 50%",
+     "metric": "approval",
+     "op": ">",
+     "value": 0.5,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Non-energy share above 78%",
+     "metric": "nonenergy",
+     "op": ">",
+     "value": 0.78,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [
+    {
+     "id": "oil_glut",
+     "month": 0,
+     "country": false
+    }
+   ],
+   "hints": [],
+   "unlock": "hist_inflation_wave"
+  },
+  {
+   "id": "chal_debt",
+   "name": "Debt Spiral (Argentina)",
+   "kind": "challenge",
+   "country": "ARG",
+   "years": 8,
+   "difficulty": "Hard",
+   "description": "Triple-digit inflation, a depreciating peso and a restless population. Stabilise before the next crisis.",
+   "goals": [
+    {
+     "label": "Inflation below 20%",
+     "metric": "infl",
+     "op": "<",
+     "value": 0.2,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Debt below 100% of GDP",
+     "metric": "debt",
+     "op": "<",
+     "value": 1.0,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Unemployment below 12%",
+     "metric": "unemp",
+     "op": "<",
+     "value": 0.12,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [],
+   "unlock": "hist_oil_crash"
+  },
+  {
+   "id": "chal_green",
+   "name": "Great Decarbonisation (Germany)",
+   "kind": "challenge",
+   "country": "DEU",
+   "years": 20,
+   "difficulty": "Normal",
+   "description": "Halve emissions without hollowing out industry.",
+   "goals": [
+    {
+     "label": "Emissions below 55% of today",
+     "metric": "emissions",
+     "op": "<",
+     "value": 0.55,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Real GDP per head x1.15",
+     "metric": "gdppc",
+     "op": ">",
+     "value": 1.15,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Approval above 30%",
+     "metric": "approval",
+     "op": ">",
+     "value": 0.3,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [],
+   "unlock": "chal_debt"
+  },
+  {
+   "id": "chal_catchup",
+   "name": "Catch-up Growth (Ethiopia)",
+   "kind": "challenge",
+   "country": "ETH",
+   "years": 25,
+   "difficulty": "Hard",
+   "description": "Escape the low-income trap: build capacity, avoid default, keep society together.",
+   "goals": [
+    {
+     "label": "Real GDP per head x2.5",
+     "metric": "gdppc",
+     "op": ">",
+     "value": 2.5,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Gini below 0.45",
+     "metric": "gini",
+     "op": "<",
+     "value": 0.45,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "No default",
+     "metric": "default",
+     "op": "<",
+     "value": 0.5,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [],
+   "unlock": "chal_green"
+  },
+  {
+   "id": "chal_curse",
+   "name": "Resource Curse (Nigeria)",
+   "kind": "challenge",
+   "country": "NGA",
+   "years": 15,
+   "difficulty": "Hard",
+   "description": "Oil rents, a fragile state and a young population. Diversify before the rents fade.",
+   "goals": [
+    {
+     "label": "Real GDP per head x1.6",
+     "metric": "gdppc",
+     "op": ">",
+     "value": 1.6,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Inflation below 10%",
+     "metric": "infl",
+     "op": "<",
+     "value": 0.1,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Non-energy share above 96%",
+     "metric": "nonenergy",
+     "op": ">",
+     "value": 0.96,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [],
+   "unlock": "chal_catchup"
+  },
+  {
+   "id": "chal_ageing",
+   "name": "Ageing Nation (Japan)",
+   "kind": "challenge",
+   "country": "JPN",
+   "years": 20,
+   "difficulty": "Normal",
+   "description": "The world's oldest society with the world's largest debt. Keep it solvent and growing.",
+   "goals": [
+    {
+     "label": "Real GDP per head x1.15",
+     "metric": "gdppc",
+     "op": ">",
+     "value": 1.15,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Debt below 300% of GDP",
+     "metric": "debt",
+     "op": "<",
+     "value": 3.0,
+     "byMonth": 0,
+     "weight": 1.0
+    },
+    {
+     "label": "Approval above 30%",
+     "metric": "approval",
+     "op": ">",
+     "value": 0.3,
+     "byMonth": 0,
+     "weight": 1.0
+    }
+   ],
+   "setup": [],
+   "events": [],
+   "hints": [],
+   "unlock": "chal_curse"
+  }
+ ]
+}

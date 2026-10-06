@@ -11,6 +11,7 @@
     <EmbeddedResource Include="..\..\data\countries.json" LogicalName="data/countries.json" />
     <EmbeddedResource Include="..\..\data\policies.json" LogicalName="data/policies.json" />
     <EmbeddedResource Include="..\..\data\events.json" LogicalName="data/events.json" />
+    <EmbeddedResource Include="..\..\data\scenarios.json" LogicalName="data/scenarios.json" />
   </ItemGroup>
 
 </Project>
