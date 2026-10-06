@@ -218,10 +218,13 @@ public partial class SelfTest : Node
         if (!(Game.Player.PoliticalCapital != pc0)) throw new Exception("political capital did not move when the turn was played");
         Shot(shots, "14c_turn_played");
 
+        // auto-pause is switched off here: on a slow machine the clock could otherwise run a month and stop itself between the two key presses
+        int triggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
         await Key(Godot.Key.Space); await Frames(2);
         if (Game.Speed == 0) throw new Exception("Space did not start the clock");
         await Key(Godot.Key.Space); await Frames(2);
         if (Game.Speed != 0) throw new Exception("Space did not pause");
+        Settings.PauseTriggers = triggers;
         var nav = FindButton(shell, b => b.Text == "World map") ?? throw new Exception("no World map nav button");
         await Click(nav.GlobalPosition + nav.Size / 2); await Frames(10);
         var mv = (EconGame.Views.WorldMapView)shell.Current!;
@@ -284,10 +287,15 @@ public partial class SelfTest : Node
     /// <summary>The guided first turn: each step completes when the player does what it asks.</summary>
     async System.Threading.Tasks.Task<GameShell> Tutorial(Main main, string shots)
     {
+        // a first-ever sandbox game starts the coach by itself; a scenario does not
+        Game.SuppressModals = false; Settings.TutorialSeen = false;
+        var scn = Sim.Core.Scoring.Scenarios.Find("tut_budget")!;
+        Game.NewGame(scn.Country, Difficulty.Easy, 5, scn); main.ShowGame(); await Frames(6);
+        if (main.GetChildren().OfType<GameShell>().First().Coach != null) throw new Exception("the tutorial coach started inside a scenario");
         Game.NewGame("GBR", Difficulty.Easy, 5); main.ShowGame(); await Frames(6);
+        Game.SuppressModals = true;
         var shell = main.GetChildren().OfType<GameShell>().First();
-        shell.StartTutorial(); await Frames(6);
-        var coach = shell.Coach ?? throw new Exception("the tutorial coach did not start");
+        var coach = shell.Coach ?? throw new Exception("the tutorial coach did not start in a new sandbox game");
         void At(int step, string why) { if (coach.CurrentStep != step) throw new Exception($"tutorial: expected step {step + 1} {why}, at step {coach.CurrentStep + 1}"); }
         At(0, "at the start"); Shot(shots, "33_tutorial_step1");
         var next = FindButton(coach, b => b.Text == "Next ▸" && b.IsVisibleInTree()) ?? throw new Exception("no Next button on an informational step");
