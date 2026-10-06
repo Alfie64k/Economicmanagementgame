@@ -7,9 +7,9 @@ The game is a Godot 4.3 **.NET** project on top of a pure C# simulation. You nee
 | .NET SDK | 8.0 | <https://dotnet.microsoft.com/download/dotnet/8.0> |
 | Godot | 4.3 **.NET / Mono** edition | <https://godotengine.org/download> — pick the ".NET" download, not the standard one (the standard build cannot run C#) |
 
-## Option A — pre-built download (if available)
+## Option A — pre-built download
 
-The `Release` GitHub Actions workflow builds Windows, Linux and macOS exports. Open the repository's **Actions → Release → latest run → Artifacts → `builds`**, download, unzip and run `EconomicGame.exe` (Windows), `EconomicGame.x86_64` (Linux) or the `.app` inside the zip (macOS). These builds are unsigned: Windows SmartScreen and macOS Gatekeeper will warn (macOS: right-click → Open).
+The `Release` GitHub Actions workflow (run manually from the Actions tab, or by pushing a `v*` tag) builds Windows, Linux and macOS exports; it completes successfully, but the exported binaries have not been run on real hardware. Open the repository's **Actions → Release → latest run → Artifacts → `builds`**, download, unzip and run `EconomicGame.exe` (Windows), `EconomicGame.x86_64` (Linux) or the `.app` inside the zip (macOS). These builds are unsigned: Windows SmartScreen and macOS Gatekeeper will warn (macOS: right-click → Open).
 
 ## Option B — run from source
 
