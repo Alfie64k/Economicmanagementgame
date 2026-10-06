@@ -36,7 +36,7 @@ public class RosterTests
 
 public class EngineTests
 {
-    static Simulation Det(string id) => Simulation.New(id, 1, stochastic: false);
+    static Simulation Det(string id) { var s = Simulation.New(id, 1, stochastic: false); s.World.Events = false; return s; }
 
     [Fact]
     public void Same_seed_gives_identical_hash_and_different_seed_differs()

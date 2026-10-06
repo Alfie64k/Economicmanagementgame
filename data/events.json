@@ -1,1 +1,1397 @@
-[]
+{
+ "events": [
+  {
+   "id": "pandemic",
+   "name": "Novel virus outbreak",
+   "text": "A fast-spreading respiratory virus triggers lockdowns and travel restrictions worldwide.",
+   "scope": "global",
+   "prob": 0.012,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": -0.07,
+     "months": 0,
+     "scale": "health"
+    },
+    {
+     "kind": "level",
+     "key": "inv",
+     "value": -0.08,
+     "months": 0,
+     "scale": "health"
+    },
+    {
+     "kind": "mod",
+     "key": "export",
+     "value": -0.12,
+     "months": 12,
+     "scale": "health"
+    },
+    {
+     "kind": "mod",
+     "key": "tfp",
+     "value": -0.004,
+     "months": 12,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.03,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "pop",
+     "value": -0.001,
+     "months": 0,
+     "scale": "health"
+    },
+    {
+     "kind": "global",
+     "key": "risk",
+     "value": -0.25,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "global",
+     "key": "oil",
+     "value": 0.7,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [
+    {
+     "id": "post_pandemic_rebound",
+     "prob": 1.0,
+     "delay": 18
+    }
+   ],
+   "cooldown": 240,
+   "category": "global",
+   "allCountries": true
+  },
+  {
+   "id": "post_pandemic_rebound",
+   "name": "Post-pandemic rebound",
+   "text": "Pent-up demand and stimulus unwind: spending surges, supply chains strain.",
+   "scope": "global",
+   "prob": 0.0,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "inflation",
+     "value": 0.02,
+     "months": 12,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": 0.03,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "global",
+     "key": "oil",
+     "value": 1.3,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "global",
+     "key": "risk",
+     "value": 0.2,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "global",
+   "allCountries": true
+  },
+  {
+   "id": "oil_supply_shock",
+   "name": "Oil supply shock",
+   "text": "Conflict and OPEC cuts send crude soaring.",
+   "scope": "global",
+   "prob": 0.04,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "global",
+     "key": "oil",
+     "value": 1.7,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "global",
+     "key": "food",
+     "value": 1.1,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [
+    {
+     "id": "oil_glut",
+     "prob": 0.4,
+     "delay": 30
+    }
+   ],
+   "cooldown": 60,
+   "category": "global",
+   "allCountries": false
+  },
+  {
+   "id": "oil_glut",
+   "name": "Oil glut",
+   "text": "Shale output and weak demand crash oil prices.",
+   "scope": "global",
+   "prob": 0.025,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "global",
+     "key": "oil",
+     "value": 0.6,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 60,
+   "category": "global",
+   "allCountries": false
+  },
+  {
+   "id": "global_financial_crisis",
+   "name": "Global financial crisis",
+   "text": "A leveraged-finance meltdown freezes credit across advanced economies.",
+   "scope": "global",
+   "prob": 0.015,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "global",
+     "key": "risk",
+     "value": -0.35,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "inv",
+     "value": -0.1,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": -0.03,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "export",
+     "value": -0.08,
+     "months": 18,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.04,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "risk",
+     "value": 0.01,
+     "months": 24,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [
+    {
+     "id": "austerity_pressure",
+     "prob": 0.6,
+     "delay": 12
+    }
+   ],
+   "cooldown": 180,
+   "category": "global",
+   "allCountries": true
+  },
+  {
+   "id": "austerity_pressure",
+   "name": "Austerity pressure",
+   "text": "Markets and lenders demand deficit reduction after the crisis.",
+   "scope": "global",
+   "prob": 0.0,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "risk",
+     "value": 0.005,
+     "months": 24,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "global",
+   "allCountries": true
+  },
+  {
+   "id": "tech_boom",
+   "name": "Global technology boom",
+   "text": "A productivity wave (AI-driven software and automation) lifts world demand.",
+   "scope": "global",
+   "prob": 0.02,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "tfp",
+     "value": 0.003,
+     "months": 60,
+     "scale": "digital"
+    },
+    {
+     "kind": "global",
+     "key": "risk",
+     "value": 0.2,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "export",
+     "value": 0.03,
+     "months": 36,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 120,
+   "category": "global",
+   "allCountries": true
+  },
+  {
+   "id": "food_price_spike",
+   "name": "Food price spike",
+   "text": "Harvest failures and export bans lift global food prices.",
+   "scope": "global",
+   "prob": 0.03,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "global",
+     "key": "food",
+     "value": 1.5,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 48,
+   "category": "global",
+   "allCountries": false
+  },
+  {
+   "id": "earthquake_flood",
+   "name": "Major natural disaster",
+   "text": "A catastrophic earthquake or flood strikes a populated region.",
+   "scope": "country",
+   "prob": 0.03,
+   "cond": [],
+   "probMods": [
+    {
+     "metric": "temp",
+     "ref": 1.2,
+     "slope": 0.8
+    }
+   ],
+   "effects": [
+    {
+     "kind": "level",
+     "key": "capital",
+     "value": -0.012,
+     "months": 0,
+     "scale": "infra"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.02,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": -0.015,
+     "months": 0,
+     "scale": "infra"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Full national relief and rebuild package (1.2% GDP)",
+     "cost": 0.012,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.04,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "mod",
+       "key": "tfp",
+       "value": 0.0006,
+       "months": 24,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Targeted relief (0.5% GDP)",
+     "cost": 0.005,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.01,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Appeal for international aid only",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.04,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": 0.05,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 1,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "drought",
+   "name": "Severe drought",
+   "text": "Rains fail across the agricultural belt.",
+   "scope": "country",
+   "prob": 0.04,
+   "cond": [
+    "agri>0.04"
+   ],
+   "probMods": [
+    {
+     "metric": "temp",
+     "ref": 1.2,
+     "slope": 1.0
+    }
+   ],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "inflation",
+     "value": 0.015,
+     "months": 12,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": -0.01,
+     "months": 0,
+     "scale": "vuln"
+    },
+    {
+     "kind": "state",
+     "key": "unrest",
+     "value": 0.05,
+     "months": 0,
+     "scale": "vuln"
+    },
+    {
+     "kind": "mod",
+     "key": "export",
+     "value": -0.03,
+     "months": 12,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Emergency food subsidies (0.6% GDP)",
+     "cost": 0.006,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.02,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "mod",
+       "key": "inflation",
+       "value": -0.01,
+       "months": 12,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Let markets adjust",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": 0.06,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 1,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "strike_wave",
+   "name": "Strike wave",
+   "text": "Unions walk out over pay and conditions.",
+   "scope": "country",
+   "prob": 0.05,
+   "cond": [
+    "unemp<0.07",
+    "infl>0.03"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "tfp",
+     "value": -0.002,
+     "months": 6,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.03,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "inflation",
+     "value": 0.008,
+     "months": 12,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Concede with a pay settlement",
+     "cost": 0.003,
+     "effects": [
+      {
+       "kind": "mod",
+       "key": "inflation",
+       "value": 0.006,
+       "months": 12,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.04,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Hold the line",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": 0.08,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.02,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "corruption_scandal",
+   "name": "Corruption scandal",
+   "text": "A ministerial scandal dominates the headlines.",
+   "scope": "country",
+   "prob": 0.06,
+   "cond": [
+    "corruption>0.25"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.07,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "polcap",
+     "value": -12,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "corruption",
+     "value": 0.01,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "fdi",
+     "value": -0.05,
+     "months": 12,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Sack the minister and open an inquiry",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.03,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "polcap",
+       "value": -5,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Defend the government",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.03,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "stability",
+       "value": -0.03,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "tech_breakthrough",
+   "name": "Domestic technology breakthrough",
+   "text": "Your universities and firms lead a new field.",
+   "scope": "country",
+   "prob": 0.05,
+   "cond": [],
+   "probMods": [
+    {
+     "metric": "rnd",
+     "ref": 1.0,
+     "slope": 1.5
+    }
+   ],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "tfp",
+     "value": 0.004,
+     "months": 36,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "fdi",
+     "value": 0.1,
+     "months": 24,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": 0.02,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "resource_discovery",
+   "name": "Major resource discovery",
+   "text": "Prospectors confirm a large offshore field.",
+   "scope": "country",
+   "prob": 0.012,
+   "cond": [
+    "dev<0.8"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "revenue",
+     "value": 0.012,
+     "months": 120,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "fdi",
+     "value": 0.1,
+     "months": 24,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "fx",
+     "value": 0.04,
+     "months": 60,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": 0.03,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 240,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "cyberattack",
+   "name": "Major cyberattack",
+   "text": "State-linked hackers hit hospitals, banks and ministries.",
+   "scope": "country",
+   "prob": 0.04,
+   "cond": [],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "tfp",
+     "value": -0.0025,
+     "months": 6,
+     "scale": "digital"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.02,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "stability",
+     "value": -0.01,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Emergency cyber-defence programme (0.4% GDP)",
+     "cost": 0.004,
+     "effects": [
+      {
+       "kind": "mod",
+       "key": "tfp",
+       "value": 0.0006,
+       "months": 24,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Business as usual",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "mod",
+       "key": "fdi",
+       "value": -0.05,
+       "months": 12,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "social_movement",
+   "name": "Mass protest movement",
+   "text": "Cost-of-living protests fill city squares.",
+   "scope": "country",
+   "prob": 0.06,
+   "cond": [
+    "unrest>0.3"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "state",
+     "key": "unrest",
+     "value": 0.1,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "stability",
+     "value": -0.04,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Concede: cost-of-living support (0.8% GDP)",
+     "cost": 0.008,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": -0.15,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.04,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Repress",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": -0.05,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "stability",
+       "value": -0.05,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.06,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "mod",
+       "key": "fdi",
+       "value": -0.08,
+       "months": 18,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "refugee_inflow",
+   "name": "Refugee inflow",
+   "text": "Conflict next door sends hundreds of thousands across your border.",
+   "scope": "country",
+   "prob": 0.02,
+   "cond": [
+    "dev<0.9"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "mod",
+     "key": "migration",
+     "value": 1.5,
+     "months": 12,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.03,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": 0.004,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Open borders with a reception programme (0.5% GDP)",
+     "cost": 0.005,
+     "effects": [
+      {
+       "kind": "mod",
+       "key": "tfp",
+       "value": 0.0003,
+       "months": 60,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": -0.02,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Close the border",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": 0.01,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "mod",
+       "key": "fdi",
+       "value": -0.03,
+       "months": 12,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 36,
+   "category": "shock",
+   "allCountries": false
+  },
+  {
+   "id": "banking_crisis",
+   "name": "Banking crisis",
+   "text": "A credit boom turns to bust; lenders fail and credit dries up.",
+   "scope": "country",
+   "prob": 0.05,
+   "cond": [
+    "gap>0.03",
+    "realloan<0.0"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "level",
+     "key": "inv",
+     "value": -0.14,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "cons",
+     "value": -0.02,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.05,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "risk",
+     "value": 0.012,
+     "months": 24,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Bank bailout (4% GDP)",
+     "cost": 0.04,
+     "effects": [
+      {
+       "kind": "mod",
+       "key": "risk",
+       "value": -0.006,
+       "months": 24,
+       "scale": "none"
+      },
+      {
+       "kind": "level",
+       "key": "inv",
+       "value": 0.05,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.03,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Let banks fail (bail-in)",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "level",
+       "key": "inv",
+       "value": -0.05,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "level",
+       "key": "cons",
+       "value": -0.02,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": 0.05,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 120,
+   "category": "crisis",
+   "allCountries": false
+  },
+  {
+   "id": "currency_crisis",
+   "name": "Currency crisis",
+   "text": "Capital flees; the currency collapses under pressure.",
+   "scope": "country",
+   "prob": 0.25,
+   "cond": [
+    "ca<-0.045",
+    "reserves<3.5"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "level",
+     "key": "fx",
+     "value": 0.3,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "inflation",
+     "value": 0.04,
+     "months": 12,
+     "scale": "none"
+    },
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.07,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "level",
+     "key": "reserves",
+     "value": -1.0,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [
+    {
+     "id": "sovereign_debt_crisis",
+     "prob": 0.3,
+     "delay": 6
+    }
+   ],
+   "cooldown": 60,
+   "category": "crisis",
+   "allCountries": false
+  },
+  {
+   "id": "sovereign_debt_crisis",
+   "name": "Sovereign debt crisis",
+   "text": "Bond markets shut. The treasury cannot roll over its debt.",
+   "scope": "country",
+   "prob": 0.0,
+   "cond": [
+    "yield>0.16",
+    "debt>0.8"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "state",
+     "key": "approval",
+     "value": -0.05,
+     "months": 0,
+     "scale": "none"
+    },
+    {
+     "kind": "mod",
+     "key": "fdi",
+     "value": -0.15,
+     "months": 12,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "IMF programme (loan 6% GDP, 3 years of conditionality)",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "imf",
+       "key": "loan",
+       "value": 0.06,
+       "months": 36,
+       "scale": "none"
+      },
+      {
+       "kind": "mod",
+       "key": "risk",
+       "value": -0.04,
+       "months": 36,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.05,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Unilateral restructuring (40% haircut)",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "default",
+       "key": "haircut",
+       "value": 0.4,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "level",
+       "key": "cons",
+       "value": -0.04,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "level",
+       "key": "inv",
+       "value": -0.08,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "mod",
+       "key": "risk",
+       "value": 0.03,
+       "months": 24,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Muddle through with emergency taxes",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "unrest",
+       "value": 0.1,
+       "months": 0,
+       "scale": "none"
+      },
+      {
+       "kind": "state",
+       "key": "approval",
+       "value": -0.08,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 60,
+   "category": "crisis",
+   "allCountries": false
+  },
+  {
+   "id": "coalition_collapse",
+   "name": "Coalition collapse",
+   "text": "Your governing partners walk out; an early election is called.",
+   "scope": "country",
+   "prob": 0.08,
+   "cond": [
+    "approval<0.32",
+    "democracy>0.5"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "election",
+     "key": "early",
+     "value": 1,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 48,
+   "category": "politics",
+   "allCountries": false
+  },
+  {
+   "id": "coup_attempt",
+   "name": "Coup attempt",
+   "text": "Officers move against the government.",
+   "scope": "country",
+   "prob": 0.1,
+   "cond": [
+    "stability<0.30",
+    "democracy<0.55",
+    "unrest>0.35"
+   ],
+   "probMods": [],
+   "effects": [
+    {
+     "kind": "state",
+     "key": "stability",
+     "value": -0.05,
+     "months": 0,
+     "scale": "none"
+    }
+   ],
+   "choices": [
+    {
+     "label": "Buy off the army (1% GDP defence bonus)",
+     "cost": 0.01,
+     "effects": [
+      {
+       "kind": "state",
+       "key": "stability",
+       "value": 0.12,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    },
+    {
+     "label": "Rely on loyal units",
+     "cost": 0.0,
+     "effects": [
+      {
+       "kind": "gameover",
+       "key": "coup",
+       "value": 0.5,
+       "months": 0,
+       "scale": "none"
+      }
+     ]
+    }
+   ],
+   "defaultChoice": 0,
+   "deadline": 3,
+   "next": [],
+   "cooldown": 60,
+   "category": "politics",
+   "allCountries": false
+  }
+ ]
+}

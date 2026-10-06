@@ -2,6 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace Sim.Core.Model;
 
+/// <summary>A temporary policy-style modifier created by an event; removed when it expires.</summary>
+public sealed class TimedMod { public string Key = ""; public double Value; public int ExpireMonth; public string Source = ""; }
+
 /// <summary>A policy the government has enacted (possibly still waiting to take effect).</summary>
 public sealed class ActivePolicy
 {
@@ -135,6 +138,10 @@ public sealed class CountryState
 
     // ---- crises / status ----
     public bool InDefault;
+    public int DefaultUntil, ImfUntil, ElectionTerm = 48;
+    public bool ImfAutopilot;
+    public List<TimedMod> TimedMods = new();
+    public Dictionary<string, int> EventLast = new();
     public int CrisisMonths;
     public string Status = "";
 

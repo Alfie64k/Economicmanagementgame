@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Sim.Core.Data;
 using Sim.Core.Model;
+using Sim.Core.Events;
 using Sim.Core.Policy;
 using Sim.Core.Util;
 
@@ -22,6 +23,7 @@ public sealed class Simulation
         w.CountryRng = w.Countries.Select(c => new Rng(Rng.Mix(seed, c.Id))).ToArray();
         w.WorldRng = new Rng(Rng.Mix(seed, "world"));
         if (w.Find(playerId) == null) throw new ArgumentException($"Unknown country {playerId}", nameof(playerId));
+        Politics.Init(w);
         return new Simulation(w);
     }
 
@@ -41,6 +43,7 @@ public sealed class Simulation
             MacroEngine.Step(w.Countries[i], w.Global, Dt, w.CountryRng[i], w.Stochastic);
         GlobalEngine.Climate(w, Dt);
         w.Month++;
+        if (w.Events) { EventEngine.Step(w); Politics.Step(w); }
         if (w.Month % 3 == 0)
         {
             if (w.RecordHistory) Record();
@@ -72,7 +75,10 @@ public sealed class Simulation
         foreach (var cmd in q) Execute(cmd);
     }
 
-    public void Run(int months) { for (int i = 0; i < months; i++) Tick(); }
+    /// <summary>Resolve a pending player decision popup.</summary>
+    public bool Resolve(int decisionId, int choice) => EventEngine.ResolveDecision(World, decisionId, choice);
+
+    public void Run(int months) { for (int i = 0; i < months && !World.GameOver; i++) Tick(); }
 
     void Record()
     {

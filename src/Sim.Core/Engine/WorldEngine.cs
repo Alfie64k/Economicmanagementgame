@@ -90,6 +90,12 @@ public static class WorldEngine
         double stressShare = stress / Math.Max(1, gdpSum);
         w.Global.RiskAppetite = Maths.Clamp(w.Global.RiskAppetite - 0.6 * stressShare * 0.1, 0.4, 1.3);
 
+        // ---- climate club: once the big emitters price carbon, a floor spreads to everyone (border-adjustment pressure) ----
+        double totEm = cs.Sum(c => c.EmissionsMt), clubEm = 0, clubPrice = 0;
+        foreach (var c in cs) if (c.CarbonPrice >= 50) { clubEm += c.EmissionsMt; clubPrice += c.CarbonPrice * c.EmissionsMt; }
+        double target = totEm > 0 && clubEm / totEm >= 0.5 ? 0.6 * clubPrice / clubEm : 0;
+        w.Global.GlobalCarbonPrice += (target - w.Global.GlobalCarbonPrice) * 0.05;
+
         // ---- AI retaliation: answer tariffs and mirror sanctions ----
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)

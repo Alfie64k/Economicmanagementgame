@@ -42,7 +42,7 @@ public static class CommandProcessor
                     double r0 = c.TaxRate[(int)t], r = Maths.Clamp(cmd.Value, 0, 0.9);
                     if (Math.Abs(r - r0) < 1e-9) return CommandResult.Pass("No change", 0);
                     double cost = Math.Min(40, 4 + 30 * Math.Abs(r - r0) / Math.Max(0.05, c.TaxRate0[(int)t]));
-                    return Spend(cost, $"{t} tax {(r > r0 ? "raised" : "cut")} to {r:P1}", () => c.TaxRate[(int)t] = r);
+                    return Spend(cost, $"{t} tax {(r > r0 ? "raised" : "cut")} to {Fmt.P(r, 1)}", () => c.TaxRate[(int)t] = r);
                 }
             case "budget":
                 {
@@ -51,21 +51,21 @@ public static class CommandProcessor
                     double d = s - s0;
                     if (Math.Abs(d) < 1e-9) return CommandResult.Pass("No change", 0);
                     double cost = Math.Min(40, 2 + 150 * Math.Abs(d) * (d < 0 ? 1.5 : 1.0));
-                    return Spend(cost, $"{l} budget set to {s:P2} of GDP", () => c.Budget[(int)l] = s);
+                    return Spend(cost, $"{l} budget set to {Fmt.P(s, 2)} of GDP", () => c.Budget[(int)l] = s);
                 }
             case "rate":
                 {
                     bool manual = cmd.Id == "Manual";
                     if (!manual) return Spend(0, "Central bank returned to its rule", () => c.RateMode = RateMode.Auto);
                     double cost = c.CbIndependence > 0.6 ? 12 : 4;
-                    return Spend(cost, $"Policy rate pinned toward {cmd.Value:P2}", () =>
+                    return Spend(cost, $"Policy rate pinned toward {Fmt.P(cmd.Value, 2)}", () =>
                     {
                         c.RateMode = RateMode.Manual; c.ManualRate = Maths.Clamp(cmd.Value, -0.01, 1.5);
                         if (c.CbIndependence > 0.6) c.Cred = Math.Max(0.05, c.Cred - 0.03);
                     });
                 }
             case "minwage":
-                return Spend(10, $"Minimum wage set to {cmd.Value:P0} of median", () => c.MinWageRatio = Maths.Clamp(cmd.Value, 0.2, 0.9));
+                return Spend(10, $"Minimum wage set to {Fmt.P(cmd.Value, 0)} of median", () => c.MinWageRatio = Maths.Clamp(cmd.Value, 0.2, 0.9));
             case "fxregime":
                 {
                     if (!Enum.TryParse<FxRegime>(cmd.Id, out var r)) return CommandResult.Fail("Unknown regime");
@@ -79,7 +79,7 @@ public static class CommandProcessor
                 {
                     if (!Enum.TryParse<Sector>(cmd.Id, out var s)) return CommandResult.Fail("Unknown sector");
                     double v = Maths.Clamp(cmd.Value, 0, 0.15);
-                    return Spend(10, $"{s} subsidy {v:P1} of value added", () => c.SectorSubsidy[(int)s] = v);
+                    return Spend(10, $"{s} subsidy {Fmt.P(v, 1)} of value added", () => c.SectorSubsidy[(int)s] = v);
                 }
             case "tradedeal":
                 {
@@ -97,7 +97,7 @@ public static class CommandProcessor
                     if (p.Id != w.PlayerId && !w.CountryRng[w.Countries.IndexOf(p)].Chance(accept))
                     {
                         c.PoliticalCapital += cost * 0.5;
-                        return CommandResult.Fail($"{p.Name} declined a trade agreement ({accept:P0} chance of acceptance)", cost * 0.5);
+                        return CommandResult.Fail($"{p.Name} declined a trade agreement ({Fmt.P(accept, 0)} chance of acceptance)", cost * 0.5);
                     }
                     ab.Deal = ba.Deal = true; ab.DealStart = ba.DealStart = w.Month;
                     return CommandResult.Pass($"Trade agreement signed with {p.Name}", cost);
@@ -108,7 +108,7 @@ public static class CommandProcessor
                     if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown partner");
                     double v = Maths.Clamp(cmd.Value, 0, 0.5);
                     var r = WorldEngine.Rel(w, c.Id, p.Id);
-                    return Spend(10 + 100 * Math.Abs(v - r.ExtraTariff), $"Extra tariff on {p.Name}: {v:P0}", () => r.ExtraTariff = v);
+                    return Spend(10 + 100 * Math.Abs(v - r.ExtraTariff), $"Extra tariff on {p.Name}: {Fmt.P(v, 0)}", () => r.ExtraTariff = v);
                 }
             case "sanction":
                 {
@@ -130,7 +130,7 @@ public static class CommandProcessor
                     if (dryRun) return CommandResult.Pass($"Would cost {cost:F0} political capital", cost);
                     c.PoliticalCapital -= cost;
                     if (p.Id != w.PlayerId && !w.CountryRng[w.Countries.IndexOf(p)].Chance(accept))
-                    { c.PoliticalCapital += cost * 0.5; return CommandResult.Fail($"{p.Name} declined an alliance ({accept:P0})", cost * 0.5); }
+                    { c.PoliticalCapital += cost * 0.5; return CommandResult.Fail($"{p.Name} declined an alliance ({Fmt.P(accept, 0)})", cost * 0.5); }
                     ab.Alliance = ba.Alliance = true;
                     return CommandResult.Pass($"Alliance formed with {p.Name}", cost);
                 }
@@ -139,7 +139,7 @@ public static class CommandProcessor
                     var p = w.Find(cmd.Id);
                     if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown recipient");
                     double v = Maths.Clamp(cmd.Value, 0.0005, 0.02);
-                    return Spend(5 + 400 * v, $"Aid of {v:P2} of GDP sent to {p.Name}", () =>
+                    return Spend(5 + 400 * v, $"Aid of {Fmt.P(v, 2)} of GDP sent to {p.Name}", () =>
                     {
                         c.OtherRevenue -= v * c.GdpNominal * 6;
                         double usd = v * c.GdpUsdBn;
@@ -189,7 +189,7 @@ public static class CommandProcessor
         {
             ap.Failed = true; c.Policies.Add(ap);
             c.PoliticalCapital += cost * 0.5; // half the capital is recovered after a lost vote
-            return CommandResult.Fail($"The legislature rejected {def.Name} ({pass:P0} chance of passing)", cost * 0.5);
+            return CommandResult.Fail($"The legislature rejected {def.Name} ({Fmt.P(pass, 0)} chance of passing)", cost * 0.5);
         }
         c.Policies.Add(ap);
         return CommandResult.Pass($"{def.Name} passed; takes effect in {def.Delay} months", cost);
@@ -214,6 +214,6 @@ public static class CommandProcessor
             Delay = Maths.Clamp(1 + Math.Max(0, rng.Normal() * 0.2 + 0.10) + 0.6 * c.Corruption * rng.NextDouble(), 0.9, 2.0),
             Bonus = def.Bonus * scale, MaintRate = def.Maint, StartMonth = w.Month,
         });
-        return CommandResult.Pass($"{def.Name} started (budget {def.Cost * scale:P1} of GDP over {def.Months} months)", cost);
+        return CommandResult.Pass($"{def.Name} started (budget {Fmt.P(def.Cost * scale, 1)} of GDP over {def.Months} months)", cost);
     }
 }

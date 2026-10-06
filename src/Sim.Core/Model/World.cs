@@ -19,6 +19,7 @@ public sealed class World
     public bool Stochastic = true;
     public bool RecordHistory = true;
     public bool Advisors = true;
+    public bool Events = true;
     public List<CountryState> Countries = new();
     public Rng[] CountryRng = Array.Empty<Rng>();
     public Rng WorldRng = new();
@@ -30,6 +31,12 @@ public sealed class World
     public List<LoggedCommand> CommandLog = new();
     public Dictionary<string, int> AdvisorLast = new();
     public TradeMatrix Trade = new();
+    public List<ScheduledEvent> Scheduled = new();
+    public List<PendingDecision> Decisions = new();
+    public List<EventRecord> EventHistory = new();
+    public int NextDecisionId = 1;
+    public bool GameOver, GameOverOnLoss = false;
+    public string GameOverReason = "";
     public Dictionary<string, Relation> Relations = new();   // keyed "A>B" (directional)
     public List<Command> Queue = new();      // commands waiting for the next tick boundary
 
@@ -99,3 +106,16 @@ public sealed class Relation
     public int DealStart;
     public double ExtraTariff;   // additional tariff A levies on B's goods
 }
+
+public sealed class ScheduledEvent { public int Month; public string EventId = "", Country = ""; }
+
+public sealed class PendingDecision
+{
+    public int Id, Month, Deadline;
+    public string Country = "", EventId = "", Title = "", Text = "";
+    public List<string> Labels = new();
+    public List<double> Costs = new();
+    public int DefaultChoice;
+}
+
+public sealed class EventRecord { public int Month; public string Country = "", EventId = "", Name = "", Choice = ""; }

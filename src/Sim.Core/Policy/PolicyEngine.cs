@@ -30,7 +30,7 @@ public static class PolicyEngine
             {
                 p.Done = true;
                 if (Enum.TryParse<Asset>(p.Asset, out var a)) c.AssetBoost[(int)a] += p.Bonus * (1 - 0.4 * c.Corruption);
-                string note = p.Overrun > 1.25 ? $" (cost overrun {p.Overrun - 1:P0}" + (p.Delay > 1.15 ? $", {p.Delay - 1:P0} late)" : ")") : p.Delay > 1.15 ? $" ({p.Delay - 1:P0} late)" : "";
+                string note = p.Overrun > 1.25 ? $" (cost overrun {Fmt.P(p.Overrun - 1, 0)}" + (p.Delay > 1.15 ? $", {Fmt.P(p.Delay - 1, 0)} late)" : ")") : p.Delay > 1.15 ? $" ({Fmt.P(p.Delay - 1, 0)} late)" : "";
                 w.Log.Add(new LogEntry { Month = w.Month, Country = c.Id, Kind = "policy", Text = $"Project completed: {PolicyCatalog.Project(p.Id)?.Name ?? p.Id}{note}." });
             }
         }

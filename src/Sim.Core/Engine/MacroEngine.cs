@@ -59,7 +59,7 @@ public static class MacroEngine
         c.HumanCapital += (hcTarget - c.HumanCapital) * 0.04 * dt;
         double lnHc = Math.Log(c.HumanCapital);
 
-        double gA = c.BaseTfpGrowth + 0.012 * lnRnd + 0.010 * lnInf + 0.015 * lnHc + c.Mod("tfp") + shock * 12;
+        double gA = c.BaseTfpGrowth + 0.012 * lnRnd + 0.010 * lnInf + 0.015 * lnHc + c.Mod("tfp") - 0.01 * Math.Max(0, c.Unrest - 0.4) + shock * 12;
         // climate damage is applied to the level of potential output below, not to growth
         for (int s = 0; s < Dim.Sectors; s++)
         {

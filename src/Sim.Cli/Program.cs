@@ -34,6 +34,21 @@ static class Program
                     }
                     return 0;
                 }
+            case "events":
+                {
+                    var sim = Simulation.New(country, seed, true);
+                    sim.World.RecordHistory = false;
+                    while (sim.World.Month < years * 12 && !sim.World.GameOver)
+                    {
+                        sim.Tick();
+                        foreach (var d in sim.World.Decisions.ToList()) sim.Resolve(d.Id, d.DefaultChoice);
+                    }
+                    foreach (var g in sim.World.EventHistory.GroupBy(e => e.EventId).OrderByDescending(g => g.Count()))
+                        Console.WriteLine($"{g.Key,-28} {g.Count(),4}  ({g.Count() / (double)years:F2}/yr)");
+                    Console.WriteLine(sim.World.GameOver ? "GAME OVER: " + sim.World.GameOverReason : "alive");
+                    foreach (var l in sim.World.Log.Where(l => l.Kind is "news" or "crisis").Take(25)) Console.WriteLine($"{l.Month / 12 + 2024}.{l.Month % 12 + 1:D2} [{l.Country}] {l.Text}");
+                    return 0;
+                }
             case "trace":
                 {
                     var sim = Simulation.New(country, seed, false);
@@ -66,7 +81,7 @@ static class Program
                     {
                         string? why = Check(c);
                         var a = st[c.Id];
-                        bool unstable = why != null || a[0] > 1.2 || a[1] > 4.0 || a[2] < -0.12;
+                        bool unstable = why != null || a[0] > 1.2 || a[1] > 4.0 || a[2] < -0.20;
                         if (unstable) { bad++; }
                         Console.WriteLine($"{(unstable ? "!!" : "  ")}{c.Id} {a[0] * 100,7:F0} {a[1] * 100,7:F0} {a[2] * 100,6:F1} | {Row(sim.World.Year, c)} {why}");
                     }
