@@ -24,7 +24,9 @@ public sealed class Simulation
         w.WorldRng = new Rng(Rng.Mix(seed, "world"));
         if (w.Find(playerId) == null) throw new ArgumentException($"Unknown country {playerId}", nameof(playerId));
         Politics.Init(w);
-        return new Simulation(w);
+        var sim = new Simulation(w);
+        sim.RecordNow();
+        return sim;
     }
 
     public void Tick()
@@ -80,12 +82,16 @@ public sealed class Simulation
 
     public void Run(int months) { for (int i = 0; i < months && !World.GameOver; i++) Tick(); }
 
+    public void RecordNow() => Record();
+
     void Record()
     {
         foreach (var c in World.Countries)
         {
             if (!World.History.TryGetValue(c.Id, out var list)) World.History[c.Id] = list = new List<HistoryPoint>();
-            list.Add(Snapshot(c, World.Month));
+            var hp = Snapshot(c, World.Month);
+            if (c.Id == World.PlayerId) hp.SectorVa = (double[])c.SectorVa.Clone();
+            list.Add(hp);
         }
     }
 

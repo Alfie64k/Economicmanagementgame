@@ -5,6 +5,7 @@ namespace Sim.Core.Model;
 public sealed class HistoryPoint
 {
     public int Month;
+    public double[] SectorVa = Array.Empty<double>();
     public double Gdp, GdpUsdBn, Growth, Inflation, Unemployment, DebtToGdp, DeficitToGdp, PolicyRate, Yield10, Fx, Approval, Gini, CaToGdp, EmissionsMt, Stability, Pop;
 }
 

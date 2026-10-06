@@ -66,6 +66,7 @@ public sealed class CountryState
     public double[] FinalDemand0 = new double[Dim.Sectors];
     public double[] SectorSubsidy = new double[Dim.Sectors]; // industrial-policy subsidy (share of sector VA)
     public double Depreciation = 0.05;
+    public double GrowthTrend;        // data: trend real GDP growth
     public double BaseTfpGrowth;      // calibrated annual baseline TFP growth
     public double HumanCapital = 1.0;
     public double Potential;          // potential real GDP

@@ -71,7 +71,7 @@ public static class Calibrator
         c.Budget0 = b.ToArray(); c.Budget = b.ToArray();
 
         // ---- capital & productivity ----
-        double g = d.Macro.GrowthTrend;
+        double g = d.Macro.GrowthTrend; c.GrowthTrend = g;
         double ktot = Maths.Clamp(c.InvPriv / (c.Depreciation + Math.Max(0.0, g)), 1.5 * y0, 5.0 * y0);
         double kw = 0; for (int s = 0; s < n; s++) kw += CapIntensity[s] * v0[s];
         double abar = 0; for (int s = 0; s < n; s++) abar += Alpha[s] * v0[s] / y0;
