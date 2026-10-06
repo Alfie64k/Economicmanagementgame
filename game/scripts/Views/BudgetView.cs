@@ -59,21 +59,38 @@ public partial class BudgetView : View
 
     public BudgetView()
     {
-        _page = Page("Budget", "Set tax rates and departmental budgets, preview the consequences, then enact them. Changes cost political capital; cuts cost more than increases.");
-        Draft.Changed += OnDraft;
+        _page = Page("Budget", "Set tax rates and departmental budgets, preview the consequences, then add them to this turn's plan. They take effect when you end the turn; changes cost political capital, and cuts cost more than increases.");
     }
 
-    public override void _ExitTree() { Draft.Changed -= OnDraft; }
+    public override void _EnterTree() { Draft.Changed += OnDraft; Game.PlanChanged += OnPlan; }
+    public override void _ExitTree() { Draft.Changed -= OnDraft; Game.PlanChanged -= OnPlan; }
+
+    // value the sliders show: the unsent draft, else what is already staged for the end of the turn, else the live setting
+    static double? StagedTax(Tax t) => Game.Staged("tax:" + t)?.Value;
+    static double? StagedLine(BudgetLine l) => Game.Staged("budget:" + l)?.Value;
+    static double TaxNow(CountryState c, Tax t) => StagedTax(t) ?? c.TaxRate[(int)t];
+    static double LineNow(CountryState c, BudgetLine l) => StagedLine(l) ?? c.Budget[(int)l];
+    static double TaxEff(CountryState c, Tax t) => Draft.Taxes.TryGetValue(t, out var d) ? d : TaxNow(c, t);
+    static double LineEff(CountryState c, BudgetLine l) => Draft.Lines.TryGetValue(l, out var d) ? d : LineNow(c, l);
+
+    void OnPlan() { if (_built && Game.Running) { SyncSliders(); UpdateBars(); UpdateSummary(); } }
+
+    void SyncSliders()
+    {
+        var c = Game.Player;
+        foreach (var kv in _taxRows) { kv.Value.s.Baseline = c.TaxRate[(int)kv.Key]; kv.Value.s.SetValue(TaxEff(c, kv.Key)); }
+        foreach (var kv in _lineRows) { kv.Value.s.Baseline = c.Budget[(int)kv.Key]; kv.Value.s.SetValue(LineEff(c, kv.Key)); }
+    }
 
     public override void Refresh()
     {
         if (!Game.Running) return;
         var c = Game.Player;
         if (!_built || _builtMonth != Game.World.Month / 12 * 100 + (Draft.Any ? 1 : 0) && !Draft.Any) Build();
-        UpdateTiles(); UpdateBars(); UpdateSummary();
+        SyncSliders(); UpdateTiles(); UpdateBars(); UpdateSummary();
     }
 
-    void OnDraft() { if (_built) { UpdateBars(); UpdateSummary(); } }
+    void OnDraft() { if (_built && Game.Running) { UpdateBars(); UpdateSummary(); } }
 
     void Build()
     {
@@ -94,7 +111,7 @@ public partial class BudgetView : View
         {
             var tt = t; double r0 = c.TaxRate[(int)t];
             var s = new AppSlider(); s.Setup(0, Math.Min(0.9, Math.Max(0.12, c.TaxRate0[(int)t] * 2.2)), 0.0025, r0, v => UI.Pct(v, 1));
-            s.Changed += v => Draft.Set(tt, v, c.TaxRate[(int)tt]);
+            s.Changed += v => Draft.Set(tt, v, TaxNow(Game.Player, tt));
             var info = UI.Dim("", 12, true);
             _taxRows[t] = (s, info);
             var box = UI.VBox(2, UI.HBox(8, UI.Lbl(TaxNames[t], 14, Pal.Text, true)), s, info);
@@ -108,7 +125,7 @@ public partial class BudgetView : View
         {
             var ll = l; double s0 = c.Budget[(int)l];
             var s = new AppSlider(); s.Setup(0, Math.Min(0.6, Math.Max(0.05, c.Budget0[(int)l] * 3 + 0.02)), 0.0005, s0, v => UI.Pct(v, 2));
-            s.Changed += v => Draft.Set(ll, v, c.Budget[(int)ll]);
+            s.Changed += v => Draft.Set(ll, v, LineNow(Game.Player, ll));
             var info = UI.Dim("", 12, true);
             _lineRows[l] = (s, info);
             var box = UI.VBox(2, UI.Lbl(LineNames[l], 14, Pal.Text, true), s, info);
@@ -119,31 +136,34 @@ public partial class BudgetView : View
         _page.AddChild(cols);
 
         var act = UI.VBox(8);
-        act.AddChild(UI.H2("Your draft"));
+        act.AddChild(UI.H2("This turn's plan and your draft"));
         act.AddChild(_summary); act.AddChild(_cost);
-        _enact = UI.Btn("Enact changes", Enact, true, 160);
-        act.AddChild(UI.HBox(10, _enact, UI.Btn("Preview 5 years", () => _preview.Run(Draft.ToCommands(Game.Player)), false, 160), UI.Btn("Reset draft", ResetDraft, false, 130)));
+        _enact = UI.Btn("Add to plan", AddToPlan, true, 160);
+        act.AddChild(UI.HBox(10, _enact, UI.Btn("Preview 5 years", RunPreview, false, 160), UI.Btn("Reset draft", ResetDraft, false, 130)));
         act.AddChild(_result);
         act.AddChild(_preview);
         _page.AddChild(UI.Card(act));
     }
 
-    public void RunPreview() => _preview.Run(Draft.ToCommands(Game.Player));
+    public void RunPreview() => _preview.Run(Game.Sim!.Merged(Draft.ToCommands(Game.Player)));
 
     void ResetDraft()
     {
         Draft.Clear(); _built = false; Refresh();
     }
 
-    void Enact()
+    void AddToPlan()
     {
-        var c = Game.Player; var cmds = Draft.ToCommands(c);
-        var msgs = new List<string>();
-        foreach (var cmd in cmds) { var r = Game.Sim!.Execute(cmd); msgs.Add((r.Ok ? "✔ " : "✘ ") + r.Message); }
-        Draft.Clear(); _built = false;
-        Game.NotifyChanged();
-        Refresh();
-        _result.Text = string.Join("\n", msgs);
+        var c = Game.Player; var msgs = new List<string>();
+        foreach (var cmd in Draft.ToCommands(c))
+        {
+            var r = Game.Stage(cmd);
+            msgs.Add(PlanUi.Feedback(r, cmd));
+            if (r.Ok) { if (cmd.Type == "tax") Draft.Taxes.Remove(Enum.Parse<Tax>(cmd.Id)); else Draft.Lines.Remove(Enum.Parse<BudgetLine>(cmd.Id)); }
+        }
+        Draft.Clear();
+        SyncSliders(); UpdateBars(); UpdateSummary();
+        _result.Text = string.Join("\n", msgs) + (Game.Sim!.Plan.Count > 0 ? "\nNothing changes until you end the turn." : "");
     }
 
     void UpdateTiles()
@@ -168,12 +188,12 @@ public partial class BudgetView : View
         int i = 0;
         foreach (Tax t in Enum.GetValues<Tax>())
         {
-            double rate = Draft.Taxes.TryGetValue(t, out var d) ? d : c.TaxRate[(int)t];
+            double rate = TaxEff(c, t);
             double rev = FiscalEngine.TaxRevenueAt(c, t, rate, gdp, c.Cons, c.Imports) / gdp;
             double rev0 = FiscalEngine.TaxRevenueAt(c, t, c.TaxRate[(int)t], gdp, c.Cons, c.Imports) / gdp;
             taxSegs.Add(new Seg { Label = TaxNames[t], Value = rev, Color = Pal.Series[i % 8] }); i++;
             if (_taxRows.TryGetValue(t, out var row))
-                row.info.Text = $"raises {UI.Pct(rev, 1)} of GDP" + (Math.Abs(rev - rev0) > 1e-5 ? $"  ({(rev >= rev0 ? "+" : "")}{(rev - rev0) * 100:0.00}pp vs now)" : "");
+                row.info.Text = $"raises {UI.Pct(rev, 1)} of GDP" + (Math.Abs(rev - rev0) > 1e-5 ? $"  ({(rev >= rev0 ? "+" : "")}{(rev - rev0) * 100:0.00}pp vs now)" : "") + (Draft.Taxes.ContainsKey(t) ? "  · draft" : StagedTax(t) != null ? "  · in the plan" : "");
         }
         double other = c.OtherRevShare + c.Mod("revenue") + c.ResourceRev0Share * Game.World.Global.OilIdx;
         if (other > 0.001) taxSegs.Add(new Seg { Label = "Resource & other", Value = other, Color = Pal.Series[7] });
@@ -182,13 +202,13 @@ public partial class BudgetView : View
         var lineSegs = new List<Seg>(); i = 0;
         foreach (BudgetLine l in Enum.GetValues<BudgetLine>())
         {
-            double share = Draft.Lines.TryGetValue(l, out var d) ? d : c.Budget[(int)l];
+            double share = LineEff(c, l);
             double mult = l == BudgetLine.Social ? Math.Pow(c.Old / Math.Max(1e-6, c.Old0), 0.4) : 1;
             lineSegs.Add(new Seg { Label = LineNames[l], Value = share * mult * c.Potential / gdp, Color = Pal.Series[i % 8] }); i++;
             if (_lineRows.TryGetValue(l, out var row))
             {
                 double now = c.Budget[(int)l] * c.Potential * P;
-                row.info.Text = $"{Money.Local(c, share * c.Potential * P)} a year" + (Math.Abs(share - c.Budget[(int)l]) > 1e-6 ? $"  ({(share >= c.Budget[(int)l] ? "+" : "")}{(share - c.Budget[(int)l]) * 100:0.00}pp of GDP)" : "") + (l == BudgetLine.Social ? "  · rises with ageing" : "");
+                row.info.Text = $"{Money.Local(c, share * c.Potential * P)} a year" + (Math.Abs(share - c.Budget[(int)l]) > 1e-6 ? $"  ({(share >= c.Budget[(int)l] ? "+" : "")}{(share - c.Budget[(int)l]) * 100:0.00}pp of GDP)" : "") + (l == BudgetLine.Social ? "  · rises with ageing" : "") + (Draft.Lines.ContainsKey(l) ? "  · draft" : StagedLine(l) != null ? "  · in the plan" : "");
             }
         }
         lineSegs.Add(new Seg { Label = "Debt interest", Value = c.Interest / Math.Max(1e-9, c.GdpNominal), Color = Pal.Bad });
@@ -198,19 +218,36 @@ public partial class BudgetView : View
 
     void UpdateSummary()
     {
-        var c = Game.Player;
-        var cmds = Draft.ToCommands(c);
-        if (cmds.Count == 0) { _summary.Text = "No changes drafted. Move a slider to experiment."; _cost.Text = ""; _enact.Disabled = true; return; }
-        double gdp = c.Gdp;
-        double dRev = 0, dSpend = 0;
-        foreach (var kv in Draft.Taxes) dRev += (FiscalEngine.TaxRevenueAt(c, kv.Key, kv.Value, gdp, c.Cons, c.Imports) - FiscalEngine.TaxRevenueAt(c, kv.Key, c.TaxRate[(int)kv.Key], gdp, c.Cons, c.Imports)) / gdp;
-        foreach (var kv in Draft.Lines) dSpend += (kv.Value - c.Budget[(int)kv.Key]) * c.Potential / gdp;
+        var c = Game.Player; var sim = Game.Sim!;
+        var cmds = Draft.ToCommands(c); int staged = sim.Plan.Count;
+        // the combined effect of the plan and the draft against today's live settings, before economic feedback
+        double gdp = c.Gdp, dRev = 0, dSpend = 0; int nTax = 0, nLine = 0;
+        foreach (Tax t in Enum.GetValues<Tax>())
+        {
+            double eff = TaxEff(c, t); if (Math.Abs(eff - c.TaxRate[(int)t]) < 1e-9) continue; nTax++;
+            dRev += (FiscalEngine.TaxRevenueAt(c, t, eff, gdp, c.Cons, c.Imports) - FiscalEngine.TaxRevenueAt(c, t, c.TaxRate[(int)t], gdp, c.Cons, c.Imports)) / gdp;
+        }
+        foreach (BudgetLine l in Enum.GetValues<BudgetLine>())
+        {
+            double eff = LineEff(c, l); if (Math.Abs(eff - c.Budget[(int)l]) < 1e-9) continue; nLine++;
+            dSpend += (eff - c.Budget[(int)l]) * c.Potential / gdp;
+        }
+        _enact.Disabled = cmds.Count == 0;
+        if (nTax + nLine == 0 && cmds.Count == 0)
+        {
+            _summary.Text = staged == 0 ? "No changes yet. Move a slider to experiment, then add it to the plan." : $"{staged} action{(staged == 1 ? "" : "s")} in the plan (see the Plan button). Nothing here differs from today's settings.";
+            _cost.Text = ""; return;
+        }
         double dDef = dSpend - dRev;
-        _summary.Text = $"{cmds.Count} change{(cmds.Count > 1 ? "s" : "")}: revenue {dRev * 100:+0.00;-0.00}pp, spending {dSpend * 100:+0.00;-0.00}pp → deficit {dDef * 100:+0.00;-0.00}pp of GDP before economic feedback.";
-        double pc = Draft.PoliticalCost(Game.World, cmds);
-        bool ok = pc <= c.PoliticalCapital;
-        _cost.Text = $"Political capital: {pc:0} needed, {c.PoliticalCapital:0} available" + (ok ? "" : "  — not enough; trim the draft");
+        string draftNote = cmds.Count > 0 ? $"{cmds.Count} unsent draft change{(cmds.Count > 1 ? "s" : "")}" : "";
+        string planNote = Game.Sim!.Plan.Any(q => q.Type is "tax" or "budget") ? "changes already in the plan" : "";
+        _summary.Text = $"{string.Join(" + ", new[] { planNote, draftNote }.Where(x => x != ""))}: revenue {dRev * 100:+0.00;-0.00}pp, spending {dSpend * 100:+0.00;-0.00}pp → deficit {dDef * 100:+0.00;-0.00}pp of GDP before economic feedback.";
+        double draftCost = Draft.PoliticalCost(Game.World, cmds);
+        var keys = cmds.Select(Simulation.KeyOf).ToHashSet();
+        double others = sim.Plan.Where(q => !keys.Contains(Simulation.KeyOf(q))).Sum(q => CommandProcessor.Apply(Game.World, q, true).PcCost);
+        double total = draftCost + others; bool ok = total <= c.PoliticalCapital + 1e-9;
+        _cost.Text = $"Political capital: {total:0} needed this turn (plan and draft), {c.PoliticalCapital:0} banked" + (ok ? "" : "  — not enough; trim the draft or the plan");
         _cost.AddThemeColorOverride("font_color", ok ? Pal.Warn : Pal.Bad);
-        _enact.Disabled = !ok;
+        _enact.Disabled = cmds.Count == 0 || !ok;
     }
 }

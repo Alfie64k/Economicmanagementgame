@@ -47,6 +47,7 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 
 | Key / action | Effect |
 |---|---|
+| Enter | End turn (play one month) |
 | Space | Pause / resume |
 | 1 – 4 | Speed (1 = slowest) |
 | Ctrl+Tab or PageDown / PageUp | Next / previous page |
@@ -61,11 +62,12 @@ dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 1. Main menu → **New game (sandbox)** → pick Germany (stable) or Brazil (more drama) → **Start as this country**. (For guided play use **Scenarios & campaign**, starting with "1. Your First Budget".)
 2. Dashboard: note GDP growth, inflation, unemployment, debt/GDP, approval. Press **Space**, speed 3, run two years.
 3. **Monetary**: switch from rule to manual, raise the policy rate 2pp; watch inflation, FX and the output gap respond with a lag.
-4. **Budget**: drag a tax slider; the preview panel shows the projected effect before you commit. Commit one cut and one spending rise.
-5. **Policies**: propose one; it needs political capital and a legislative vote.
-6. **Forecast**: fan chart of the next ten years; compare with and without your changes.
-7. **World map**: change the overlay, click a partner, try a trade deal.
-8. Let a crisis event pop up; choose between options. Open **Report** for the scorecard and the "why did this change?" attribution.
-9. Esc → **Save to slot 1** → Quit to main menu → **Load slot 1** (or **Continue autosave**).
+4. **Budget**: drag a tax slider; the preview panel shows the projected effect before you commit. **Add** one cut and one spending rise **to the plan**, then open **Plan** in the top bar to review it. Nothing has happened yet: political capital, the news feed and adviser notes stay put.
+5. **Policies**: add one to the plan; it needs political capital and a legislative vote, both resolved when you end the turn.
+6. Press **End turn ▸** (Enter): the plan is applied first, then the economy moves a month, and the news feed and adviser notes update. Running the clock with Space or 1–4 applies whatever is staged on its first month.
+7. **Forecast**: fan chart of the next ten years; compare with and without your changes.
+8. **World map**: change the overlay, click a partner, try a trade deal.
+9. Let a crisis event pop up; choose between options. Open **Report** for the scorecard and the "why did this change?" attribution.
+10. Esc → **Save to slot 1** → Quit to main menu → **Load slot 1** (or **Continue autosave**).
 
 Please note anything that feels broken, unreadable or boring; this build has had automated testing only, no human playtest.

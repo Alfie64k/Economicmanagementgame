@@ -18,6 +18,7 @@ public partial class MonetaryView : View
     readonly Label _status = UI.Lbl("", 14, Pal.Text, false, HorizontalAlignment.Left, true);
     readonly Label _fxStatus = UI.Lbl("", 14, Pal.Text, false, HorizontalAlignment.Left, true);
     readonly Label _result = UI.Dim("", 13, true);
+    readonly Label _staged = UI.Lbl("", 13, Pal.Warn, true, HorizontalAlignment.Left, true);
     readonly AppSlider _rate = new();
     readonly OptionButton _regime = new();
     bool _init;
@@ -35,8 +36,9 @@ public partial class MonetaryView : View
         _rate.Setup(-0.01, 0.4, 0.0025, 0.03, v => UI.Pct(v, 2)); _rate.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         ctl.AddChild(UI.HBox(10, UI.Lbl("Target rate", 14, Pal.Dim), _rate));
         ctl.AddChild(UI.HBox(10,
-            UI.Btn("Pin the policy rate", () => Do(Command.SetRate(Game.Player.Id, true, _rate.Value)), true),
-            UI.Btn("Return to the rule", () => Do(Command.SetRate(Game.Player.Id, false, 0)))));
+            UI.Btn("Add rate pin to plan", () => Do(Command.SetRate(Game.Player.Id, true, _rate.Value)), true),
+            UI.Btn("Plan a return to the rule", () => Do(Command.SetRate(Game.Player.Id, false, 0)))));
+        ctl.AddChild(_staged);
         ctl.AddChild(UI.Dim("The rate moves at most 0.5pp a month toward your target. Real rates drive investment, saving and the exchange rate with a lag.", 13, true));
         page.AddChild(UI.Card(ctl));
 
@@ -44,13 +46,17 @@ public partial class MonetaryView : View
         fx.AddChild(UI.H2("Exchange-rate regime"));
         fx.AddChild(_fxStatus);
         foreach (var r in new[] { "Float", "Managed", "Peg" }) _regime.AddItem(r);
-        fx.AddChild(UI.HBox(10, _regime, UI.Btn("Change regime", () => Do(Command.SetFxRegime(Game.Player.Id, (FxRegime)_regime.Selected))), UI.Spacer(0, 0, true)));
+        fx.AddChild(UI.HBox(10, _regime, UI.Btn("Add regime change to plan", () => Do(Command.SetFxRegime(Game.Player.Id, (FxRegime)_regime.Selected))), UI.Spacer(0, 0, true)));
         fx.AddChild(UI.Dim("A peg imports the anchor currency's rates and risks a disorderly break if reserves run out. Floats absorb shocks but pass depreciation into prices.", 13, true));
         fx.AddChild(_result);
         page.AddChild(UI.Card(fx));
     }
 
-    void Do(Command cmd) { var r = Game.Sim!.Execute(cmd); _result.Text = (r.Ok ? "✔ " : "✘ ") + r.Message; Game.NotifyChanged(); Refresh(); }
+    void Do(Command cmd) { PlanUi.Stage(cmd, t => _result.Text = t); Refresh(); }
+
+    public override void _EnterTree() { Game.PlanChanged += OnPlan; }
+    public override void _ExitTree() { Game.PlanChanged -= OnPlan; }
+    void OnPlan() { if (Game.Running && IsInsideTree()) Refresh(); }
 
     public override void Refresh()
     {
@@ -79,6 +85,10 @@ public partial class MonetaryView : View
         _status.Text = c.RateMode == RateMode.Manual
             ? $"You are pinning the rate toward {UI.Pct(c.ManualRate, 2)}; the rule would set {UI.Pct(rule, 2)}."
             : $"The central bank is following its rule (target {UI.Pct(c.InflTarget, 0)}). Natural real rate {UI.Pct(c.NaturalRate, 1)}.";
+        var sr = Game.Staged("rate"); var sf = Game.Staged("fxregime");
+        _staged.Text = (sr == null ? "" : sr.Id == "Manual" ? $"In the plan: pin the policy rate at {UI.Pct(sr.Value, 2)} from the end of this turn." : "In the plan: return the central bank to its rule.")
+            + (sr != null && sf != null ? "\n" : "") + (sf == null ? "" : $"In the plan: switch the exchange-rate regime to {sf.Id}.");
+        _staged.Visible = _staged.Text != "";
         _fxStatus.Text = $"Regime: {c.Regime}. Reserves cover {c.Reserves:0.0} months of imports; real exchange rate {c.Rer:0.00}; depreciation {UI.Pct(c.FxChange, 1)} a year.";
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using Godot;
 using Sim.Core.Engine;
 using Sim.Core.Model;
+using Sim.Core.Policy;
 using Sim.Core.Scoring;
 
 namespace EconGame.App;
@@ -18,7 +19,11 @@ public static class Game
     public static bool Running => Sim != null;
     public static World World => Sim!.World;
     public static CountryState Player => Sim!.World.Player;
-    public static event Action? Ticked, Changed, Ended, DecisionPending;
+    public static event Action? Ticked, Changed, Ended, DecisionPending, PlanChanged;
+    /// <summary>Raised after a turn that began with a staged plan: (actions attempted, actions that failed).</summary>
+    public static event Action<int, int>? PlanApplied;
+    /// <summary>Bumped whenever the staged plan changes, so views can include it in their refresh signature.</summary>
+    public static int PlanVersion { get; private set; }
     static int _autosaveMonth = -1;
     public static readonly HashSet<string> ShownHints = new();
 
@@ -32,6 +37,7 @@ public static class Game
         if (scenario == null) Scenarios.ApplyDifficulty(Sim.World, diff);
         Speed = 0; _autosaveMonth = -1;
         Money.Track(Sim.World);
+        Draft.Clear(); RaisePlanChanged();
         Changed?.Invoke();
     }
 
@@ -65,6 +71,7 @@ public static class Game
         Scenario = sid == "-" ? null : Scenarios.Find(sid);
         Speed = 0; ShownHints.Clear();
         Money.Track(Sim.World);
+        Draft.Clear(); RaisePlanChanged();
         Changed?.Invoke();
         return true;
     }
@@ -75,7 +82,13 @@ public static class Game
     public static bool Step()
     {
         if (Sim == null || Sim.World.GameOver || Sim.World.Decisions.Count > 0) return false;
+        int staged = Sim.Plan.Count, logged = Sim.World.CommandLog.Count;
         Sim.Tick();
+        if (staged > 0)
+        {
+            int failed = Sim.World.CommandLog.Skip(logged).Count(l => !l.Ok);
+            PlanVersion++; PlanChanged?.Invoke(); PlanApplied?.Invoke(staged, failed);
+        }
         if (Settings.Autosave && Sim.World.Month % 12 == 0 && Sim.World.Month != _autosaveMonth) { _autosaveMonth = Sim.World.Month; Save("auto"); }
         Ticked?.Invoke();
         if (Sim.World.Decisions.Count > 0) { Speed = 0; DecisionPending?.Invoke(); }
@@ -86,7 +99,27 @@ public static class Game
 
     public static void NotifyChanged() => Changed?.Invoke();
 
-    public static void Quit() { Sim = null; Scenario = null; Speed = 0; }
+    // ---- the staged turn plan (see Simulation.Stage) ----
+    static void RaisePlanChanged() { PlanVersion++; PlanChanged?.Invoke(); }
+
+    /// <summary>Add (or replace) an action in this turn's plan. Nothing changes in the world until the turn is played.</summary>
+    public static CommandResult Stage(Command cmd)
+    {
+        var r = Sim!.Stage(cmd);
+        if (r.Staged || r.Unstaged) RaisePlanChanged();
+        return r;
+    }
+
+    public static void Unstage(string key) { if (Sim!.Unstage(key)) RaisePlanChanged(); }
+    public static void ClearPlan() { if (Sim!.Plan.Count > 0) { Sim.ClearPlan(); RaisePlanChanged(); } }
+
+    /// <summary>The staged command that would replace <paramref name="key"/>'s live setting, if any.</summary>
+    public static Command? Staged(string key) => Sim?.Staged(key);
+
+    /// <summary>Play exactly one month: the plan is applied first, then the economy moves.</summary>
+    public static bool EndTurn() { Speed = 0; return Step(); }
+
+    public static void Quit() { Sim = null; Scenario = null; Speed = 0; Draft.Clear(); PlanVersion++; }
 
     public static List<HistoryPoint> History(string id) => Sim != null && Sim.World.History.TryGetValue(id, out var h) ? h : new List<HistoryPoint>();
 

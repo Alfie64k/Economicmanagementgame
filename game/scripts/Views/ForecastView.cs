@@ -25,7 +25,7 @@ public partial class ForecastView : View
         page.AddChild(UI.HBox(10, run, _status));
         _chips.AddThemeConstantOverride("separation", 6); page.AddChild(_chips);
         page.AddChild(UI.Card(_chart));
-        page.AddChild(Cards.Section("Draft vs unchanged", UI.VBox(8, UI.Btn("Preview current budget draft", () => _preview.Run(Draft.ToCommands(Game.Player)), false, 260), _preview)));
+        page.AddChild(Cards.Section("Plan and draft vs unchanged", UI.VBox(8, UI.Btn("Preview this turn's plan and budget draft", () => _preview.Run(Game.Sim!.Merged(Draft.ToCommands(Game.Player))), false, 300), _preview)));
     }
 
     public override void Refresh()

@@ -62,8 +62,11 @@ public static class SocietyEngine
         c.Corruption = Maths.Clamp(c.Corruption + dt * (c.Mod("corruption") - 0.002 * (c.Democracy - 0.5)), 0, 1);
 
         // political capital: regenerates with approval, capped
-        double regen = (1.2 + 2.2 * c.Approval + c.Mod("polcap")) * (c.Gov == "autocracy" ? 1.2 : 1.0) * (c.Id == w.PlayerId ? w.PcRegenMult : 1.0);
-        c.PoliticalCapital = Maths.Clamp(c.PoliticalCapital + regen, 0, 100) ;
+        c.PoliticalCapital = Maths.Clamp(c.PoliticalCapital + PcRegen(w, c), 0, 100);
         // note: regen is per month; spending happens when policies are enacted
     }
+
+    /// <summary>Political capital regenerated per month at the current approval (what the next tick will add; also used for the top-bar projection).</summary>
+    public static double PcRegen(World w, CountryState c) =>
+        (1.2 + 2.2 * c.Approval + c.Mod("polcap")) * (c.Gov == "autocracy" ? 1.2 : 1.0) * (c.Id == w.PlayerId ? w.PcRegenMult : 1.0);
 }

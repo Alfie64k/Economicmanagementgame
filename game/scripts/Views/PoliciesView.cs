@@ -29,7 +29,7 @@ public partial class PoliciesView : View
 
     public PoliciesView()
     {
-        var page = Page("Policies", "Legislation that reshapes the economy over years. Each costs political capital, takes time to implement and may be voted down in a democracy.");
+        var page = Page("Policies", "Legislation that reshapes the economy over years. Add a bill to this turn's plan; it goes to the vote, and costs its political capital, when you end the turn. It takes time to implement and may be voted down in a democracy.");
         _chips.AddThemeConstantOverride("separation", 6); page.AddChild(_chips);
         page.AddChild(_result);
         _list.AddThemeConstantOverride("separation", 10); page.AddChild(_list);
@@ -39,7 +39,7 @@ public partial class PoliciesView : View
     {
         if (!Game.Running) return;
         var c = Game.Player;
-        int sig = c.Policies.Count * 1000 + c.Policies.Count(p => p.Active) * 10 + (int)(c.PoliticalCapital / 5) + _cat.GetHashCode() % 97;
+        int sig = c.Policies.Count * 1000 + c.Policies.Count(p => p.Active) * 10 + (int)(c.PoliticalCapital / 5) + _cat.GetHashCode() % 97 + Game.PlanVersion * 7919;
         if (sig == _lastSig) return; _lastSig = sig;
         foreach (var ch in _chips.GetChildren().ToList()) ch.QueueFree();
         var cats = new[] { "all" }.Concat(PolicyCatalog.Policies.Select(p => p.Category).Distinct()).ToList();
@@ -67,15 +67,21 @@ public partial class PoliciesView : View
         double pass = c.Gov == "autocracy" ? 0.97 : Math.Clamp(0.55 + 0.6 * (c.Coalition - 0.5) + 0.3 * (c.Approval - 0.4) - 0.003 * def.Pc, 0.2, 0.97);
         var foot = UI.HBox(10, UI.Dim($"Cost {def.Pc * (c.Gov == "autocracy" ? 0.7 : 1):0} political capital · {def.Delay} months to take effect · {UI.Pct(pass, 0)} chance to pass"));
         foot.AddChild(UI.Spacer(0, 0, true));
+        string pkey = "policy:" + def.Id; var pending = Game.Staged(pkey);
         var dry = CommandProcessor.Apply(Game.World, Command.Enact(c.Id, def.Id), true);
-        if (ap == null || ap.Failed)
+        if (pending != null)
         {
-            var b = UI.Btn("Enact", () => Act(Command.Enact(c.Id, def.Id)), true, 100); b.Disabled = !dry.Ok; if (!dry.Ok) b.TooltipText = dry.Message; foot.AddChild(b);
+            foot.AddChild(Cards.Chip(pending.Type == "enact" ? "Proposed: vote at the end of the turn" : "Repeal at the end of the turn", Pal.Warn));
+            foot.AddChild(UI.Btn("Withdraw", () => { Game.Unstage(pkey); _result.Text = "↶ Withdrawn from the plan"; }, false, 100));
         }
-        else foot.AddChild(UI.Btn("Repeal", () => Act(Command.Repeal(c.Id, def.Id)), false, 100));
+        else if (ap == null || ap.Failed)
+        {
+            var b = UI.Btn("Add to plan", () => Act(Command.Enact(c.Id, def.Id)), true, 120); b.Disabled = !dry.Ok; if (!dry.Ok) b.TooltipText = dry.Message; foot.AddChild(b);
+        }
+        else foot.AddChild(UI.Btn("Plan repeal", () => Act(Command.Repeal(c.Id, def.Id)), false, 120));
         box.AddChild(foot);
         return UI.Card(box);
     }
 
-    void Act(Command cmd) { var r = Game.Sim!.Execute(cmd); _result.Text = (r.Ok ? "✔ " : "✘ ") + r.Message; _lastSig = -1; Game.NotifyChanged(); Refresh(); }
+    void Act(Command cmd) { PlanUi.Stage(cmd, t => _result.Text = t); _lastSig = -1; Refresh(); }
 }

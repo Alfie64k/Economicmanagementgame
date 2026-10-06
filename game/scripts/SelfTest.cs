@@ -139,6 +139,27 @@ public partial class SelfTest : Node
         await Hover(dashNav.GlobalPosition + dashNav.Size / 2); await Frames(3); Shot(shots, "03b_nav_hover");
         await Hover(budgetNav.GlobalPosition + budgetNav.Size / 2); await Frames(3); Shot(shots, "03c_nav_selected_hover");
         await Hover(new Vector2(900, 700)); await Frames(2);
+
+        // staged turn: nothing visible changes until the turn is played
+        var pl = Game.Player; double pc0 = pl.PoliticalCapital, tax0 = pl.TaxRate[(int)Sim.Core.Model.Tax.Income]; int log0 = Game.World.Log.Count, month0 = Game.World.Month;
+        var st = Game.Stage(Sim.Core.Model.Command.SetTax(pl.Id, Sim.Core.Model.Tax.Income, tax0 + 0.01));
+        if (!st.Staged) throw new Exception("staging a tax change failed: " + st.Message);
+        await Frames(20);
+        if (pl.PoliticalCapital != pc0 || pl.TaxRate[(int)Sim.Core.Model.Tax.Income] != tax0 || Game.World.Log.Count != log0 || Game.World.Month != month0) throw new Exception("staging changed the world before the turn was played");
+        var planBtn = FindButton(shell, b => b.Text.StartsWith("Plan ·")) ?? throw new Exception("no Plan button");
+        if (!planBtn.Text.Contains("1")) throw new Exception("Plan button does not show the staged action: " + planBtn.Text);
+        Shot(shots, "14_plan_staged");
+        await Click(planBtn.GlobalPosition + planBtn.Size / 2); await Frames(8); Shot(shots, "14b_plan_tray");
+        if (FindButton(main, b => b.Text == "Clear plan") == null) throw new Exception("plan tray did not open");
+        var closeBtn = FindButton(main, b => b.Text == "Close") ?? throw new Exception("no Close button in the plan tray");
+        await Click(closeBtn.GlobalPosition + closeBtn.Size / 2); await Frames(6);
+        await Key(Godot.Key.Enter); await Frames(10);
+        if (Game.World.Month != month0 + 1) throw new Exception("Enter did not end the turn");
+        if (Game.Sim!.Plan.Count != 0) throw new Exception("plan not cleared after the turn");
+        if (!(Game.Player.TaxRate[(int)Sim.Core.Model.Tax.Income] > tax0)) throw new Exception("planned tax change was not applied by the turn");
+        if (!(Game.Player.PoliticalCapital != pc0)) throw new Exception("political capital did not move when the turn was played");
+        Shot(shots, "14c_turn_played");
+
         await Key(Godot.Key.Space); await Frames(2);
         if (Game.Speed == 0) throw new Exception("Space did not start the clock");
         await Key(Godot.Key.Space); await Frames(2);

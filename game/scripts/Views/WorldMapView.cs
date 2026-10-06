@@ -114,7 +114,7 @@ public partial class WorldMapView : View
     {
         if (!Game.Running) return;
         var w = Game.World;
-        int sig = w.Month / 3 * 100000 + _overlay.Selected * 1000 + (_flows.ButtonPressed ? 1 : 0) * 100 + (_events.ButtonPressed ? 1 : 0) * 10 + (_regionMode ? 1 : 0) + (_sel?.Id.GetHashCode() ?? 0) % 997 * 7 + (_regionFocus?.GetHashCode() ?? 0) % 31 + _regionMetric.Selected * 13;
+        int sig = w.Month / 3 * 100000 + _overlay.Selected * 1000 + (_flows.ButtonPressed ? 1 : 0) * 100 + (_events.ButtonPressed ? 1 : 0) * 10 + (_regionMode ? 1 : 0) + (_sel?.Id.GetHashCode() ?? 0) % 997 * 7 + (_regionFocus?.GetHashCode() ?? 0) % 31 + _regionMetric.Selected * 13 + Game.PlanVersion * 7919;
         if (sig == _sig) return; _sig = sig;
         if (_built == 0) { _built = 1; _map.Fit(); }
         var o = Ov;
@@ -216,14 +216,14 @@ public partial class WorldMapView : View
             _panel.AddChild(UI.Dim($"{UI.Pct(w.Trade.W[mi][ci], 1)} of your exports go here. " + (mineRel.Alliance ? "Allied. " : "") + (mineRel.Deal ? "Trade agreement in place. " : "") +
                 (mineRel.ExtraTariff > 0 ? $"Your tariff {UI.Pct(mineRel.ExtraTariff, 0)}. " : "") + (theirs.ExtraTariff > 0 ? $"Their tariff {UI.Pct(theirs.ExtraTariff, 0)}. " : "") + (mineRel.Sanction ? "You sanction them. " : "") + (theirs.Sanction ? "They sanction you." : ""), 13, true));
             var row = new HFlowContainer(); row.AddThemeConstantOverride("h_separation", 6); row.AddThemeConstantOverride("v_separation", 6);
-            void A(string label, Command cmd, bool accent = false) { var dry = CommandProcessor.Apply(w, cmd, true); var b = UI.Btn($"{label} ({dry.PcCost:0})", () => Do(cmd), accent); b.Disabled = !dry.Ok && dry.PcCost == 0; row.AddChild(b); }
+            void A(string label, Command cmd, bool accent = false) => row.AddChild(PlanUi.Toggle(label, cmd, t => _result.Text = t, accent));
             if (!mineRel.Deal) A("Trade deal", Command.TradeDeal(me.Id, c.Id), true);
             if (!mineRel.Alliance) A("Alliance", Command.Alliance(me.Id, c.Id));
             A(mineRel.Sanction ? "Lift sanctions" : "Sanction", Command.Sanction(me.Id, c.Id, !mineRel.Sanction));
             A("Tariff 10%", Command.Tariff(me.Id, c.Id, mineRel.ExtraTariff > 0 ? 0 : 0.10));
             A("Aid 0.2%", Command.Aid(me.Id, c.Id, 0.002));
             _panel.AddChild(row);
-            _panel.AddChild(UI.Dim("Numbers in brackets are political capital.", 11));
+            _panel.AddChild(UI.Dim("Numbers in brackets are political capital, charged when you end the turn. Click again to withdraw.", 11, true));
             _panel.AddChild(_result);
         }
 
@@ -260,11 +260,6 @@ public partial class WorldMapView : View
     }
 
     readonly Label _result = UI.Dim("", 12, true);
-
-    void Do(Command cmd)
-    {
-        var r = Game.Sim!.Execute(cmd); _result.Text = (r.Ok ? "✔ " : "✘ ") + r.Message; _sig = -1; Game.NotifyChanged(); Refresh();
-    }
 
     sealed partial class Legend : Control
     {

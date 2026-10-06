@@ -70,7 +70,7 @@ public partial class TradeView : View
         var g = w.Global;
         _world.Text = $"World: oil {g.OilIdx * 100:0}, food {g.FoodIdx * 100:0}, USD rate {UI.Pct(g.WorldRate, 2)}, risk appetite {g.RiskAppetite:0.00}, global temperature +{g.TempAnomaly - 0.0:0.00}°C, carbon-price floor {g.GlobalCarbonPrice:0}/t.";
 
-        int sig = w.Month / 3 * 100 + w.Relations.Count + (_sel?.Id.GetHashCode() ?? 0) % 7;
+        int sig = w.Month / 3 * 100 + w.Relations.Count + (_sel?.Id.GetHashCode() ?? 0) % 7 + Game.PlanVersion * 7919;
         if (sig == _sig) return; _sig = sig;
         int me = w.Countries.IndexOf(c);
         var rows = new List<object>();
@@ -92,18 +92,21 @@ public partial class TradeView : View
         _actions.AddChild(UI.H2($"Relations with {p.Name}"));
         _actions.AddChild(UI.Dim($"{p.Region} · {p.Gov} · GDP {Money.Gbp(p.GdpUsdBn)} · {Game.World.Trade.W[w.Countries.IndexOf(me)][w.Countries.IndexOf(p)] * 100:0.0}% of your exports", 13));
         var row = UI.HBox(8);
-        void A(string label, Command cmd, bool accent = false) { var dry = CommandProcessor.Apply(w, cmd, true); var b = UI.Btn($"{label}  ({dry.PcCost:0} PC)", () => Do(cmd), accent); b.Disabled = !dry.Ok && dry.PcCost == 0; row.AddChild(b); }
+        void A(string label, Command cmd, bool accent = false) => row.AddChild(PlanUi.Toggle(label, cmd, t => _result.Text = t, accent));
         if (!mine.Deal) A("Propose trade agreement", Command.TradeDeal(me.Id, p.Id), true);
         if (!mine.Alliance) A("Propose alliance", Command.Alliance(me.Id, p.Id));
         A(mine.Sanction ? "Lift sanctions" : "Impose sanctions", Command.Sanction(me.Id, p.Id, !mine.Sanction));
         _actions.AddChild(row);
 
-        _tariff = new AppSlider { SizeFlagsHorizontal = SizeFlags.ExpandFill }; _tariff.Setup(0, 0.4, 0.01, mine.ExtraTariff, v => UI.Pct(v, 0));
-        _actions.AddChild(UI.HBox(10, UI.Lbl("Extra tariff on their goods", 14, Pal.Dim), _tariff, UI.Btn("Apply tariff", () => Do(Command.Tariff(me.Id, p.Id, _tariff.Value)))));
-        _aid = new AppSlider { SizeFlagsHorizontal = SizeFlags.ExpandFill }; _aid.Setup(0.0005, 0.02, 0.0005, 0.002, v => UI.Pct(v, 2));
-        _actions.AddChild(UI.HBox(10, UI.Lbl("Aid (share of your GDP)", 14, Pal.Dim), _aid, UI.Btn("Send aid", () => Do(Command.Aid(me.Id, p.Id, _aid.Value)))));
-        _actions.AddChild(UI.Dim("PC = political capital. AI governments retaliate against tariffs; deals need the partner's consent.", 12, true));
+        var stagedTariff = Game.Staged("tariff:" + p.Id); var stagedAid = Game.Staged("aid:" + p.Id);
+        _tariff = new AppSlider { SizeFlagsHorizontal = SizeFlags.ExpandFill }; _tariff.Setup(0, 0.4, 0.01, mine.ExtraTariff, v => UI.Pct(v, 0)); if (stagedTariff != null) _tariff.SetValue(stagedTariff.Value);
+        _actions.AddChild(UI.HBox(10, UI.Lbl("Extra tariff on their goods", 14, Pal.Dim), _tariff, UI.Btn(stagedTariff != null ? "Update tariff in plan" : "Add tariff to plan", () => Do(Command.Tariff(me.Id, p.Id, _tariff.Value)))));
+        _aid = new AppSlider { SizeFlagsHorizontal = SizeFlags.ExpandFill }; _aid.Setup(0.0005, 0.02, 0.0005, stagedAid?.Value ?? 0.002, v => UI.Pct(v, 2));
+        _actions.AddChild(UI.HBox(10, UI.Lbl("Aid (share of your GDP)", 14, Pal.Dim), _aid, UI.Btn(stagedAid != null ? "Update aid in plan" : "Add aid to plan", () => Do(Command.Aid(me.Id, p.Id, _aid.Value)))));
+        if (stagedTariff != null) _actions.AddChild(UI.Btn("Withdraw tariff from plan", () => Game.Unstage("tariff:" + p.Id)));
+        if (stagedAid != null) _actions.AddChild(UI.Btn("Withdraw aid from plan", () => Game.Unstage("aid:" + p.Id)));
+        _actions.AddChild(UI.Dim("PC = political capital, charged when the turn is played. AI governments retaliate against tariffs; deals need the partner's consent.", 12, true));
     }
 
-    void Do(Command cmd) { var r = Game.Sim!.Execute(cmd); _result.Text = (r.Ok ? "✔ " : "✘ ") + r.Message; _sig = -1; Game.NotifyChanged(); Refresh(); }
+    void Do(Command cmd) { PlanUi.Stage(cmd, t => _result.Text = t); _sig = -1; Refresh(); }
 }

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Sim.Core.Engine;
 using Sim.Core.Events;
 using Sim.Core.Model;
+using Sim.Core.Policy;
 using Sim.Core.Scoring;
 using EconGame.App;
 using EconGame.Ui;
@@ -21,7 +23,9 @@ public partial class GameShell : Control
     View? _current; string _currentName = "";
     Control _pageHost = new();
     Label _date = new(), _country = new(), _pcLabel = new(), _score = new(), _alert = new();
-    ProgressBar _pc = new();
+    readonly PcBar _pcBar = new();
+    Button _endTurn = new(), _planBtn = new();
+    VBoxContainer? _planBox;
     readonly Dictionary<int, Button> _speedBtns = new();
     VBoxContainer _feed = new();
     string _feedFilter = "all";
@@ -60,7 +64,7 @@ public partial class GameShell : Control
         AddChild(_toasts);
         Game.DecisionPending += ShowDecision;
         Game.Ended += ShowEnd;
-        Game.Ticked += MarkDirty; Game.Changed += MarkDirty;
+        Game.Ticked += MarkDirty; Game.Changed += MarkDirty; Game.PlanChanged += OnPlanChanged; Game.PlanApplied += OnPlanApplied;
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
         Navigate("Dashboard");
         UpdateTop(); UpdateFeed(true);
@@ -68,7 +72,7 @@ public partial class GameShell : Control
         if (Game.Scenario != null) ShowBriefing();
     }
 
-    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; }
+    public override void _ExitTree() { Game.DecisionPending -= ShowDecision; Game.Ended -= ShowEnd; Game.Ticked -= MarkDirty; Game.Changed -= MarkDirty; Game.PlanChanged -= OnPlanChanged; Game.PlanApplied -= OnPlanApplied; }
 
     // ---------------- layout ----------------
     Control BuildTopBar()
@@ -88,13 +92,15 @@ public partial class GameShell : Control
             b.TooltipText = i == 0 ? "Pause (Space)" : $"Speed {i} (key {i})";
         }
         h.AddChild(speeds);
-        h.AddChild(UI.Btn("+1 month", () => { Game.Speed = 0; Game.Step(); MarkDirty(); }, false, 0));
+        _planBtn = UI.Btn("Plan · empty", ShowPlan, false, 0);
+        _endTurn = UI.Btn("End turn ▸", EndTurn, true, 0);
+        _endTurn.TooltipText = "Play one month (Enter). Your plan is applied first, then the economy moves.";
+        h.AddChild(_planBtn); h.AddChild(_endTurn);
         _ticker = UI.Lbl("", 13, Pal.Dim); _ticker.ClipText = true; _ticker.CustomMinimumSize = new Vector2(120, 0); _ticker.SizeFlagsHorizontal = SizeFlags.ExpandFill; h.AddChild(_ticker);
         _alert = UI.Lbl("", 14, Pal.Warn, true); h.AddChild(_alert);
         var pcBox = UI.VBox(2); _pcLabel = UI.Lbl("Political capital", 12, Pal.Dim);
-        _pc = new ProgressBar { MaxValue = 100, ShowPercentage = false, CustomMinimumSize = new Vector2(160, 10) };
-        _pc.AddThemeStyleboxOverride("background", AppTheme.Box(Pal.Border, 5)); _pc.AddThemeStyleboxOverride("fill", AppTheme.Box(Pal.Accent, 5));
-        pcBox.AddChild(_pcLabel); pcBox.AddChild(_pc); h.AddChild(pcBox);
+        _pcBar.CustomMinimumSize = new Vector2(180, 10);
+        pcBox.AddChild(_pcLabel); pcBox.AddChild(_pcBar); h.AddChild(pcBox);
         _score = UI.Lbl("", 18, Pal.Accent, true); h.AddChild(_score);
         h.AddChild(UI.Btn("Menu", ShowMenu));
         bar.AddChild(h);
@@ -193,6 +199,7 @@ public partial class GameShell : Control
         else if (k.Keycode >= Key.Key1 && k.Keycode <= Key.Key4) SetSpeed((int)k.Keycode - (int)Key.Key0);
         else if (k.Keycode == Key.Pagedown || (k.Keycode == Key.Tab && k.CtrlPressed && !k.ShiftPressed)) CyclePage(1);
         else if (k.Keycode == Key.Pageup || (k.Keycode == Key.Tab && k.CtrlPressed && k.ShiftPressed)) CyclePage(-1);
+        else if ((k.Keycode == Key.Enter || k.Keycode == Key.KpEnter) && !k.AltPressed) EndTurn();
         else if (k.Keycode == Key.Escape) ShowMenu();
         else if (k.Keycode == Key.F1) ShowHelp();
     }
@@ -207,7 +214,7 @@ public partial class GameShell : Control
         {
             kv.Value.SetPressedNoSignal(kv.Key == Game.Speed);
         }
-        _pc.Value = c.PoliticalCapital; _pcLabel.Text = $"Political capital  {c.PoliticalCapital:0}/100";
+        UpdatePlanReadouts();
         var sc = Scorer.Compute(w, c); _score.Text = $"{sc.Grade} {sc.Total:0}";
         _alert.Text = w.Decisions.Count > 0 ? "⚠ Decision required" : Game.Speed == 0 ? "Paused" : "";
         var last = w.Log.LastOrDefault(l => (l.Country == w.PlayerId || l.Country == "WORLD") && l.Kind is "event" or "crisis" or "news");
@@ -237,6 +244,99 @@ public partial class GameShell : Control
         txt.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         p.AddChild(UI.HBox(8, bar, txt));
         return p;
+    }
+
+    // ---------------- the turn plan ----------------
+    void UpdatePlanReadouts()
+    {
+        var c = Game.Player; var sim = Game.Sim!; int n = sim.Plan.Count;
+        double pend = n > 0 ? sim.PendingPcCost() : 0, bank = c.PoliticalCapital;
+        double next = Math.Min(100, Math.Max(0, bank - pend) + SocietyEngine.PcRegen(Game.World, c));
+        _pcBar.Set(bank, pend, next);
+        _pcLabel.Text = n > 0 ? $"Political capital  {bank:0}/100  ·  plan −{pend:0}  →  {bank - pend:0}" : $"Political capital  {bank:0}/100";
+        _pcBar.TooltipText = $"Banked {bank:0} of 100. It changes only when a turn is played: the plan spends {pend:0}, then about +{SocietyEngine.PcRegen(Game.World, c):0.0} regenerates (marker: about {next:0} next turn).";
+        _planBtn.Text = n == 0 ? "Plan · empty" : $"Plan · {n}";
+        _planBtn.TooltipText = n == 0 ? "Nothing staged. Changes you make are collected here and applied only when you end the turn." : $"{n} staged action{(n == 1 ? "" : "s")}, {pend:0} political capital. Click to review.";
+        _endTurn.Text = n == 0 ? "End turn ▸" : $"End turn ▸ ({n})";
+    }
+
+    void OnPlanChanged()
+    {
+        if (!Game.Running) return;
+        UpdatePlanReadouts(); MarkDirty();
+        if (_modal == null) _planBox = null;
+        else if (_planBox != null && IsInstanceValid(_planBox)) BuildPlan();
+    }
+
+    void OnPlanApplied(int staged, int failed)
+    {
+        string msg = failed == 0 ? $"Turn played: {staged} planned action{(staged == 1 ? "" : "s")} applied." : $"Turn played: {staged - failed} of {staged} planned actions applied; {failed} failed (see the news feed).";
+        Toast(msg, failed == 0 ? Pal.Accent : Pal.Warn);
+    }
+
+    void EndTurn()
+    {
+        if (!Game.Running || _modal != null || Game.World.Decisions.Count > 0 || Game.World.GameOver) return;
+        var bad = Game.Sim!.PlanItems().Where(i => !i.Ok || !i.Affordable).ToList();
+        if (bad.Count > 0) { ShowEndTurnConfirm(bad); return; }
+        Game.EndTurn(); MarkDirty();
+    }
+
+    void ShowEndTurnConfirm(List<Simulation.PlanItem> bad)
+    {
+        var box = UI.VBox(10);
+        box.AddChild(UI.Lbl("Some planned actions will fail", 22, Pal.Warn, true));
+        box.AddChild(UI.Dim("The situation has changed since these were staged. Fix the plan, or play the turn and accept the failures.", 13, true));
+        foreach (var i in bad) box.AddChild(UI.Lbl($"✘ {i.Label}" + (i.Note != "" ? $" — {i.Note}" : " — not enough political capital left after earlier items"), 13, Pal.Bad, false, HorizontalAlignment.Left, true));
+        box.AddChild(UI.HBox(10, UI.Btn("Review plan", () => { Close(); ShowPlan(); }, true), UI.Btn("End turn anyway", () => { Close(); Game.EndTurn(); MarkDirty(); })));
+        Overlay(box);
+    }
+
+    void ShowPlan()
+    {
+        if (_modal != null) return;
+        _planBox = UI.VBox(10); BuildPlan(); Overlay(_planBox, 780);
+    }
+
+    void BuildPlan()
+    {
+        var box = _planBox; if (box == null) return;
+        foreach (var ch in box.GetChildren().ToList()) { box.RemoveChild(ch); ch.QueueFree(); }
+        var sim = Game.Sim!; var c = Game.Player; var items = sim.PlanItems();
+        double cost = items.Sum(i => i.PcCost), regen = SocietyEngine.PcRegen(Game.World, c);
+        box.AddChild(UI.Lbl("Turn plan", 26, Pal.Text, true));
+        box.AddChild(UI.Dim("Staged actions are priced now but applied only when you end the turn, in this order. Change your mind freely: nothing has happened yet, and political capital, the news feed and adviser notes stay as they are until then.", 13, true));
+        if (items.Count == 0)
+        {
+            box.AddChild(UI.Lbl("Nothing staged yet.", 16, Pal.Dim));
+            box.AddChild(UI.Dim("Use “Add to plan” on the Budget, Monetary, Policies, Investment, Trade and World map pages.", 13, true));
+        }
+        else
+        {
+            box.AddChild(UI.Lbl($"{items.Count} action{(items.Count == 1 ? "" : "s")} · {cost:0} of {c.PoliticalCapital:0} political capital · {Math.Max(0, c.PoliticalCapital - cost):0} left after the turn, about {Math.Min(100, Math.Max(0, c.PoliticalCapital - cost) + regen):0} once it regenerates", 14, cost > c.PoliticalCapital ? Pal.Bad : Pal.Accent, true));
+            var list = UI.VBox(4);
+            for (int n = 0; n < items.Count; n++)
+            {
+                var it = items[n]; bool good = it.Ok && it.Affordable;
+                var row = UI.HBox(10);
+                row.AddChild(UI.Lbl($"{n + 1}.", 14, Pal.Dim));
+                var lbl = UI.Lbl(it.Label, 14, good ? Pal.Text : Pal.Bad, false, HorizontalAlignment.Left, true); lbl.SizeFlagsHorizontal = SizeFlags.ExpandFill; row.AddChild(lbl);
+                row.AddChild(Cards.Chip(it.PcCost > 0 ? $"−{it.PcCost:0} PC" : "free", it.PcCost > 0 ? Pal.Warn : Pal.Faint));
+                if (!good) row.AddChild(Cards.Chip(it.Ok ? "can't afford" : "will fail", Pal.Bad));
+                string key = it.Key; var rm = UI.Btn("Remove", () => Game.Unstage(key), false, 90); row.AddChild(rm);
+                if (!good && it.Note != "") row.TooltipText = it.Note;
+                list.AddChild(UI.Card(row, Pal.PanelAlt, 8));
+            }
+            var sc = UI.Scroll(list); sc.SizeFlagsVertical = SizeFlags.ShrinkBegin; sc.CustomMinimumSize = new Vector2(0, Math.Min(250, items.Count * 48 + 6)); box.AddChild(sc);
+            var prev = new PreviewPanel { Months = 60 };
+            box.AddChild(UI.HBox(10, UI.Btn("Preview 5 years", () => prev.Run(sim.Plan.ToList()), false, 170), UI.Dim("Plan versus carrying on unchanged.", 12)));
+            box.AddChild(prev);
+        }
+        var actions = UI.HBox(10);
+        actions.AddChild(UI.Btn("End turn ▸", () => { Close(); EndTurn(); }, true, 150));
+        var clear = UI.Btn("Clear plan", () => Game.ClearPlan(), false, 130); clear.Disabled = items.Count == 0; actions.AddChild(clear);
+        actions.AddChild(UI.Btn("Close", Close, false, 110));
+        box.AddChild(actions);
     }
 
     // ---------------- modals ----------------
@@ -327,7 +427,7 @@ public partial class GameShell : Control
         box.AddChild(UI.H1("How to play"));
         foreach (var line in new[]
         {
-            "Space — pause / resume · 1-4 — game speed · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help",
+            "Enter — end turn · Space — pause / resume · 1-4 — game speed · Ctrl+Tab or PageUp/PageDown — change page · Tab — move keyboard focus · Esc — menu · F1 — this help",
             "Dashboard: click a headline tile to see why it moved. Hover for a quick explanation.",
             "Budget: drag sliders to draft changes, preview five years ahead, then enact. Cuts cost more political capital than rises.",
             "Policies and Investment: reforms and projects take years; the legislature may refuse and projects can overrun.",

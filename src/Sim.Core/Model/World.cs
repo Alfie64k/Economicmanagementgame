@@ -42,7 +42,7 @@ public sealed class World
     public bool GameOver, GameOverOnLoss = false;
     public string GameOverReason = "";
     public Dictionary<string, Relation> Relations = new();   // keyed "A>B" (directional)
-    public List<Command> Queue = new();      // commands waiting for the next tick boundary
+    public List<Command> Queue = new();      // the staged turn plan: applied, in order, at the start of the next tick
 
     public int Year => StartYear + Month / 12;
     public int MonthOfYear => Month % 12 + 1;
@@ -85,6 +85,7 @@ public sealed class Command
     public static Command Repeal(string country, string policyId) => new() { Type = "repeal", Country = country, Id = policyId };
     public static Command StartProject(string country, string projectId, double scale = 1.0) => new() { Type = "project", Country = country, Id = projectId, Value = scale };
     public static Command CancelProject(string country, int index) => new() { Type = "cancelproject", Country = country, Value = index };
+    public static Command CancelProject(string country, string projectId) => new() { Type = "cancelproject", Country = country, Id = projectId };
     public static Command SetSubsidy(string country, Sector s, double share) => new() { Type = "subsidy", Country = country, Id = s.ToString(), Value = share };
     public static Command SetCarbon(string country, double price) => new() { Type = "carbon", Country = country, Value = price };
     public static Command TradeDeal(string country, string partner) => new() { Type = "tradedeal", Country = country, Id = partner };

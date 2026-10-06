@@ -9,6 +9,11 @@ public sealed class CommandResult
     public bool Ok;
     public string Message = "";
     public double PcCost;
+    /// <summary>The command would leave the setting where it already is (nothing to stage or charge for).</summary>
+    public bool NoOp;
+    /// <summary>Set by <see cref="Engine.Simulation.Stage"/>: the command is now in the turn plan; <see cref="Replaced"/> when it displaced an earlier entry; <see cref="Unstaged"/> when it removed one.</summary>
+    public bool Staged, Replaced, Unstaged;
+    public static CommandResult Same(string m = "No change") => new() { Ok = true, Message = m, NoOp = true };
     public static CommandResult Fail(string m, double pc = 0) => new() { Ok = false, Message = m, PcCost = pc };
     public static CommandResult Pass(string m, double pc) => new() { Ok = true, Message = m, PcCost = pc };
 }
@@ -40,7 +45,7 @@ public static class CommandProcessor
                 {
                     if (!Enum.TryParse<Tax>(cmd.Id, out var t)) return CommandResult.Fail("Unknown tax");
                     double r0 = c.TaxRate[(int)t], r = Maths.Clamp(cmd.Value, 0, 0.9);
-                    if (Math.Abs(r - r0) < 1e-9) return CommandResult.Pass("No change", 0);
+                    if (Math.Abs(r - r0) < 1e-9) return CommandResult.Same();
                     if (c.ImfAutopilot && r < r0) return CommandResult.Fail("Blocked by IMF programme conditionality: no tax cuts during the programme");
                     double cost = Math.Min(40, 4 + 30 * Math.Abs(r - r0) / Math.Max(0.05, c.TaxRate0[(int)t]));
                     return Spend(cost, $"{t} tax {(r > r0 ? "raised" : "cut")} to {Fmt.P(r, 1)}", () => c.TaxRate[(int)t] = r);
@@ -50,7 +55,7 @@ public static class CommandProcessor
                     if (!Enum.TryParse<BudgetLine>(cmd.Id, out var l)) return CommandResult.Fail("Unknown budget line");
                     double s0 = c.Budget[(int)l], s = Maths.Clamp(cmd.Value, 0, 0.6);
                     double d = s - s0;
-                    if (Math.Abs(d) < 1e-9) return CommandResult.Pass("No change", 0);
+                    if (Math.Abs(d) < 1e-9) return CommandResult.Same();
                     if (c.ImfAutopilot && d > 0) return CommandResult.Fail("Blocked by IMF programme conditionality: no spending increases during the programme");
                     double cost = Math.Min(40, 2 + 150 * Math.Abs(d) * (d < 0 ? 1.5 : 1.0));
                     return Spend(cost, $"{l} budget set to {Fmt.P(s, 2)} of GDP", () => c.Budget[(int)l] = s);
@@ -58,7 +63,9 @@ public static class CommandProcessor
             case "rate":
                 {
                     bool manual = cmd.Id == "Manual";
+                    if (!manual && c.RateMode == RateMode.Auto) return CommandResult.Same("The central bank already follows its rule");
                     if (!manual) return Spend(0, "Central bank returned to its rule", () => c.RateMode = RateMode.Auto);
+                    if (c.RateMode == RateMode.Manual && Math.Abs(Maths.Clamp(cmd.Value, -0.01, 1.5) - c.ManualRate) < 1e-9) return CommandResult.Same("The rate is already pinned there");
                     double cost = c.CbIndependence > 0.6 ? 12 : 4;
                     return Spend(cost, $"Policy rate pinned toward {Fmt.P(cmd.Value, 2)}", () =>
                     {
@@ -67,20 +74,24 @@ public static class CommandProcessor
                     });
                 }
             case "minwage":
+                if (Math.Abs(Maths.Clamp(cmd.Value, 0.2, 0.9) - c.MinWageRatio) < 1e-9) return CommandResult.Same();
                 return Spend(10, $"Minimum wage set to {Fmt.P(cmd.Value, 0)} of median", () => c.MinWageRatio = Maths.Clamp(cmd.Value, 0.2, 0.9));
             case "fxregime":
                 {
                     if (!Enum.TryParse<FxRegime>(cmd.Id, out var r)) return CommandResult.Fail("Unknown regime");
+                    if (r == c.Regime) return CommandResult.Same("Already in this regime");
                     return Spend(20, $"Exchange-rate regime: {r}", () => { c.Regime = r; if (r == FxRegime.Peg) c.Fx0 = c.Fx; });
                 }
             case "autopilot":
                 return CommandResult.Pass("Autopilot " + cmd.Id, 0).Also(() => { if (!dryRun) c.Autopilot = cmd.Id == "on"; });
             case "carbon":
+                if (Math.Abs(Math.Max(0, cmd.Value) - c.CarbonPrice) < 1e-9) return CommandResult.Same();
                 return Spend(10 + cmd.Value / 10, $"Carbon price {cmd.Value:F0}/t", () => c.CarbonPrice = Math.Max(0, cmd.Value));
             case "subsidy":
                 {
                     if (!Enum.TryParse<Sector>(cmd.Id, out var s)) return CommandResult.Fail("Unknown sector");
                     double v = Maths.Clamp(cmd.Value, 0, 0.15);
+                    if (Math.Abs(v - c.SectorSubsidy[(int)s]) < 1e-9) return CommandResult.Same();
                     return Spend(10, $"{s} subsidy {Fmt.P(v, 1)} of value added", () => c.SectorSubsidy[(int)s] = v);
                 }
             case "tradedeal":
@@ -110,6 +121,7 @@ public static class CommandProcessor
                     if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown partner");
                     double v = Maths.Clamp(cmd.Value, 0, 0.5);
                     var r = WorldEngine.Rel(w, c.Id, p.Id);
+                    if (Math.Abs(v - r.ExtraTariff) < 1e-9) return CommandResult.Same();
                     return Spend(10 + 100 * Math.Abs(v - r.ExtraTariff), $"Extra tariff on {p.Name}: {Fmt.P(v, 0)}", () => r.ExtraTariff = v);
                 }
             case "sanction":
@@ -118,6 +130,7 @@ public static class CommandProcessor
                     if (p == null || p.Id == c.Id) return CommandResult.Fail("Unknown target");
                     bool on = cmd.Value > 0;
                     var r = WorldEngine.Rel(w, c.Id, p.Id);
+                    if (on == r.Sanction) return CommandResult.Same();
                     return Spend(on ? 20 : 5, on ? $"Sanctions imposed on {p.Name}" : $"Sanctions on {p.Name} lifted", () => r.Sanction = on);
                 }
             case "alliance":
@@ -161,8 +174,8 @@ public static class CommandProcessor
             case "project": return StartProject(w, c, idx, cmd, dryRun, pcMult);
             case "cancelproject":
                 {
-                    int i = (int)cmd.Value;
                     var live = c.Projects.Where(p => !p.Done).ToList();
+                    int i = cmd.Id != "" ? live.FindIndex(p => p.Id == cmd.Id) : (int)cmd.Value;   // by id when given (stable inside a staged plan), else by position
                     if (i < 0 || i >= live.Count) return CommandResult.Fail("No such project");
                     return Spend(10, $"Cancelled {live[i].Id} after spending {live[i].Spent:F0}", () => c.Projects.Remove(live[i]));
                 }

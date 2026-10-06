@@ -5,9 +5,9 @@ Plain-English companion to [MODEL.md](MODEL.md) (equations) and [PLAY.md](PLAY.m
 ## The loop
 
 1. **Pick** a country (28) and either sandbox or one of 11 scenarios.
-2. **Time** advances one month per tick (Space to pause, 1–4 for speed). Every country in the world ticks, not just yours.
-3. **You decide** on the Budget, Monetary, Policies, Investment, Sectors and Trade pages. Decisions are queued as commands and applied at the next tick boundary; sliders show a what-if preview first.
-4. **Engine order each month:** policy/commands → supply → demand → prices and rates → labour → fiscal and debt → FX and external → sectors → society and environment → world layer (trade, contagion, AI governments) → events and politics → scoring.
+2. **A turn is one month.** **End turn ▸** (Enter) plays exactly one; Space and 1–4 run turns on a clock. Every country in the world ticks, not just yours.
+3. **You plan, then play.** On the Budget, Monetary, Policies, Investment and Trade pages (and the world map) you *add actions to the turn plan*. Each is priced in political capital and validated at once, but nothing is applied until the turn is played: political capital, the news feed and the advisers only move then, so you can change your mind. The **Plan** button in the top bar lists the staged actions, lets you remove them and previews the whole plan against carrying on. Staging the same instrument again replaces the earlier entry, putting a setting back to its live value removes it, and the plan's total cost must fit in the banked political capital. Event decision popups are the one exception: they are forced, and resolve immediately.
+4. **Engine order each month:** your staged plan, in order → policy/commands → supply → demand → prices and rates → labour → fiscal and debt → FX and external → sectors → society and environment → world layer (trade, contagion, AI governments) → events and politics → scoring.
 5. **Feedback** arrives through the dashboard, news, advisers, events that need a choice, and the Report page (scorecard plus "why did this change?").
 
 ## The economy (per country)

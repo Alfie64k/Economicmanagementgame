@@ -32,10 +32,11 @@ public static class Forecaster
     /// <summary>Compact JSON copy of the world (history and logs omitted). Take it on the main thread, then hand it to a worker.</summary>
     public static string Snapshot(Simulation sim)
     {
-        var w = sim.World; var h = w.History; var log = w.Log; var cl = w.CommandLog;
-        w.History = new(); w.Log = new(); w.CommandLog = new();
+        // the staged plan is not part of "carry on": previews pass the plan (and any draft) explicitly
+        var w = sim.World; var h = w.History; var log = w.Log; var cl = w.CommandLog; var q = w.Queue;
+        w.History = new(); w.Log = new(); w.CommandLog = new(); w.Queue = new();
         try { return sim.Save(); }
-        finally { w.History = h; w.Log = log; w.CommandLog = cl; }
+        finally { w.History = h; w.Log = log; w.CommandLog = cl; w.Queue = q; }
     }
 
     public static Simulation FromSnapshot(string json)
@@ -76,6 +77,39 @@ public static class Forecaster
             }
             return f;
         }).ToList();
+    }
+
+    /// <summary>Result of <see cref="PreviewPlan"/>: the series plus a note for every command that could not be applied.</summary>
+    public sealed class PlanPreview
+    {
+        public List<PreviewSeries> Series = new();
+        public List<string> Skipped = new();
+        public int Applied;
+    }
+
+    /// <summary>Like <see cref="Preview(string, IEnumerable{Command}, int, string[]?)"/>, but reports commands that fail (for instance for lack of political capital) instead of dropping them silently.</summary>
+    public static PlanPreview PreviewPlan(string snapshot, IEnumerable<Command> commands, int months, string[]? metrics = null)
+    {
+        metrics ??= Metrics;
+        var a = FromSnapshot(snapshot); var b = FromSnapshot(snapshot);
+        a.World.Stochastic = false; b.World.Stochastic = false;
+        var res = new PlanPreview();
+        foreach (var cmd in commands)
+        {
+            var r = b.Execute(cmd);
+            if (r.Ok) res.Applied++; else res.Skipped.Add(PlanText.Describe(b.World, cmd) + " — " + r.Message);
+        }
+        res.Series = metrics.Select(m => new PreviewSeries { Metric = m, Baseline = new double[months], WithPolicy = new double[months] }).ToList();
+        for (int t = 0; t < months; t++)
+        {
+            a.Tick(); b.Tick();
+            for (int k = 0; k < metrics.Length; k++)
+            {
+                res.Series[k].Baseline[t] = Read(a.World.Player, metrics[k]);
+                res.Series[k].WithPolicy[t] = Read(b.World.Player, metrics[k]);
+            }
+        }
+        return res;
     }
 
     /// <summary>Deterministic comparison of "carry on" vs "apply these commands now" for the player's country.</summary>
