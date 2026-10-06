@@ -90,8 +90,8 @@ public static class TaxCodeCatalog
         double mean = Num(m["meanEarnings"]);
         if (mean <= 0) mean = 0.8 * FiscalEngine.IncomeBaseShare * c.Gdp0 * 1000.0 / Math.Max(1e-6, c.Pop * c.Working * c.Participation * (1 - c.Unemp0));
         f.MeanEarn = mean / earnIdx;
-        f.Sigma = IncomeGrid.SigmaFromGini(Maths.Clamp(c.Gini0 + 0.10, 0.30, 0.65));
         f.Soc0 = c.Budget0[(int)BudgetLine.Social];
+        f.Sigma = IncomeGrid.SigmaFromGini(Maths.Clamp(c.Gini0 + 0.10, 0.30, 0.65));   // first guess, refined below once the code is read
 
         var p = f.P0;
         var inc = m["income"] as JsonObject ?? new JsonObject();
@@ -134,21 +134,32 @@ public static class TaxCodeCatalog
         f.LastRealWage = 0; f.LastPrice = 0;                 // initialised on the first step
         f.Init = true;
 
-        // calibration: how the engine's effective rate responds to a change in the statutory average
+        // the grid's spread of market incomes is set so that, after the starting taxes and benefits, inequality of net income matches the country's Gini
+        double lo = 0.55, hi = 1.15;                  // realistic earnings dispersion; richer redistribution than the data shows simply saturates the search
+        for (int it = 0; it < 22; it++)
+        {
+            double mid = 0.5 * (lo + hi);
+            double g = TaxCodeEngine.Evaluate(f, f.P0, 1.0, 1.0, null, IncomeGrid.Fresh(mid)).GiniNet;
+            if (g < c.Gini0) lo = mid; else hi = mid;
+        }
+        f.Sigma = Math.Round(0.5 * (lo + hi), 3);
+        f.Cache = null;
+
+        // calibration: relative changes in the statutory average rate carry over one for one to the engine's effective rate
+        // (where the code has no such tax at the start, a change is taken at face value instead)
         var bas = TaxCodeEngine.BaseEval(f);
+        f.GiniScale = Math.Clamp(c.Gini0 / Math.Max(0.05, bas.GiniNet), 1.0, 1.5);
         var raw = RawCalib(c, bas);
-        for (int i = 0; i < 4; i++) f.Calib[i] = raw[i] > 0 ? Math.Clamp(raw[i], CalibLo[i], CalibHi[i]) : 1.0;
+        for (int i = 0; i < 4; i++) f.Calib[i] = raw[i] > 0 ? raw[i] : 1.0;
         for (int i = 0; i < Dim.Taxes; i++) f.Written[i] = c.TaxRate[i];
         TaxCodeEngine.Recalc(c, f);
         return f;
     }
 
-    static readonly double[] CalibLo = { 0.4, 0.3, 0.5, 0.4 }, CalibHi = { 2.5, 1.5, 1.5, 2.5 };
-
     /// <summary>Unclamped ratio of the engine's starting effective rate to the statutory average rate, per tax (Income, Corporate, Consumption, Payroll); 0 when the code has no such tax.</summary>
     public static double[] RawCalib(CountryState c, FiscalEval bas)
     {
-        double R(double x, double engine) => x > 1e-3 ? engine / x : 0;
+        double R(double x, double engine) => x > 5e-3 ? engine / x : 0;
         return new[]
         {
             R(bas.AvgInc, c.TaxRate0[(int)Tax.Income]), R(bas.CorpEff, c.TaxRate0[(int)Tax.Corporate]),

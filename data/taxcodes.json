@@ -542,11 +542,11 @@
     "categories": {
      "food": "zero",
      "energy": "reduced",
-     "housing": "exempt",
+     "housing": "zero",
      "transport": "standard",
-     "services": "exempt",
+     "services": "reduced",
      "goods": "standard",
-     "health_edu": "exempt"
+     "health_edu": "zero"
     }
    },
    "benefits": {
@@ -1906,7 +1906,7 @@
    }
   },
   "IDN": {
-   "label": "Indonesia 2024 (approximate; PTKP single, BPJS employment and health)",
+   "label": "Indonesia 2024 (approximate; PTKP single, BPJS; 35% band above IDR 5bn omitted)",
    "unit": "lcu",
    "meanEarnings": 40000000,
    "income": {
@@ -1929,10 +1929,6 @@
      {
       "from": 500000000,
       "rate": 0.3
-     },
-     {
-      "from": 5000000000,
-      "rate": 0.35
      }
     ],
     "index": "frozen"

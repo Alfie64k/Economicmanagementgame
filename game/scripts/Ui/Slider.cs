@@ -10,6 +10,7 @@ public partial class AppSlider : Control
 
     public double Min, Max = 1, Step = 0.01, Value, Baseline = double.NaN;
     public Func<double, string> Format = v => v.ToString("0.00");
+    public float LabelWidth = 78;
     bool _drag, _hover, _mouseFocus;
 
     public AppSlider() { CustomMinimumSize = new Vector2(180, 30); FocusMode = FocusModeEnum.All; MouseFilter = MouseFilterEnum.Stop; }
@@ -17,6 +18,14 @@ public partial class AppSlider : Control
     public void Setup(double min, double max, double step, double value, Func<double, string> fmt)
     {
         Min = min; Max = max; Step = step; Value = Mathf.Clamp(value, min, max); Baseline = Value; Format = fmt; QueueRedraw();
+    }
+
+    /// <summary>Show a value without snapping it to the step grid (for values that did not come from this slider).</summary>
+    public void SetExact(double v)
+    {
+        v = Mathf.Clamp(v, Min, Max);
+        if (Math.Abs(v - Value) < 1e-12) return;
+        Value = v; QueueRedraw();
     }
 
     public void SetValue(double v, bool notify = false)
@@ -31,7 +40,7 @@ public partial class AppSlider : Control
 
     public override void _GuiInput(InputEvent e)
     {
-        float trackL = 8, trackW = Size.X - 16 - 78;
+        float trackL = 8, trackW = Size.X - 16 - LabelWidth;
         if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Left)
         {
             _drag = mb.Pressed; if (mb.Pressed) { _mouseFocus = true; GrabFocus(); Set(mb.Position.X); }
@@ -61,7 +70,7 @@ public partial class AppSlider : Control
     public override void _Draw()
     {
         var font = ThemeDB.FallbackFont; int fs = Mathf.RoundToInt(13 * Pal.TextScale);
-        float trackL = 8, trackW = Size.X - 16 - 78, cy = Size.Y / 2;
+        float trackL = 8, trackW = Size.X - 16 - LabelWidth, cy = Size.Y / 2;
         DrawRect(new Rect2(trackL, cy - 3, trackW, 6), Pal.Border);
         float hx = trackL + Frac * trackW;
         DrawRect(new Rect2(trackL, cy - 3, hx - trackL, 6), Pal.Accent.Darkened(0.2f));
@@ -75,6 +84,6 @@ public partial class AppSlider : Control
         if (_hover && !_drag) DrawArc(new Vector2(hx, cy), 9, 0, Mathf.Tau, 24, new Color(Pal.Text, 0.6f), 1);
         if (focus) { DrawRect(new Rect2(trackL - 3, cy - 8, trackW + 6, 16), Pal.FocusRing, false, 2); }
         bool changed = !double.IsNaN(Baseline) && Math.Abs(Value - Baseline) > Step / 2;
-        DrawString(font, new Vector2(Size.X - 72, cy + 5), Format(Value), HorizontalAlignment.Right, 70, fs, changed ? Pal.Warn : Pal.Text);
+        DrawString(font, new Vector2(Size.X - LabelWidth + 6, cy + 5), Format(Value), HorizontalAlignment.Right, LabelWidth - 8, fs, changed ? Pal.Warn : Pal.Text);
     }
 }

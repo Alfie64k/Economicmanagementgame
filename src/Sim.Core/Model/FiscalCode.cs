@@ -18,7 +18,8 @@ public sealed class FiscalCode
     public string Label = "";                 // e.g. "United Kingdom 2024/25 (approximate)"
     public string StatIndex = "";             // how the real country indexes thresholds today (shown as a note; the game starts neutral)
     public double MeanEarn;                   // local currency per year at the start: mean gross earnings of an employee
-    public double Sigma = 0.7;                // dispersion of log earnings, from the Gini
+    public double Sigma = 0.7;                // dispersion of log earnings, set so net-income inequality matches the country (within realistic bounds)
+    public double GiniScale = 1.0;            // widens Gini changes where the grid shows less inequality than the data does
     public double Soc0;                       // starting Social budget line (share of GDP)
     public double[] Shares = new double[7];   // share of social spending by strand at the start (sums to 1)
 

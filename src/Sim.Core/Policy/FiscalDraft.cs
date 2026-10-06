@@ -16,6 +16,9 @@ public sealed class FiscalEstimate
     public double LongRunGdp;                               // supply side once labour and capital have adjusted (fraction)
     public double GiniDelta, PovertyDelta, ApprovalDelta, NairuDelta, LabourDelta;
     public double[] DecileNet = new double[10];            // change in net income by decile of earnings (fraction of today's net income)
+    public double[] BenGdpNow = new double[7], BenGdpNew = new double[7];   // spending by strand, share of GDP, in force and after the change
+    public double[] BenRatioNew = new double[7];
+    public FiscalEval Cur = new(), New = new();
     public double PcCost;
 }
 
@@ -101,6 +104,8 @@ public static class FiscalDraft
             double dr = nw.Ratio[k] - f.BenRatio[k];
             double d = pool * f.Shares[k] * dr + (k == (int)Ben.Unemployment ? stab * (nw.Ratio[k] - f.BenRatio[k]) : 0);
             est.BenSpendGdp[k] = d / gdp; est.SpendGdp += d / gdp;
+            est.BenGdpNow[k] = (pool * f.Shares[k] * f.BenRatio[k] + (k == (int)Ben.Unemployment ? stab * f.BenRatio[k] : 0)) / gdp;
+            est.BenGdpNew[k] = est.BenGdpNow[k] + d / gdp; est.BenRatioNew[k] = nw.Ratio[k];
             demand += d * f.BenMpc[k];
         }
         // demand side: spending on benefits and tax cuts reach households; poorer households spend more of each extra pound
@@ -127,6 +132,7 @@ public static class FiscalDraft
             for (int i = d * n; i < (d + 1) * n; i++) { a += nw.Net[i] - cur.Net[i]; b += cur.Net[i]; }
             est.DecileNet[d] = b > 0 ? a / b : 0;
         }
+        est.Cur = cur; est.New = nw;
         est.PcCost = est.Changed ? PcCost(c, draft) : 0;
         return est;
     }

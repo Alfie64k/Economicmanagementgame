@@ -33,8 +33,6 @@ public static class TaxCodeEngine
     sealed class EvalCache { public FiscalEval? Base, Cur; }
 
     static readonly Tax[] Driven = { Tax.Income, Tax.Corporate, Tax.Consumption, Tax.Payroll };
-    // how far the engine's effective rate may move per unit of change in the statutory average rate
-    static readonly double[] CalibLo = { 0.4, 0.3, 0.5, 0.4, 1 }, CalibHi = { 2.5, 1.5, 1.5, 2.5, 1 };
     // share of the electorate directly affected by each benefit (for approval)
     static readonly double[] Voters = { 0.22, 0.05, 0.14, 0.08, 0.06, 0.10, 0.0 };
 
@@ -63,10 +61,10 @@ public static class TaxCodeEngine
     /// Evaluates a parameter set against the income grid. <paramref name="bas"/> is the starting code's evaluation, used for ratios and
     /// differences; pass null when evaluating the starting code itself.
     /// </summary>
-    public static FiscalEval Evaluate(FiscalCode f, IReadOnlyDictionary<string, double> P, double drift, double penDrift, FiscalEval? bas)
+    public static FiscalEval Evaluate(FiscalCode f, IReadOnlyDictionary<string, double> P, double drift, double penDrift, FiscalEval? bas, IncomeGrid? grid = null)
     {
         const int N = IncomeGrid.N;
-        var g = IncomeGrid.For(f.Sigma);
+        var g = grid ?? IncomeGrid.For(f.Sigma);
         var tp = TaxParams.Of(P, drift);
         var bp = BenParams.Of(P, f.P0, penDrift);
         double G(string k) => P.TryGetValue(k, out var v) ? v : 0;
@@ -233,7 +231,7 @@ public static class TaxCodeEngine
         f.Mix = mix;
         f.LabourTarget = Math.Clamp(cur.Labour * (1.0 + 0.005 * (f.Get("Pen.Age") - f.Get0("Pen.Age"))), 0.85, 1.15);
         f.NairuTarget = cur.NairuAdj;
-        f.GiniDelta = cur.GiniNet - bas.GiniNet;
+        f.GiniDelta = f.GiniScale * (cur.GiniNet - bas.GiniNet);
         f.PovertyDelta = cur.Poverty - bas.Poverty;
         double ap = 0;
         for (int k = 0; k < 7; k++) ap += Voters[k] * Math.Log(Math.Max(0.05, cur.Ratio[k]));

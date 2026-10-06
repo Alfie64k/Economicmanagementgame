@@ -24,6 +24,8 @@ public sealed class IncomeGrid
 
     static readonly ConcurrentDictionary<int, IncomeGrid> Cache = new();
     public static IncomeGrid For(double sigma) => Cache.GetOrAdd((int)Math.Round(sigma * 1000), k => new IncomeGrid(k / 1000.0));
+    /// <summary>An uncached grid, for searching over sigma without filling the cache.</summary>
+    public static IncomeGrid Fresh(double sigma) => new(Math.Round(sigma, 3));
     public static double SigmaFromGini(double gini) => Math.Round(Maths.Clamp(Math.Sqrt(2) * Maths.NormInv((Maths.Clamp(gini, 0.2, 0.7) + 1) / 2), 0.3, 1.4), 3);
 
     static readonly double[] VatLow = { .25, .12, .12, .08, .15, .20, .08 }, VatHigh = { .08, .04, .12, .11, .30, .25, .10 };

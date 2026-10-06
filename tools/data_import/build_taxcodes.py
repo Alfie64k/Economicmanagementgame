@@ -186,8 +186,9 @@ COUNTRIES["USA"] = {
     "payroll": {"employee": tiers((0, 0.0765), (168600, 0.0145)), "employer": {"from": 0, "rate": 0.0765}},
     # federal 21% flat; 2024 bonus depreciation 60% of qualifying investment
     "corp": corp(0.21, 0.21, 0, 0.6),
-    # average combined state+local sales tax about 6.5%; most states exempt groceries and housing, tax few services
-    "vat": vat(0.065, 0.0, "zero", "reduced", "exempt", "standard", "exempt", "standard", "exempt"),
+    # average combined state+local sales tax about 6.5%; groceries, housing and health/education are untaxed; most services and
+    # utilities fall outside the base ("reduced" is 0.0 here, so a reduced-rate switch is how a player would tax them)
+    "vat": vat(0.065, 0.0, "zero", "reduced", "zero", "standard", "reduced", "standard", "zero"),
     "benefits": benefits(shares(0.50, 0.02, 0.04, 0.08, 0.03, 0.15, 0.18),
                          23000, 67, "cpi",          # average Social Security retirement benefit
                          23000, 6,                  # average weekly UI benefit (~$450) annualised; typically 26 weeks
@@ -490,11 +491,10 @@ COUNTRIES["TUR"] = {
 
 # --- Indonesia ----------------------------------------------------------------------------------------------------------------------------
 COUNTRIES["IDN"] = {
-    "label": "Indonesia 2024 (approximate; PTKP single, BPJS employment and health)",
+    "label": "Indonesia 2024 (approximate; PTKP single, BPJS; 35% band above IDR 5bn omitted)",
     "unit": "lcu", "meanEarnings": 40000000,
-    # PTKP 54m; 5% to 60m; 15% to 250m; 25% to 500m; 30% to 5bn; 35% above
-    "income": income(54000000, bands((0, 0.05), (60000000, 0.15), (250000000, 0.25), (500000000, 0.30),
-                                     (5000000000, 0.35)), "frozen"),
+    # PTKP 54m; 5% to 60m; 15% to 250m; 25% to 500m; 30% above. The 35% band above 5bn (~125 ME) is dropped: beyond the 40 ME band cap
+    "income": income(54000000, bands((0, 0.05), (60000000, 0.15), (250000000, 0.25), (500000000, 0.30)), "frozen"),
     "payroll": {"employee": tiers((0, 0.04)), "employer": {"from": 0, "rate": 0.105}},
     "corp": corp(0.22, 0.22, 0, 0.2),
     "vat": vat(0.11, 0.055, "exempt", "standard", "exempt", "standard", "standard", "standard", "exempt"),
@@ -819,6 +819,37 @@ def check_code(cid, code, errors):
     return True
 
 
+# Bounds the game engine applies when it loads a code (mirrors FiscalParams): amounts are multiples of mean earnings.
+ENGINE_BOUNDS = {
+    "income.allowance": (0, 3), "income.taperStart": (0, 40), "payroll.employer.from": (0, 3), "corp.smallLimit": (0, 2000),
+    "benefits.pension.level": (0, 1.5), "benefits.unemployment.level": (0, 1), "benefits.child.level": (0, 0.5),
+    "benefits.child.threshold": (0, 15), "benefits.disability.level": (0, 1), "benefits.housing.level": (0, 0.8),
+    "benefits.meanstest.level": (0, 1), "benefits.meanstest.taper": (0, 0.9), "benefits.meanstest.workAllowance": (0, 1.5),
+    "payroll.employer.rate": (0, 0.5), "corp.main": (0, 0.45), "corp.small": (0, 0.45), "vat.standard": (0, 0.30),
+    "vat.reduced": (0, 0.30), "benefits.pension.age": (55, 75), "benefits.unemployment.months": (1, 36),
+}
+
+
+def check_engine_bounds(cid, me, errors):
+    for path, (lo, hi) in ENGINE_BOUNDS.items():
+        val, ok = get_path(me, path)
+        if ok and not (lo - 1e-9 <= val <= hi + 1e-9):
+            errors.append(f"{cid}: {path} = {val:.4g} (in ME) outside the engine range [{lo}, {hi}]")
+    prev = 0.0
+    for i, b in enumerate(me["income"]["bands"]):
+        if i and not (0.02 <= b["from"] <= 40 and b["from"] >= prev + 0.01):
+            errors.append(f"{cid}: band {i + 1} starts at {b['from']:.4g} ME (engine range 0.02-40, spacing 0.01)")
+        prev = b["from"]
+    emp = me["payroll"]["employee"]
+    if not (0 <= emp[0]["from"] <= 3):
+        errors.append(f"{cid}: employee contributions start at {emp[0]['from']:.4g} ME (engine range 0-3)")
+    if len(emp) > 1 and not (emp[0]["from"] + 0.05 <= emp[1]["from"] <= 40):
+        errors.append(f"{cid}: employee upper limit {emp[1]['from']:.4g} ME must be 0.05-40 ME above the lower threshold")
+    for t in emp:
+        if t["rate"] > 0.4:
+            errors.append(f"{cid}: employee rate {t['rate']} above the engine cap 0.4")
+
+
 def build():
     archetypes = {name: ARCHETYPES[name] for name in ARCHETYPE_NAMES}
     countries = {cid: COUNTRIES[cid] for cid, _ in ROSTER if cid in COUNTRIES}
@@ -836,7 +867,8 @@ def validate(data):
             continue
         if arch[name]["unit"] != "me":
             errors.append(f"archetype {name} must use unit 'me'")
-        check_code(f"[{name}]", arch[name], errors)
+        if check_code(f"[{name}]", arch[name], errors):
+            check_engine_bounds(f"[{name}]", arch[name], errors)
     countries = data["countries"]
     for cid, a in ROSTER:
         if cid not in countries:
@@ -874,6 +906,7 @@ def validate(data):
         if not check_code(cid, merged, errors):
             continue
         me = to_me(merged)
+        check_engine_bounds(cid, me, errors)
         inc_rate, pay_yield = stats(me)
         if not (0.0 <= inc_rate <= 0.40):
             errors.append(f"{cid}: average income-tax rate {inc_rate:.3f} outside [0, 0.40]")
