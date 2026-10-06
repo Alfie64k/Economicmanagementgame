@@ -11,8 +11,12 @@ public static class FiscalEngine
     public static double TaxRevenueReal(CountryState c, Tax t, double gdp, double cons, double imports) =>
         TaxRevenueAt(c, t, c.TaxRate[(int)t], gdp, cons, imports);
 
-    /// <summary>Real revenue the tax would raise at a hypothetical rate (used for draft budgets in the UI).</summary>
-    public static double TaxRevenueAt(CountryState c, Tax t, double rate, double gdp, double cons, double imports)
+    /// <summary>
+    /// Real revenue the tax would raise at a hypothetical rate (used for draft budgets in the UI). Informal activity escapes every tax except
+    /// tariffs (collected at the border): the base is scaled by <see cref="CountryState.ShadowMult"/>, exactly 1.0 until the shadow share moves.
+    /// Pass <paramref name="erode"/> false for the statutory take before evasion (the tax burden voters feel).
+    /// </summary>
+    public static double TaxRevenueAt(CountryState c, Tax t, double rate, double gdp, double cons, double imports, bool erode = true)
     {
         int i = (int)t;
         double r = rate, r0 = Math.Max(1e-4, c.TaxRate0[i]);
@@ -26,7 +30,8 @@ public static class FiscalEngine
             Tax.Payroll => PayrollBaseShare * gdp,
             _ => imports,
         };
-        return eff * baseAmt;
+        double rev = eff * baseAmt;
+        return erode && t != Tax.Tariff ? rev * c.ShadowMult : rev;
     }
 
     /// <summary>Sovereign risk premium over the baseline; evaluated relative to initial state so data-calibrated yields are preserved.</summary>

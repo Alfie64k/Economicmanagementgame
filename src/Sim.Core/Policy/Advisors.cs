@@ -39,6 +39,15 @@ public static class Advisors
                 $"Sovereign spreads are {c.RiskPremium * 10000:F0}bp above their baseline and 10-year yields are {Fmt.P(c.Yield10, 1)}.");
         if (revShare > 0.15)
             Add("Finance Minister", Severity.Warning, "interest", $"Debt interest now absorbs {Fmt.P(revShare, 0)} of revenue, crowding out services.");
+        if (c.Shadow > c.Shadow0 + 0.015)
+        {
+            var d = c.ShadowDrivers;
+            string why = d[1] >= d[2] && d[1] >= d[3] ? "Heavier taxes are pushing activity off the books" : d[2] >= d[3] ? "Corruption is eroding compliance" : "Weaker tax enforcement is letting more activity go unreported";
+            Add("Finance Minister", Severity.Warning, "shadow",
+                $"The informal economy has grown to {Fmt.P(c.Shadow, 1)} of GDP ({Fmt.P(c.Shadow0, 1)} at the start), shrinking the tax base by {Fmt.P(1 - c.ShadowMult, 1)}. {why}.");
+        }
+        else if (c.Shadow < c.Shadow0 - 0.015)
+            Add("Finance Minister", Severity.Info, "shadowfall", $"Compliance is improving: the informal economy is down to {Fmt.P(c.Shadow, 1)} of GDP ({Fmt.P(c.Shadow0, 1)} at the start), which widens the tax base by {Fmt.P(c.ShadowMult - 1, 1)}.");
         if (debt < ceiling - 0.2 && def < 0.02 && c.Gap < 0.01)
             Add("Finance Minister", Severity.Info, "space", $"We have fiscal space (debt {Fmt.P(debt, 0)}, deficit {Fmt.P(def, 1)}). A productive investment programme would be affordable.");
 

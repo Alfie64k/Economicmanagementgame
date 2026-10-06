@@ -14,6 +14,7 @@ public static class MacroEngine
         double shockS = stochastic ? rng.Normal() * 0.0015 : 0;
         RampModifiers(c);
         TaxCodeEngine.Step(c);
+        if (w.EconomicDepth) ShadowEngine.Step(c, dt);
         Demography.Step(c, dt);
         PublicAssets(c, dt);
         Supply(c, g, dt, shockS);

@@ -57,7 +57,8 @@ public class LabourMarketTests
     [Fact]
     public void Version_2_saves_load_with_the_new_state_at_its_starting_values_and_without_a_jump()
     {
-        var a = DepthFixture.Quiet("GBR", 3); a.Run(30);
+        // a game as version 2 would have played it: no shadow-economy or labour-market dynamics
+        var a = DepthFixture.Quiet("GBR", 3, depth: false); a.Run(30);
         var v2 = DepthFixture.AsVersion2(a.Save());
         Assert.DoesNotContain("\"Shadow\"", v2);
         Assert.DoesNotContain("EconomicDepth", v2);

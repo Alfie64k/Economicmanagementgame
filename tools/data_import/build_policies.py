@@ -4,7 +4,9 @@
 Effect magnitudes are game-balance parameters informed by the empirical literature (rough orders of magnitude), not forecasts.
 Modifier keys are consumed by the engine: tfp (annual TFP growth add), nairu, fdi, export, import, corruption (annual change),
 approval, gini, invest, savings, inflation, credibility, risk, fx, participation, fertility, migration (multiplier add),
-lifeexp, renewables (annual add), emissions (multiplier add), unrest, polcap (monthly PC add), revenue (share of GDP), stability.
+lifeexp, renewables (annual add), emissions (multiplier add), unrest, polcap (monthly PC add), revenue (share of GDP), stability,
+shadow (relative change in the informal share: -0.10 = informality 10% below its starting size, which shrinks evasion and widens the tax base),
+bargaining (add to union coverage: +0.10 = ten more points of employees covered by collective agreements).
 """
 import json, pathlib
 
@@ -14,8 +16,8 @@ def P(id, name, cat, desc, pc, delay, mods=None, budget=None, subsidy=None, carb
                 minDemocracy=min_dem, maxDemocracy=max_dem)
 
 policies = [
- P("labour_flex","Labour market flexibility","labour","Easier hiring and firing, weaker employment protection. Lowers structural unemployment and lifts productivity but widens inequality.",25,6,{"nairu":-0.012,"tfp":0.0010,"gini":0.012,"approval":-0.03},shock=-0.02,group="labour_rules"),
- P("union_rights","Strengthen collective bargaining","labour","Stronger unions and sectoral bargaining. Compresses wages and inequality at some cost to flexibility.",20,6,{"nairu":0.006,"gini":-0.015,"tfp":-0.0005,"approval":0.02},shock=0.01,group="labour_rules"),
+ P("labour_flex","Labour market flexibility","labour","Easier hiring and firing, weaker employment protection. Lowers structural unemployment and lifts productivity but widens inequality.",25,6,{"nairu":-0.012,"tfp":0.0010,"gini":0.012,"approval":-0.03,"bargaining":-0.12},shock=-0.02,group="labour_rules"),
+ P("union_rights","Strengthen collective bargaining","labour","Stronger unions and sectoral bargaining. Compresses wages and inequality at some cost to flexibility.",20,6,{"nairu":0.006,"gini":-0.015,"tfp":-0.0005,"approval":0.02,"bargaining":0.15},shock=0.01,group="labour_rules"),
  P("apprenticeships","National apprenticeship scheme","labour","Employer-linked skills programme: lower mismatch unemployment, higher productivity.",10,9,{"tfp":0.0008,"nairu":-0.004},{"Education":0.004}),
  P("active_labour","Active labour market programmes","welfare","Job-search support and retraining.",12,6,{"nairu":-0.005,"approval":0.01},{"Social":0.004}),
  P("fta_network","Free-trade agreement network","trade","Negotiate preferential access to major markets: exports, imports and FDI rise; import-competing sectors protest.",20,12,{"export":0.06,"import":0.04,"fdi":0.05,"approval":-0.01},group="trade_stance"),
@@ -49,7 +51,7 @@ policies = [
  P("housing_reform","Planning and housing supply reform","welfare","Liberalise planning rules to build more homes.",20,12,{"gini":-0.01,"approval":0.02,"invest":0.02},{"Housing":0.003}),
  P("capital_controls","Capital flow management","monetary","Curb hot money. Reduces crisis risk premia; deters FDI.",25,3,{"risk":-0.010,"fdi":-0.15,"approval":-0.01},group="capital"),
  P("wealth_tax","Annual wealth tax","fiscal","Levy on top fortunes. Reduces inequality, raises modest revenue, risks capital flight.",30,12,{"gini":-0.02,"invest":-0.03,"revenue":0.005,"approval":0.01,"fdi":-0.05},shock=0.01),
- P("tax_compliance","Digital tax compliance drive","fiscal","E-invoicing and data matching to shrink the informal economy and evasion.",15,12,{"revenue":0.006,"corruption":-0.002},{"Digital":0.001}),
+ P("tax_compliance","Digital tax compliance drive","fiscal","E-invoicing and data matching to shrink the informal economy and evasion.",15,12,{"revenue":0.002,"shadow":-0.10,"corruption":-0.002},{"Digital":0.001}),
  P("universal_healthcare","Universal healthcare expansion","welfare","Extend free care at point of use. Healthier workforce and happier voters; large permanent cost.",30,18,{"approval":0.04,"lifeexp":2.0},{"Health":0.015},shock=0.03),
  P("student_loans","Graduate tax and student finance","welfare","Shift higher education cost to graduates.",15,9,{"approval":-0.01,"tfp":0.0002},{"Education":-0.003}),
  P("inflation_targeting","Formal inflation-targeting regime","monetary","Publish a target and forecasts, accountability to parliament.",15,6,{"credibility":0.15}),

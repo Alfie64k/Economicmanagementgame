@@ -8,6 +8,8 @@ public static class Maths
     public static double Approach(double x, double target, double k) => x + (target - x) * Clamp(k, 0, 1);
     public static double Sigmoid(double x) => 1.0 / (1.0 + Math.Exp(-x));
     public static bool Finite(double v) => !double.IsNaN(v) && !double.IsInfinity(v);
+    /// <summary>Dead-band (soft threshold): zero while |x| is within <paramref name="band"/>, then the excess beyond it with its sign. Continuous, so nothing jumps at the edge.</summary>
+    public static double Soft(double x, double band) => x > band ? x - band : x < -band ? x + band : 0.0;
 
     /// <summary>Standard normal CDF (complementary-error-function fit, absolute error below 1.2e-7).</summary>
     public static double NormCdf(double x)
