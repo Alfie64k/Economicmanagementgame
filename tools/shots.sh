@@ -7,5 +7,5 @@ GODOT=${GODOT:-/tmp/claude-0/godot/Godot_v4.3-stable_mono_linux_x86_64/Godot_v4.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 rm -rf "$OUT"; mkdir -p "$OUT"
 (cd "$ROOT/game" && dotnet build EconomicGame.csproj >/dev/null)
-xvfb-run -a -s "-screen 0 1600x2600x24" "$GODOT" --path "$ROOT/game" --rendering-driver opengl3 --resolution 1600x2600 -- --selftest --tall "--shots=$OUT" "$@" 2>&1 | grep -E "SELFTEST|Exception|rror CS|Unhandled" || true
+RES=${RES:-1600x2600}; xvfb-run -a -s "-screen 0 ${RES}x24" "$GODOT" --path "$ROOT/game" --rendering-driver opengl3 --resolution $RES -- --selftest --tall "--shots=$OUT" "$@" 2>&1 | grep -E "SELFTEST|Exception|rror CS|Unhandled" || true
 ls "$OUT"

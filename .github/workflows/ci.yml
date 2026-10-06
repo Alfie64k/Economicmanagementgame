@@ -2,15 +2,34 @@ name: CI
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "17 3 * * *"   # nightly balance run
 jobs:
   sim:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
+        with: { dotnet-version: 8.0.x }
       - run: dotnet build EconGame.sln -c Release
       - run: dotnet test EconGame.sln -c Release --no-build
-      - name: Headless 30-year smoke run
-        run: dotnet run --project src/Sim.Cli -c Release -- smoke --years 30
+      - name: Headless 30-year smoke run (stochastic, 3 seeds)
+        run: |
+          for s in 1 2 3; do dotnet run --project src/Sim.Cli -c Release --no-build -- smoke --years 30 --seed $s; done
+  game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+      - name: Compile the Godot C# project
+        run: dotnet build game/EconomicGame.csproj -c Release
+  balance:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+      - name: Self-play balance matrix (fails on dominant strategies or runaway states)
+        run: dotnet run --project src/Sim.Cli -c Release -- balance --years 15 --seeds 4

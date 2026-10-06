@@ -13,7 +13,7 @@ public partial class Main : Control
     public override void _Ready()
     {
         Instance = this;
-        Settings.Load();
+        Settings.Load(); Diagnostics.Install();
         Theme = AppTheme.Build();
         SetAnchorsPreset(LayoutPreset.FullRect);
         var bg = new ColorRect { Color = Pal.Bg };

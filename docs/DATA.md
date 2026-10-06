@@ -1,0 +1,6 @@
+# Data sources and limitations
+
+* **Countries** (`data/countries.json`, from `tools/data_import/build_roster.py`): approximate 2023/24 values compiled by hand from public series (World Bank WDI, IMF WEO and Fiscal Monitor, OECD, UN WPP, national statistics offices). They are calibration inputs for a game, not authoritative statistics. Where a country runs structural surpluses (Norway, UAE, Singapore) debt is shown net-ish so interest costs are sensible. A live importer was not possible in the build environment (API hosts were not reachable); the table structure makes a scripted refresh straightforward.
+* **Policies, projects, events, scenarios**: authored for the game (`tools/data_import/build_*.py`); effect sizes are balance parameters informed by orders of magnitude in the literature.
+* **Map**: Natural Earth (public domain) 1:110m countries and 1:50m admin-1 units for nine federations, simplified by `tools/map_prep/build_map.py`. Singapore is added as a small polygon. Border depiction follows Natural Earth defaults and is not a political statement; a configurable border set is on the backlog.
+* **Regions**: output, population and unemployment by region are generated deterministically from region ids and the national sector mix (see `Regions.cs`). They are illustrative only.

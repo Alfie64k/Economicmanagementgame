@@ -6,7 +6,6 @@ obj/
 .godot/
 .mono/
 *.translation
-export_presets.cfg
 # Raw data downloads (commit processed snapshots only)
 data/raw/
 # OS/editor

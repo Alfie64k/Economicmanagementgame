@@ -31,6 +31,9 @@ public partial class SettingsScreen : Control
         var speed = new OptionButton(); foreach (var s in new[] { "Paused", "1× (slow)", "2×", "4×", "8× (fast)" }) speed.AddItem(s);
         speed.Selected = Settings.DefaultSpeed; speed.ItemSelected += i => Settings.DefaultSpeed = (int)i;
         box.AddChild(Row("Default game speed", speed));
+        var crash = new CheckBox { Text = "Keep a local crash log (never sent anywhere)", ButtonPressed = Diagnostics.CrashLog };
+        crash.Toggled += on => Diagnostics.CrashLog = on; box.AddChild(crash);
+        box.AddChild(UI.HBox(10, UI.Btn("Copy feedback report to clipboard", Diagnostics.CopyReport), UI.Dim("Paste it into an issue or email; contains no personal data.", 12)));
         root.AddChild(UI.Card(box));
         root.AddChild(UI.Dim("Keyboard: Space pause · 1-4 speed · Tab next view · Esc menu", 13));
     }

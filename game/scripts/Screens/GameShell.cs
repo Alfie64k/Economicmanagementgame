@@ -26,6 +26,9 @@ public partial class GameShell : Control
     string _feedFilter = "all";
     double _acc, _uiAcc; bool _dirty = true; int _feedCount = -1;
     Control? _modal;
+    readonly VBoxContainer _toasts = new();
+    Label _ticker = new();
+    int _lastHintMonth = -1;
     public View? Current => _current;
     public string CurrentName => _currentName;
 
@@ -44,6 +47,7 @@ public partial class GameShell : Control
         _pages.Add(("Report", () => new ReportView()));
 
         var root = UI.VBox(0); root.SetAnchorsPreset(LayoutPreset.FullRect); AddChild(root);
+        _toasts.SetAnchorsAndOffsetsPreset(LayoutPreset.CenterTop); _toasts.Position = new Vector2(0, 70); _toasts.MouseFilter = MouseFilterEnum.Ignore; _toasts.AddThemeConstantOverride("separation", 6);
         root.AddChild(BuildTopBar());
         var body = UI.HBox(0); body.SizeFlagsVertical = SizeFlags.ExpandFill; root.AddChild(body);
         body.AddChild(BuildNav());
@@ -51,6 +55,7 @@ public partial class GameShell : Control
         body.AddChild(_pageHost);
         body.AddChild(BuildFeed());
 
+        AddChild(_toasts);
         Game.DecisionPending += ShowDecision;
         Game.Ended += ShowEnd;
         Game.Ticked += MarkDirty; Game.Changed += MarkDirty;
@@ -82,7 +87,7 @@ public partial class GameShell : Control
         }
         h.AddChild(speeds);
         h.AddChild(UI.Btn("+1 month", () => { Game.Speed = 0; Game.Step(); MarkDirty(); }, false, 0));
-        h.AddChild(UI.Spacer(0, 0, true));
+        _ticker = UI.Lbl("", 13, Pal.Dim); _ticker.ClipText = true; _ticker.CustomMinimumSize = new Vector2(120, 0); _ticker.SizeFlagsHorizontal = SizeFlags.ExpandFill; h.AddChild(_ticker);
         _alert = UI.Lbl("", 14, Pal.Warn, true); h.AddChild(_alert);
         var pcBox = UI.VBox(2); _pcLabel = UI.Lbl("Political capital", 12, Pal.Dim);
         _pc = new ProgressBar { MaxValue = 100, ShowPercentage = false, CustomMinimumSize = new Vector2(160, 10) };
@@ -148,6 +153,9 @@ public partial class GameShell : Control
 
     public void MarkDirty() => _dirty = true;
 
+    /// <summary>Closes any open popup (used by the self-test and when a decision is resolved elsewhere).</summary>
+    public void DismissModal() { _modal?.QueueFree(); _modal = null; }
+
     void SetSpeed(int s)
     {
         if (Game.World.Decisions.Count > 0 || Game.World.GameOver) return;
@@ -176,6 +184,7 @@ public partial class GameShell : Control
         else if (k.Keycode >= Key.Key1 && k.Keycode <= Key.Key4) SetSpeed((int)k.Keycode - (int)Key.Key0);
         else if (k.Keycode == Key.Tab) { int i = _pages.FindIndex(p => p.name == _currentName); Navigate(_pages[(i + 1) % _pages.Count].name); }
         else if (k.Keycode == Key.Escape) ShowMenu();
+        else if (k.Keycode == Key.F1) ShowHelp();
     }
 
     void UpdateTop()
@@ -192,6 +201,9 @@ public partial class GameShell : Control
         _pc.Value = c.PoliticalCapital; _pcLabel.Text = $"Political capital  {c.PoliticalCapital:0}/100";
         var sc = Scorer.Compute(w, c); _score.Text = $"{sc.Grade} {sc.Total:0}";
         _alert.Text = w.Decisions.Count > 0 ? "⚠ Decision required" : Game.Speed == 0 ? "Paused" : "";
+        var last = w.Log.LastOrDefault(l => (l.Country == w.PlayerId || l.Country == "WORLD") && l.Kind is "event" or "crisis" or "news");
+        _ticker.Text = last == null ? "" : "▸ " + last.Text;
+        CheckHints(w);
     }
 
     void UpdateFeed(bool force)
@@ -250,6 +262,21 @@ public partial class GameShell : Control
         Overlay(box);
     }
 
+    public void Toast(string text, Color? accent = null)
+    {
+        var p = new PanelContainer(); p.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelHi, 10, accent ?? Pal.Accent, 1, 12));
+        var l = UI.Lbl(text, 14, Pal.Text, false, HorizontalAlignment.Left, true); l.CustomMinimumSize = new Vector2(420, 0); p.AddChild(l);
+        _toasts.AddChild(p); EconGame.Audio.Sfx.Ok();
+        var tw = CreateTween(); tw.TweenInterval(9.0); tw.TweenProperty(p, "modulate:a", 0.0, 0.8); tw.TweenCallback(Callable.From(() => p.QueueFree()));
+    }
+
+    void CheckHints(World w)
+    {
+        if (Game.Scenario == null || w.Month == _lastHintMonth) return; _lastHintMonth = w.Month;
+        foreach (var hnt in Scenarios.HintsAt(Game.Scenario, w.Month))
+            if (w.Month > 0 && Game.ShownHints.Add(Game.Scenario.Id + hnt.Month)) Toast("Tip: " + hnt.Text, Pal.Warn);
+    }
+
     void ShowBriefing()
     {
         var sc = Game.Scenario!;
@@ -283,6 +310,23 @@ public partial class GameShell : Control
         box.AddChild(UI.Dim($"Prosperity {card.Prosperity:0} · Living standards {card.Living:0} · Stability {card.Stability:0} · Sustainability {card.Sustainability:0} · Resilience {card.Resilience:0}", 13, true));
         box.AddChild(UI.HBox(10, UI.Btn("View report", () => { Close(); Navigate("Report"); }, true), UI.Btn("Main menu", () => { Game.Quit(); Main.Instance!.ShowMainMenu(); })));
         Overlay(box);
+    }
+
+    void ShowHelp()
+    {
+        var box = UI.VBox(8);
+        box.AddChild(UI.H1("How to play"));
+        foreach (var line in new[]
+        {
+            "Space — pause / resume · 1-4 — game speed · Tab — next page · Esc — menu · F1 — this help",
+            "Dashboard: click a headline tile to see why it moved. Hover for a quick explanation.",
+            "Budget: drag sliders to draft changes, preview five years ahead, then enact. Cuts cost more political capital than rises.",
+            "Policies and Investment: reforms and projects take years; the legislature may refuse and projects can overrun.",
+            "Trade and World map: deals, tariffs, sanctions and aid ripple through partners. Drag to pan, scroll to zoom, switch to the 3D globe.",
+            "Advisers disagree on purpose. Elections (democracies) and coups (autocracies) end your term if you lose public support.",
+        }) box.AddChild(UI.Lbl(line, 14, Pal.Dim, false, HorizontalAlignment.Left, true));
+        box.AddChild(UI.Btn("Close", Close, true, 120));
+        Overlay(box, 720);
     }
 
     void ShowMenu()

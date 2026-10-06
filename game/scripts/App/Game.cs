@@ -41,11 +41,17 @@ public static class Game
     {
         if (Sim == null) return false;
         DirAccess.MakeDirRecursiveAbsolute(SaveDir);
-        using var f = FileAccess.Open($"{SaveDir}/{slot}.json", FileAccess.ModeFlags.Write);
-        if (f == null) return false;
-        f.StoreLine(Scenario?.Id ?? "-");
-        f.StoreString(Sim.Save());
-        return true;
+        string final = $"{SaveDir}/{slot}.json", tmp = $"{SaveDir}/{slot}.tmp";
+        using (var f = FileAccess.Open(tmp, FileAccess.ModeFlags.Write))
+        {
+            if (f == null) return false;
+            f.StoreLine(Scenario?.Id ?? "-");
+            f.StoreString(Sim.Save());
+        }
+        var dir = DirAccess.Open(SaveDir);                       // atomic-ish: a crash mid-write never corrupts the previous save
+        if (dir == null) return false;
+        if (dir.FileExists($"{slot}.json")) dir.Remove($"{slot}.json");
+        return dir.Rename($"{slot}.tmp", $"{slot}.json") == Error.Ok;
     }
 
     public static bool Load(string slot)
@@ -53,7 +59,8 @@ public static class Game
         var path = $"{SaveDir}/{slot}.json";
         if (!FileAccess.FileExists(path)) return false;
         using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-        string sid = f.GetLine(); string json = f.GetAsText();
+        string text = f.GetAsText(); int nl = text.IndexOf('\n');   // GetAsText reads the whole file
+        string sid = text[..nl].Trim(); string json = text[(nl + 1)..];
         Sim = Simulation.Load(json);
         Scenario = sid == "-" ? null : Scenarios.Find(sid);
         Speed = 0; ShownHints.Clear();

@@ -85,12 +85,18 @@ public static class UI
             b.AddThemeStyleboxOverride("normal", AppTheme.Box(Pal.Accent.Darkened(0.25f), 7, Pal.Accent, 1, 10));
             b.AddThemeStyleboxOverride("hover", AppTheme.Box(Pal.Accent.Darkened(0.05f), 7, Pal.Accent.Lightened(0.3f), 1, 10));
         }
+        b.Pressed += EconGame.Audio.Sfx.Click;
         if (onPress != null) b.Pressed += onPress;
         return b;
     }
 
     public static HSeparator Sep() { var s = new HSeparator(); s.AddThemeStyleboxOverride("separator", AppTheme.Box(Pal.Border, 0)); s.AddThemeConstantOverride("separation", 1); return s; }
 
-    public static string Sign(double v, string fmt = "0.0") => (v >= 0 ? "+" : "") + v.ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
+    public static string Sign(double v, string fmt = "0.0")
+    {
+        string t = Math.Abs(v).ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
+        bool zero = double.Parse(t, System.Globalization.CultureInfo.InvariantCulture) == 0;
+        return (zero ? "" : v < 0 ? "-" : "+") + t;
+    }
     public static string Pct(double v, int d = 1) => (v * 100).ToString("F" + d, System.Globalization.CultureInfo.InvariantCulture) + "%";
 }

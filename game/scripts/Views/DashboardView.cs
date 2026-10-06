@@ -112,7 +112,7 @@ public partial class DashboardView : View
         _whyHead.Text = ex.Headline;
         double max = Math.Max(0.5, ex.Items.Max(i => Math.Abs(i.Value)));
         _why.Max = max;
-        _why.Format = v => (v >= 0 ? "+" : "") + v.ToString("0.0") + "pp";
+        _why.Format = v => UI.Sign(v, "0.0") + "pp";
         _why.Set(ex.Items.Select(i => new BarItem { Label = i.Label, Value = i.Value, Color = IsBad(_whyMetric, i) ? Pal.Bad : Pal.Good, Tooltip = i.Group }));
 
         // scenario goals

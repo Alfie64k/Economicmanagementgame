@@ -48,14 +48,14 @@ public partial class SocietyView : View
         {
             new BarItem { Label = "Children (0-14)", Value = c.Young, Color = Pal.Series[0] }, new BarItem { Label = "Working age (15-64)", Value = c.Working, Color = Pal.Series[2] },
             new BarItem { Label = "Over 65", Value = c.Old, Color = Pal.Series[1], Tooltip = $"was {UI.Pct(c.Old0, 0)} at the start" },
-            new BarItem { Label = "Participation", Value = c.Participation, Color = Pal.Series[4] }, new BarItem { Label = "Fertility (births/woman ÷ 4)", Value = c.Fertility / 4, Text = c.Fertility.ToString("0.0"), Color = Pal.Series[6] },
+            new BarItem { Label = "Participation", Value = c.Participation, Color = Pal.Series[4] }, new BarItem { Label = "Fertility (÷4)", Value = c.Fertility / 4, Text = c.Fertility.ToString("0.0"), Color = Pal.Series[6] },
         });
         var ex = Explain.Why(c, "approval");
-        _approval.Max = Math.Max(5, ex.Items.Max(i => Math.Abs(i.Value))); _approval.Format = v => (v >= 0 ? "+" : "") + v.ToString("0.0") + "pp";
+        _approval.Max = Math.Max(5, ex.Items.Max(i => Math.Abs(i.Value))); _approval.Format = v => UI.Sign(v, "0.0") + "pp";
         _approval.Set(ex.Items.Where(i => i.Label != "Baseline mood").Select(i => new BarItem { Label = i.Label, Value = i.Value, Color = i.Value >= 0 ? Pal.Good : Pal.Bad }));
 
         double[] x = h.Select(p => (double)p.Month).ToArray();
-        _pop.StartYear = _emis.StartYear = w.StartYear; _pop.YFormat = v => v.ToString("0"); _emis.YFormat = v => v.ToString("0");
+        _pop.StartYear = _emis.StartYear = w.StartYear; _pop.YFormat = v => v.ToString("0.0"); _emis.YFormat = v => v.ToString("0");
         _pop.SetSeries(new[] { new Series { Name = "Population", X = x, Y = h.Select(p => p.Pop).ToArray(), Color = Pal.Series[2] } });
         _emis.SetSeries(new[] { new Series { Name = "Emissions", X = x, Y = h.Select(p => p.EmissionsMt).ToArray(), Color = Pal.Series[5] } });
 

@@ -1,0 +1,39 @@
+# Economic model
+
+Monthly time step (`dt = 1/12`), real quantities in start-year local currency, prices as an index, debt nominal. Every country runs the same engine; AI countries differ only in their policy agent. Code: `src/Sim.Core/Engine/`.
+
+## Supply (`MacroEngine.Supply`)
+* Sector potential output `V*_s = A_s K_s^α_s (L*_s h)^(1-α_s) (1 - D)`; `L*_s = λ_s · LF · (1 - u*)`; `h` human capital; `D` climate damage.
+* TFP growth `g_A = g_A0 + 0.012 ln(RnD) + 0.010 ln(Infra) + 0.015 ln(h) + modifiers - unrest drag`; digital capital adds extra to services and finance.
+* Public asset indices converge to `budget share / baseline share × (1 - 0.5·corruption)` plus project boosts at asset-specific speeds.
+* Calibration chooses `K` from investment and trend growth and `g_A0` from `g - α·g_K - (1-α)·g_L`, so the baseline grows at the data trend.
+
+## Demand (`MacroEngine.Demand`)
+* Consumption `C → (1 - s) · Yd`, `s = s0 + 0.35·Δr_real + 0.2·unrest`; `Yd` = household income share × GDP - income and payroll tax + transfers + interest income.
+* Private investment `I → I0·Pot·exp(-3Δr_loan)·(1 + 0.5·gap)·(1 - 1.5Δτ_corp)·confidence + ΔFDI`.
+* Government `G` from budget lines (current vs capital split), plus project and subsidy flows.
+* Exports `X0 · (partner demand / trend) · RER^-0.9 · (Pot/Pot0) · (1 - tariffs)`; imports `M0 · (absorption/base) · RER^0.8 · tariff term`.
+* `GDP = C + I + G + X - M`, clamped to [0.75, 1.20] × potential as a regime guard.
+
+## Prices, rates, labour
+* Underlying inflation `π → E[π] + κ·gap + cost push (oil, food) + FX pass-through + monetisation + modifiers`; CPI is year-on-year from a price-level ring.
+* Expectations adapt to realised inflation with weight `1 - credibility`; credibility is earned by positive real rates and discipline, lost by monetisation.
+* Taylor rule `i* = r* + π + 0.5·min(π-π*, 10pp) + 0.2·(next 40pp) + gap`, smoothed; peg and managed regimes modify it; manual override moves ≤ 0.5pp/month.
+* Unemployment `u → NAIRU - 0.5·gap`; NAIRU = base (with hysteresis) + minimum wage + payroll tax - skills + policy.
+
+## Fiscal and external
+* Taxes: concave revenue response `R = base·r0·(r/r0)^ε`; resource revenue scales with oil and GDP.
+* Debt accumulates nominal deficits; average cost follows the 10-year yield with 3.5-7 year maturity; yield = policy/neutral blend + sovereign spread; spread = baseline + risk(debt, deficit, inflation, stability, reserves, contagion).
+* Real exchange rate targets `CA gap / 0.45 + 2·Δ(real rate differential) - 1.5·Δspread - risk-off`; peg breaks when reserves and competitiveness are exhausted.
+
+## Sectors
+Six sectors with a stylised input-output matrix; demand composition (C, I, G, X) is pushed through the Leontief inverse to allocate value added, and capital follows relative returns and subsidies.
+
+## World layer (`WorldEngine`)
+Gravity trade weights `GDP_j^0.9 · exp(-dist/5500) · bloc · region`; partner imports drive exports; crisis scores spread to neighbours; USD rate and world inflation come from the simulated US and advanced economies.
+
+## Politics, events, scoring
+Approval target from growth, unemployment, inflation, inequality, tax burden, services and corruption; elections use a logistic of approval; autocracies face coup hazard when stability and unrest are adverse. Events are data (`data/events.json`) with conditions, cooldowns, resilience scaling, chains and choices. The scorecard and attribution live in `Scoring/`.
+
+## Validation
+Unit tests check the national-accounts identity, steady-state neutrality, impulse responses (rate hikes, stimulus, taxes, education), determinism, save/load, 30-year numerical stability over many seeds, and balance (no dominant scripted strategy). Known simplifications: no explicit banking sector or housing market, sovereign defaults are stylised, the regional split is illustrative.

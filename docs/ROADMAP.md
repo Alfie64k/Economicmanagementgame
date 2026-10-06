@@ -141,3 +141,24 @@ Multiplayer/hot-seat, modding API (data packs + scripted events), historical cam
 - Godot vs. Unity final lock (plan assumes Godot 4 .NET).
 - Target start year(s) and initial roster list.
 - Whether player has a head-of-state personality/role layer or is a faceless "government".
+
+
+---
+
+## Delivery status
+
+| Stage | Status | Evidence |
+|---|---|---|
+| 0 Foundations | Done | solution, CI, GDD, schemas |
+| 1 Framework + UI shell | Done | `game/` screens, charts, widgets, self-test screenshots (`tools/shots.sh`) |
+| 2 Data pipeline + roster | Done | 28 countries, validation tests |
+| 3 Core engine | Done | identities, impulse-response and stability tests |
+| 4 Decisions | Done | commands, policies, projects, advisers, forecaster |
+| 5 World sim | Done | gravity trade, contagion, AI agents, diplomacy; < 50 ms per world tick |
+| 6 Events + society | Done | event engine, decisions, IMF/default, elections, coups, climate club |
+| 7 2D world map | Done | overlays, flows, pins, search, bookmarks, minimap, regional drill-down |
+| 8 Balance + scoring | Done | scorecard, attribution, 11 scenarios, nightly balance job |
+| 9 3D globe | Done | sphere with live overlays, arcs and picking |
+| 10 Polish + release | Done in code | accessibility, audio, diagnostics, presets and release workflow; art pass, closed beta and platform exports still to be run on a machine with export templates |
+
+Known gaps: the 190-country roster, subnational statistical data, a live data importer, localisation beyond British English, and a human playtest of balance and fun.

@@ -32,13 +32,14 @@ public static class Pal
     public static Color Diverge(float v)
     {
         v = Mathf.Clamp(v, -1, 1);
-        return v >= 0 ? Lerp(PanelHi, Good, v) : Lerp(PanelHi, Bad, -v);
+        var mid = new Color("4B6278");
+        return v >= 0 ? Lerp(mid, Good, v) : Lerp(mid, Bad, -v);
     }
 
     /// <summary>Sequential colour ramp (dark blue to bright cyan) for t in [0,1].</summary>
     public static Color Ramp(float t)
     {
         t = Mathf.Clamp(t, 0, 1);
-        return t < 0.5f ? Lerp(new Color("1B2A3C"), new Color("2F6FA8"), t * 2) : Lerp(new Color("2F6FA8"), new Color("9BE3FF"), (t - 0.5f) * 2);
+        return t < 0.5f ? Lerp(new Color("263F58"), new Color("2F6FA8"), t * 2) : Lerp(new Color("2F6FA8"), new Color("9BE3FF"), (t - 0.5f) * 2);
     }
 }

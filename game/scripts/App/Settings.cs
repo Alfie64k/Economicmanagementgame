@@ -12,6 +12,7 @@ public static class Settings
     public static int DefaultSpeed = 1;
     public static bool Fullscreen;
     public static float Volume = 0.7f;
+    public static System.Collections.Generic.HashSet<string> Bookmarks = new();
 
     public static void Load()
     {
@@ -23,7 +24,10 @@ public static class Settings
             Autosave = (bool)cf.GetValue("game", "autosave", true);
             DefaultSpeed = (int)cf.GetValue("game", "speed", 1);
             Fullscreen = (bool)cf.GetValue("ui", "fullscreen", false);
+            Diagnostics.CrashLog = (bool)cf.GetValue("privacy", "crash_log", false);
             Volume = (float)(double)cf.GetValue("audio", "volume", 0.7);
+            var b = (string)cf.GetValue("map", "bookmarks", "");
+            Bookmarks = new System.Collections.Generic.HashSet<string>(b.Split(',', System.StringSplitOptions.RemoveEmptyEntries));
         }
         Apply();
     }
@@ -33,7 +37,8 @@ public static class Settings
         var cf = new ConfigFile();
         cf.SetValue("ui", "text_scale", (double)TextScale); cf.SetValue("ui", "colour_blind", ColourBlind);
         cf.SetValue("game", "autosave", Autosave); cf.SetValue("game", "speed", DefaultSpeed);
-        cf.SetValue("ui", "fullscreen", Fullscreen); cf.SetValue("audio", "volume", (double)Volume);
+        cf.SetValue("ui", "fullscreen", Fullscreen); cf.SetValue("privacy", "crash_log", Diagnostics.CrashLog); cf.SetValue("audio", "volume", (double)Volume);
+        cf.SetValue("map", "bookmarks", string.Join(",", Bookmarks));
         cf.Save(Path);
     }
 
