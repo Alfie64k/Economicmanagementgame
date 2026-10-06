@@ -8,14 +8,16 @@ Pick a country and run its economy: tax, budget, interest-rate stance, trade and
 
 ```bash
 # simulation only (no engine needed)
-dotnet test EconGame.sln                                   # 67 unit/property/regression tests
+dotnet test EconGame.sln                                   # 68 unit/property/regression tests
 dotnet run --project src/Sim.Cli -- run --country GBR --years 30
 dotnet run --project src/Sim.Cli -- smoke --years 30       # 28 countries, stability check
 dotnet run --project src/Sim.Cli -- balance --years 15     # scripted-strategy self-play balance report
 
-# the game: open game/ in Godot 4.3 (.NET build) and press F5, or
+# the game: tools/run.sh (or tools/run.ps1 on Windows), or open game/ in Godot 4.3 (.NET build) and press F5, or
 dotnet build game/EconomicGame.csproj && godot --path game
 ```
+
+Full install and test-run steps: [docs/PLAY.md](docs/PLAY.md). How the systems fit together: [docs/SYSTEMS.md](docs/SYSTEMS.md).
 
 Headless screenshots of every screen (needs Godot + Xvfb): `tools/shots.sh /tmp/shots` (set `RES=1600x900` for a normal-aspect run).
 
