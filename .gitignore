@@ -1,0 +1,15 @@
+# .NET
+bin/
+obj/
+*.user
+# Godot
+.godot/
+.mono/
+*.translation
+export_presets.cfg
+# Raw data downloads (commit processed snapshots only)
+data/raw/
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
