@@ -24,7 +24,7 @@ public partial class PoliciesView : View
         ["corruption"] = "corruption (per year)", ["approval"] = "approval", ["gini"] = "inequality", ["invest"] = "private investment", ["savings"] = "saving rate",
         ["inflation"] = "inflation", ["credibility"] = "central-bank credibility", ["risk"] = "sovereign risk premium", ["fx"] = "currency strength", ["participation"] = "labour participation",
         ["fertility"] = "fertility", ["migration"] = "net migration", ["lifeexp"] = "life expectancy (years)", ["renewables"] = "renewables share (per year)", ["emissions"] = "emissions",
-        ["unrest"] = "unrest", ["polcap"] = "political capital regeneration", ["revenue"] = "revenue (% GDP)", ["stability"] = "stability",
+        ["unrest"] = "unrest", ["shadow"] = "informal economy", ["bargaining"] = "union coverage", ["polcap"] = "political capital regeneration", ["revenue"] = "revenue (% GDP)", ["stability"] = "stability",
     };
 
     public PoliciesView()

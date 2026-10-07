@@ -175,8 +175,8 @@ After the first hands-on test the list below was drawn up and built in the order
 | 2 | Actionable adviser cards: add to plan, preview, snooze, visible disagreement | Built | Cabinet page; `Advisors.Conflicts` |
 | 3 | Auto-pause triggers and Run to ▾ | Built | `PauseWatcher`, Settings, top bar |
 | 4 | Glossary with the game's own definitions | Built (searchable panel, F2); live-mechanism tooltips only partly | `Glossary` (82 terms) |
-| 5 | Wage bargaining, union coverage, wage-price spiral, strikes | See "Labour market" below | `LabourMarketEngine` |
-| 6 | Shadow economy and tax-base erosion | See "Labour market" below | `LabourMarketEngine`, `FiscalEngine` |
+| 5 | Wage bargaining, union coverage, wage-price spiral, strikes | Built (also long-term unemployment hysteresis and the labour share); Society page | `LabourMarketEngine` |
+| 6 | Shadow economy and tax-base erosion | Built; Society page shows the drivers | `ShadowEngine`, `FiscalEngine` |
 | 7 | League tables and a rival | Built (12 tables, year-ago ranks, rival comparison) | Rankings page |
 | 8 | Journal, annual review, twelve-month impact strips | Built (the you-versus-autopilot counterfactual is not) | Journal page, year in review |
 | 9 | QE, forward guidance and a real lower bound | Not built | needs a central-bank balance sheet and a credibility state |
@@ -198,3 +198,8 @@ Also not built from the original plan: named plan alternatives overlaid on carry
 The Budget page is a tabbed editor over a per-country tax and benefit code (allowance and taper, up to eight income-tax bands, indexation, payroll contributions, corporation tax, VAT categories, pensions and seven individual benefits). Starting codes are 2024/25 statutory figures for all 28 countries, labelled approximate in `docs/DATA.md`. Unchanged codes reproduce the earlier aggregate model bit for bit. GDP effects differ by instrument (spending propensities, who gains from a tax cut, labour supply, natural unemployment, investment); all coefficients are starting priors, not estimates.
 
 Known simplifications: no behavioural elasticity of taxable income beyond the labour-supply term, no property, excise or capital-gains levies yet, and the catalogue policies `pension_age` and `ubi` overlap the new levers.
+
+### Informal economy and labour market
+Save version 3. Starting shares and union data are per country (`data/shadow.json`, `data/labour.json`, approximate, built by `tools/data_import`). Everything is measured against each country's starting state and sits inside dead-bands, so a quiet economy is exactly as before: bit-identical for a calm world, within stated tolerances for the default one (`docs/MODEL.md`). The six economies whose baseline sits in a permanent deep output gap (Argentina, Turkey, Ethiopia, Egypt, Nigeria, Singapore) now scar and are about two points of unemployment worse after ten years; `MaxScar` and `ScarInflow` in `LabourMarketEngine` tune that. `World.EconomicDepth = false` reproduces the earlier economy exactly. The slopes are hand-calibrated priors, not estimates.
+
+The balance harness at two seeds reports the hub archetype as "passive wins"; that finding is also present on the commit before this work. CI runs four seeds, which is clean.

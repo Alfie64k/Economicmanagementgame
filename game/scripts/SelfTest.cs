@@ -47,6 +47,11 @@ public partial class SelfTest : Node
                 foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);
                 shell.DismissModal();
                 shell.Navigate(page); await Frames(6);
+                if (page == "Society")
+                {
+                    foreach (var need in new[] { "Work, wages and the informal economy", "Informal economy", "Union coverage", "Wage-price spiral", "Strike risk", "Long-term unemployed", "Labour share" })
+                        if (!HasLabel(shell.Current!, need)) throw new Exception($"Society page is missing '{need}'");
+                }
                 if (page == "Budget")
                 {
                     var c = Game.Player;

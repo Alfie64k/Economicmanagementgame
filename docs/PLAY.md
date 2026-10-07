@@ -28,7 +28,7 @@ Then either:
 ## Sanity checks without the engine
 
 ```bash
-dotnet test EconGame.sln                                # 149 tests
+dotnet test EconGame.sln                                # 201 tests
 dotnet run --project src/Sim.Cli -- smoke --years 30    # 28 countries, 30 years each, no NaNs/runaways
 dotnet run --project src/Sim.Cli -- run --country GBR --years 20
 ```
