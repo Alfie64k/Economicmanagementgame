@@ -141,7 +141,7 @@ public partial class GameShell : Control
         h = _barB = UI.HBox(14); _barB.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         _ticker = UI.Lbl("", 13, Pal.Dim); _ticker.ClipText = true; _ticker.CustomMinimumSize = new Vector2(120, 0); _ticker.SizeFlagsHorizontal = SizeFlags.ExpandFill; h.AddChild(_ticker);
         _auto = Cards.Chip("AUTOPILOT", Pal.Series[2]); _auto.Visible = false; _auto.MouseFilter = MouseFilterEnum.Pass; _auto.TooltipText = "The cabinet is running tax, spending and rates. Open the Cabinet page to take control back."; h.AddChild(_auto);
-        _alert = UI.Lbl("", 14, Pal.Warn, true); _alert.ClipText = true; _alert.CustomMinimumSize = new Vector2(170, 0); _alert.MouseFilter = MouseFilterEnum.Pass; h.AddChild(_alert);   // fixed width: the reason must not widen the bar; the tooltip carries all of it
+        _alert = UI.Lbl("", 14, Pal.Warn, true); _alert.ClipText = true; _alert.CustomMinimumSize = new Vector2(190, 0); _alert.MouseFilter = MouseFilterEnum.Pass; h.AddChild(_alert);   // fixed width: the reason must not widen the bar; the tooltip carries all of it
         var pcBox = UI.VBox(2); _pcLabel = UI.Lbl("Political capital", 12, Pal.Dim);
         _pcBar.CustomMinimumSize = new Vector2(160, 10); _pcLabel.ClipText = true; _pcLabel.CustomMinimumSize = new Vector2(160, 0);
         pcBox.AddChild(_pcLabel); pcBox.AddChild(_pcBar); h.AddChild(pcBox);
@@ -326,7 +326,7 @@ public partial class GameShell : Control
         UpdatePlanReadouts();
         var sc = Scorer.Compute(w, c); _score.Text = $"{sc.Grade} {sc.Total:0}";
         _alert.Text = w.Decisions.Count > 0 ? "⚠ Decision required" : Game.Speed == 0 ? (_pauseReason != "" ? "⏸ " + Short(_pauseReason) : "Paused") : Game.RunTo > 0 ? $"▶ to {Game.World.StartYear + (Game.RunTo - 1) / 12}-{(Game.RunTo - 1) % 12 + 1:D2}" : "";
-        _alert.TooltipText = _pauseReason;
+        _alert.TooltipText = _pauseReason != "" ? _pauseReason : _alert.Text;
         _auto.Visible = c.Autopilot;
         UpdateCabinetBadge(w, c);
         var last = w.Log.LastOrDefault(l => (l.Country == w.PlayerId || l.Country == "WORLD") && l.Kind is "event" or "crisis" or "news");

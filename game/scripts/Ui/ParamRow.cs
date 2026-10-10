@@ -23,6 +23,7 @@ public partial class ParamRow : VBoxContainer
 
     readonly Label _name, _note;
     readonly AppSlider? _slider;
+    CountryState? _c; double _eff; string _tag = "";
     readonly OptionButton? _opt;
     readonly LineEdit? _edit;
     readonly Button _undo;
@@ -57,6 +58,7 @@ public partial class ParamRow : VBoxContainer
             _slider = new AppSlider { SizeFlagsHorizontal = SizeFlags.ExpandFill, LabelWidth = def.Kind == PKind.Amount ? 108 : 84 };
             _slider.Setup(def.Min, Math.Max(def.Min + def.Step, def.Max), def.Step, def.Min, FormatSlider);
             _slider.Changed += v => { if (!_sync) Edited?.Invoke(v); };
+            _slider.DragEnded += () => { if (_c != null) Sync(_c, _eff, _live, _tag); };   // the range was held still during the drag: fit it to where the thumb ended
             _edit = new LineEdit { CustomMinimumSize = new Vector2(104, 0), Alignment = HorizontalAlignment.Right, SelectAllOnFocus = true };
             _edit.TextSubmitted += _ => Commit();
             _edit.FocusExited += Commit;
@@ -102,6 +104,7 @@ public partial class ParamRow : VBoxContainer
     public void Sync(CountryState c, double effective, double live, string tag = "")
     {
         _sync = true;
+        _c = c; _eff = effective; _tag = tag;
         _currency = c.Currency; _live = live;
         _factor = Def.Kind == PKind.Amount ? FiscalParams.NominalFactor(c, Def.Key) : 1;
         bool changed = Math.Abs(effective - live) > 1e-9;

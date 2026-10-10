@@ -43,8 +43,9 @@ public partial class TutorialCoach : Control
         SetAnchorsPreset(LayoutPreset.FullRect); MouseFilter = MouseFilterEnum.Ignore;
         AddChild(_hl);
         _card.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelAlt, 10, Pal.Warn, 2, 14));
-        _card.CustomMinimumSize = new Vector2(340, 0);   // narrow enough to sit in the news column on the right, clear of the page controls it talks about _card.MouseFilter = MouseFilterEnum.Stop;
-        _count = UI.Lbl("", 12, Pal.Warn, true); _title = UI.Lbl("", 17, Pal.Text, true); _text = UI.Lbl("", 14, Pal.Dim, false, HorizontalAlignment.Left, true); _text.CustomMinimumSize = new Vector2(310, 0);   // a wrapping label with no width would size the card to its tallest wrap
+        _card.MouseFilter = MouseFilterEnum.Stop;
+        _card.CustomMinimumSize = new Vector2(310, 0);   // narrow enough to sit in the news column on the right, clear of the page controls it talks about
+        _count = UI.Lbl("", 12, Pal.Warn, true); _title = UI.Lbl("", 17, Pal.Text, true); _text = UI.Lbl("", 14, Pal.Dim, false, HorizontalAlignment.Left, true); _text.CustomMinimumSize = new Vector2(280, 0);   // a wrapping label with no width would size the card to its tallest wrap
         _next = UI.Btn("Next ▸", () => Advance(), true, 90); _skip = UI.Btn("Skip step", () => Advance(), false, 100);
         var exit = UI.Btn("Close tutorial", () => Finish(), false, 140);
         var hide = UI.Btn("Hide", () => { _collapsed = !_collapsed; Layout(); }, false, 70);

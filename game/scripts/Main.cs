@@ -10,6 +10,8 @@ public partial class Main : Control
     Control? _screen;
     ColorRect? _ground;
     public static Main? Instance;
+    bool _lastWasMouse;
+    readonly System.Collections.Generic.HashSet<ulong> _hooked = new();
 
     public override void _Ready()
     {
@@ -22,7 +24,7 @@ public partial class Main : Control
             GetTree().NodeAdded += n =>
             {
                 var pop = n is MenuButton mb ? mb.GetPopup() : n is OptionButton ob ? ob.GetPopup() : null;
-                if (pop != null) pop.PopupHide += () => CallDeferred(MethodName.DropClickFocus);
+                if (pop != null && _hooked.Add(pop.GetInstanceId())) pop.PopupHide += () => { if (_lastWasMouse) CallDeferred(MethodName.DropClickFocus); };   // not after keyboard use
             };
             Theme = AppTheme.Build();
             SetAnchorsPreset(LayoutPreset.FullRect);
@@ -51,6 +53,7 @@ public partial class Main : Control
     /// </summary>
     public override void _Input(InputEvent e)
     {
+        if (e is InputEventMouseButton) _lastWasMouse = true; else if (e is InputEventKey) _lastWasMouse = false;
         if (e is InputEventMouseButton { Pressed: false, ButtonIndex: MouseButton.Left }) CallDeferred(MethodName.DropClickFocus);
     }
 

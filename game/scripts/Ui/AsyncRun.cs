@@ -23,7 +23,7 @@ public sealed class AsyncRun<T>
             {
                 if (id != _id) return;
                 Busy = false;
-                if (!GodotObject.IsInstanceValid(host)) return;   // a page that is only out of the tree for now still gets its result
+                if (!GodotObject.IsInstanceValid(host) || !EconGame.App.Game.Running) return;   // a page that is only out of the tree for now still gets its result
                 if (t.IsFaulted) onFail?.Invoke(t.Exception!.GetBaseException());
                 else if (t.IsCompletedSuccessfully) onDone(t.Result);
             }).CallDeferred());

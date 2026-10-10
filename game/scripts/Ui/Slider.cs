@@ -7,6 +7,7 @@ namespace EconGame.Ui;
 public partial class AppSlider : Control
 {
     [Signal] public delegate void ChangedEventHandler(double value);
+    [Signal] public delegate void DragEndedEventHandler();
 
     public double Min, Max = 1, Step = 0.01, Value, Baseline = double.NaN;
     public Func<double, string> Format = v => v.ToString("0.00");
@@ -45,7 +46,8 @@ public partial class AppSlider : Control
         float trackL = 8, trackW = Size.X - 16 - LabelWidth;
         if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Left)
         {
-            _drag = mb.Pressed; if (mb.Pressed) { _mouseFocus = true; GrabFocus(); Set(mb.Position.X); }
+            bool wasDrag = _drag; _drag = mb.Pressed; if (!mb.Pressed && wasDrag) EmitSignal(SignalName.DragEnded);
+            if (mb.Pressed) { _mouseFocus = true; GrabFocus(); Set(mb.Position.X); }
         }
         else if (e is InputEventMouseMotion mm) { if (_drag) Set(mm.Position.X); }
         else if (e is InputEventKey k && k.Pressed)
