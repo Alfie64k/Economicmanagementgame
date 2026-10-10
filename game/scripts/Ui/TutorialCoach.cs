@@ -43,8 +43,8 @@ public partial class TutorialCoach : Control
         SetAnchorsPreset(LayoutPreset.FullRect); MouseFilter = MouseFilterEnum.Ignore;
         AddChild(_hl);
         _card.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelAlt, 10, Pal.Warn, 2, 14));
-        _card.CustomMinimumSize = new Vector2(420, 0); _card.MouseFilter = MouseFilterEnum.Stop;
-        _count = UI.Lbl("", 12, Pal.Warn, true); _title = UI.Lbl("", 17, Pal.Text, true); _text = UI.Lbl("", 14, Pal.Dim, false, HorizontalAlignment.Left, true);
+        _card.CustomMinimumSize = new Vector2(340, 0);   // narrow enough to sit in the news column on the right, clear of the page controls it talks about _card.MouseFilter = MouseFilterEnum.Stop;
+        _count = UI.Lbl("", 12, Pal.Warn, true); _title = UI.Lbl("", 17, Pal.Text, true); _text = UI.Lbl("", 14, Pal.Dim, false, HorizontalAlignment.Left, true); _text.CustomMinimumSize = new Vector2(310, 0);   // a wrapping label with no width would size the card to its tallest wrap
         _next = UI.Btn("Next ▸", () => Advance(), true, 90); _skip = UI.Btn("Skip step", () => Advance(), false, 100);
         var exit = UI.Btn("Close tutorial", () => Finish(), false, 140);
         var hide = UI.Btn("Hide", () => { _collapsed = !_collapsed; Layout(); }, false, 70);
@@ -65,7 +65,7 @@ public partial class TutorialCoach : Control
         _next.Visible = s.Gate == "next"; _skip.Visible = s.Gate != "next";
         _next.Text = i == Steps.Length - 1 ? "Finish" : "Next ▸";
         if (s.Gate == "turn") _turnMonth = Game.World.Month;
-        _collapsed = false; Layout();
+        _collapsed = false; Layout(); CallDeferred(MethodName.Layout);   // again once the wrapped text has its final height
     }
 
     void Advance() => Show(_step + 1);
@@ -91,12 +91,12 @@ public partial class TutorialCoach : Control
         var size = Size; if (size.X <= 0) return;
         _card.Size = new Vector2(_card.CustomMinimumSize.X, 0);
         _card.ResetSize();
-        _card.Position = new Vector2(196, Mathf.Max(70, size.Y - _card.Size.Y - 18));
+        _card.Position = new Vector2(Mathf.Max(8, size.X - _card.Size.X - 12), Mathf.Max(70, size.Y - _card.Size.Y - 18));
         foreach (var n in new[] { _text }) n.Visible = !_collapsed;
         _title.Visible = true;
         _next.Visible = !_collapsed && Steps[Math.Min(_step, Steps.Length - 1)].Gate == "next";
         _skip.Visible = !_collapsed && Steps[Math.Min(_step, Steps.Length - 1)].Gate != "next";
-        _card.ResetSize(); _card.Position = new Vector2(196, Mathf.Max(70, size.Y - _card.Size.Y - 18));
+        _card.ResetSize(); _card.Position = new Vector2(Mathf.Max(8, size.X - _card.Size.X - 12), Mathf.Max(70, size.Y - _card.Size.Y - 18));
     }
 
     public override void _Process(double delta)

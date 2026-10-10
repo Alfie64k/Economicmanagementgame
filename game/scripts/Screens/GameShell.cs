@@ -67,7 +67,7 @@ public partial class GameShell : Control
         _pages.Add(("Report", () => new ReportView()));
 
         var root = UI.VBox(0); root.SetAnchorsPreset(LayoutPreset.FullRect); AddChild(root);
-        _toasts.SetAnchorsAndOffsetsPreset(LayoutPreset.CenterTop); _toasts.Position = new Vector2(0, 70); _toasts.MouseFilter = MouseFilterEnum.Ignore; _toasts.AddThemeConstantOverride("separation", 6);
+        _toasts.AnchorLeft = _toasts.AnchorRight = 0.5f; _toasts.AnchorTop = _toasts.AnchorBottom = 0; _toasts.OffsetLeft = -224; _toasts.OffsetRight = 224; _toasts.OffsetTop = 70; _toasts.GrowHorizontal = GrowDirection.Both; _toasts.MouseFilter = MouseFilterEnum.Ignore; _toasts.AddThemeConstantOverride("separation", 6);
         root.AddChild(BuildTopBar());
         var body = UI.HBox(0); body.SizeFlagsVertical = SizeFlags.ExpandFill; root.AddChild(body);
         body.AddChild(BuildNav());
@@ -84,9 +84,9 @@ public partial class GameShell : Control
         Game.Speed = Settings.DefaultSpeed == 0 ? 0 : 0; // always start paused so the player can read the briefing
         Navigate("Dashboard");
         UpdateTop(); UpdateFeed(true);
-        if (Game.World.Decisions.Count > 0) ShowDecision();
-        if (Game.Scenario != null) ShowBriefing();
-        else if (!Settings.TutorialSeen && Game.World.Month == 0 && !Game.SuppressModals) StartTutorial();
+        if (Game.Scenario != null && Game.World.Month == 0) ShowBriefing();
+        if (Game.World.Decisions.Count > 0) ShowDecision();   // a decision always comes first
+        else if (Game.Scenario == null && !Settings.TutorialSeen && Game.World.Month == 0 && !Game.SuppressModals) StartTutorial();
     }
 
     public TutorialCoach? Coach => _coach;
@@ -140,8 +140,8 @@ public partial class GameShell : Control
         h.AddChild(_planBtn); h.AddChild(_endTurn);
         h = _barB = UI.HBox(14); _barB.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         _ticker = UI.Lbl("", 13, Pal.Dim); _ticker.ClipText = true; _ticker.CustomMinimumSize = new Vector2(120, 0); _ticker.SizeFlagsHorizontal = SizeFlags.ExpandFill; h.AddChild(_ticker);
-        _auto = Cards.Chip("AUTOPILOT", Pal.Series[2]); _auto.Visible = false; _auto.TooltipText = "The cabinet is running tax, spending and rates. Open the Cabinet page to take control back."; h.AddChild(_auto);
-        _alert = UI.Lbl("", 14, Pal.Warn, true); h.AddChild(_alert);
+        _auto = Cards.Chip("AUTOPILOT", Pal.Series[2]); _auto.Visible = false; _auto.MouseFilter = MouseFilterEnum.Pass; _auto.TooltipText = "The cabinet is running tax, spending and rates. Open the Cabinet page to take control back."; h.AddChild(_auto);
+        _alert = UI.Lbl("", 14, Pal.Warn, true); _alert.ClipText = true; _alert.CustomMinimumSize = new Vector2(170, 0); _alert.MouseFilter = MouseFilterEnum.Pass; h.AddChild(_alert);   // fixed width: the reason must not widen the bar; the tooltip carries all of it
         var pcBox = UI.VBox(2); _pcLabel = UI.Lbl("Political capital", 12, Pal.Dim);
         _pcBar.CustomMinimumSize = new Vector2(160, 10); _pcLabel.ClipText = true; _pcLabel.CustomMinimumSize = new Vector2(160, 0);
         pcBox.AddChild(_pcLabel); pcBox.AddChild(_pcBar); h.AddChild(pcBox);
@@ -285,7 +285,7 @@ public partial class GameShell : Control
         {
             _acc += delta * Game.MonthsPerSecond[Game.Speed];
             int n = 0;
-            while (_acc >= 1 && n < 6) { _acc -= 1; n++; if (!Game.Step()) { _acc = 0; break; } _dirty = true; }
+            while (_acc >= 1 && n < 6) { _acc -= 1; n++; if (!Game.Step()) { _acc = 0; break; } _dirty = true; if (Game.Speed == 0 || _modal != null) { _acc = 0; break; } }
             if (n == 6) _acc = 0;
         }
         _uiAcc += delta;
@@ -294,7 +294,13 @@ public partial class GameShell : Control
 
     public override void _UnhandledKeyInput(InputEvent e)
     {
-        if (e is not InputEventKey k || !k.Pressed || _modal != null) return;
+        if (e is not InputEventKey k || !k.Pressed) return;
+        if (k.Echo && k.Keycode is not (Key.Pagedown or Key.Pageup)) return;   // a held key must not end several turns or flip the clock repeatedly
+        if (_modal != null)
+        {
+            if (k.Keycode == Key.Escape && Game.World.Decisions.Count == 0) { Close(); GetViewport().SetInputAsHandled(); }
+            return;
+        }
         if (k.Keycode == Key.Space) SetSpeed(Game.Speed == 0 ? Math.Max(1, Settings.DefaultSpeed) : 0);
         else if (k.Keycode >= Key.Key1 && k.Keycode <= Key.Key4) SetSpeed((int)k.Keycode - (int)Key.Key0);
         else if (k.Keycode == Key.Pagedown || (k.Keycode == Key.Tab && k.CtrlPressed && !k.ShiftPressed)) CyclePage(1);
@@ -467,6 +473,7 @@ public partial class GameShell : Control
         var dim = new ColorRect { Color = new Color(0, 0, 0, 0.6f) }; dim.SetAnchorsPreset(LayoutPreset.FullRect); o.AddChild(dim);
         var cc = new CenterContainer(); cc.SetAnchorsPreset(LayoutPreset.FullRect); o.AddChild(cc);
         var card = UI.Card(content, Pal.PanelAlt, 22); card.CustomMinimumSize = new Vector2(width, 0); cc.AddChild(card);
+        _modal?.QueueFree();
         AddChild(o); _modal = o; Game.Speed = 0; UpdateTop();
         return o;
     }
@@ -492,7 +499,8 @@ public partial class GameShell : Control
 
     public void Toast(string text, Color? accent = null)
     {
-        var p = new PanelContainer(); p.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelHi, 10, accent ?? Pal.Accent, 1, 12));
+        var p = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };   // a toast never takes a click meant for the page under it
+        p.AddThemeStyleboxOverride("panel", AppTheme.Box(Pal.PanelHi, 10, accent ?? Pal.Accent, 1, 12));
         var l = UI.Lbl(text, 14, Pal.Text, false, HorizontalAlignment.Left, true); l.CustomMinimumSize = new Vector2(420, 0); p.AddChild(l);
         _toasts.AddChild(p); EconGame.Audio.Sfx.Ok();
         var tw = CreateTween(); tw.TweenInterval(9.0);

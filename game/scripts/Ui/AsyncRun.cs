@@ -7,7 +7,7 @@ namespace EconGame.Ui;
 
 /// <summary>
 /// Runs a calculation on a worker thread and delivers the result on the main thread, dropping stale runs. A new Start cancels the previous run, a
-/// fault is reported instead of thrown, and nothing is delivered once the host has left the tree. Work must only touch data captured beforehand.
+/// fault is reported instead of thrown, and nothing is delivered once the host has been freed. Work must only touch data captured beforehand.
 /// </summary>
 public sealed class AsyncRun<T>
 {
@@ -23,7 +23,7 @@ public sealed class AsyncRun<T>
             {
                 if (id != _id) return;
                 Busy = false;
-                if (!GodotObject.IsInstanceValid(host) || !host.IsInsideTree()) return;
+                if (!GodotObject.IsInstanceValid(host)) return;   // a page that is only out of the tree for now still gets its result
                 if (t.IsFaulted) onFail?.Invoke(t.Exception!.GetBaseException());
                 else if (t.IsCompletedSuccessfully) onDone(t.Result);
             }).CallDeferred());

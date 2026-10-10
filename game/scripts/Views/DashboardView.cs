@@ -105,13 +105,15 @@ public partial class DashboardView : View
 
         // why panel
         foreach (var kv in _tiles) kv.Value.Selected = kv.Key == _whyMetric;
-        foreach (var ch in _chips.GetChildren()) ch.QueueFree();
-        foreach (var m in Explain.Metrics)
-        {
-            string mm = m;
-            var b = UI.Chip(char.ToUpper(m[0]) + m[1..], m == _whyMetric, () => { _whyMetric = mm; Refresh(); });
-            _chips.AddChild(b);
-        }
+        // built once and restyled in place: rebuilding them on every refresh replaced the button under the cursor between press and release
+        if (_chips.GetChildCount() == 0)
+            foreach (var m in Explain.Metrics)
+            {
+                string mm = m;
+                var b = UI.Chip(char.ToUpper(m[0]) + m[1..], false, () => { _whyMetric = mm; Refresh(); }); b.Name = "chip_" + m;
+                _chips.AddChild(b);
+            }
+        foreach (var ch in _chips.GetChildren()) if (ch is Button cb) cb.SetPressedNoSignal(cb.Name == "chip_" + _whyMetric);
         var ex = Explain.Why(c, _whyMetric);
         _whyHead.Text = ex.Headline;
         double max = Math.Max(0.5, ex.Items.Max(i => Math.Abs(i.Value)));

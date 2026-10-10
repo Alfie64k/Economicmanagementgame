@@ -122,6 +122,7 @@ public partial class SelfTest : Node
                 Shot(shots, $"{n++:00}_{page.Replace(' ', '_').ToLower()}");
             }
             await RealGame(shell, shots);
+            await RealGame2(shell, shots);
             await Cabinet(shell, shots);
             await RunControls(shell, shots);
             shell = await Polish(main, shell, shots);
@@ -272,6 +273,78 @@ public partial class SelfTest : Node
         if (!Has("New game")) throw new Exception("Back from the country list did not return to the main menu");
     }
 
+    /// <summary>Things that silently swallowed real input: toasts over the page, tiles that kept focus, held keys, a budget slider whose range ran away, double wheel zoom, controls rebuilt under the cursor.</summary>
+    async System.Threading.Tasks.Task RealGame2(GameShell shell, string shots)
+    {
+        shell.DismissModal(); Game.ClearPlan(); Game.Speed = 0; await Frames(2);
+        int savedTriggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
+        shell.Navigate("Dashboard"); await Frames(6);
+
+        // a toast must not take clicks meant for what is under it
+        shell.Toast("Self-test toast"); await Frames(4);
+        Label? tl = null; { var all = new List<Label>(); FindAll(shell, all); tl = all.FirstOrDefault(l => l.Text == "Self-test toast"); }
+        if (tl == null) throw new Exception("the toast did not appear");
+        var tp = tl.GetParent<Control>(); var centre = tp.GlobalPosition + tp.Size / 2;
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = centre, GlobalPosition = centre }); await Frames(3);
+        var hovered = GetViewport().GuiGetHoveredControl();
+        for (Node? n = hovered; n != null; n = n.GetParent()) if (n == tp) throw new Exception("a toast is the control under the mouse, so it would swallow the click");
+        if (tp.GlobalPosition.X < 0 || tp.GlobalPosition.X + tp.Size.X > GetViewport().GetVisibleRect().Size.X) throw new Exception($"the toast is not on screen (x {tp.GlobalPosition.X}, width {tp.Size.X})");
+
+        // a click on a tile must not leave it holding Space and Enter
+        var tile = Find<EconGame.Ui.KpiTile>(shell) ?? throw new Exception("no KPI tile on the Dashboard");
+        await Click(tile.GlobalPosition + tile.Size / 2); await Frames(3);
+        if (GetViewport().GuiGetFocusOwner() is { } fo && fo is not LineEdit) throw new Exception($"{fo.GetType().Name} kept focus after a click");
+        await Key(Godot.Key.Space);
+        if (Game.Speed == 0) throw new Exception("Space did not start the clock after clicking a tile");
+        await Key(Godot.Key.Space);
+        if (Game.Speed != 0) throw new Exception("Space did not pause again");
+
+        // news chips on the Dashboard while the clock runs: they are not rebuilt under the cursor
+        var chips = new List<Button>(); { var all = new List<Button>(); FindAll(shell.Current!, all); chips = all.Where(b => b.Name.ToString().StartsWith("chip_")).ToList(); }
+        if (chips.Count < 2) throw new Exception("the Dashboard has no metric chips");
+        Game.Speed = 1; await Frames(3);
+        var target = chips[1];
+        await Click(target.GlobalPosition + target.Size / 2); await Frames(4);
+        Game.Speed = 0; await Frames(2);
+        if (!target.ButtonPressed || chips[0].ButtonPressed) throw new Exception("a click on a metric chip was lost while the clock was running");
+
+        // Escape closes the game menu; a held Enter does not end several turns
+        var menu = FindButton(shell, b => b.Text == "Menu") ?? throw new Exception("no Menu button");
+        await Click(menu.GlobalPosition + menu.Size / 2); await Frames(4);
+        if (!shell.HasModal) throw new Exception("Menu did not open");
+        await Key(Godot.Key.Escape); await Frames(3);
+        if (shell.HasModal) throw new Exception("Escape did not close the game menu");
+        int m = Game.World.Month;
+        Input.ParseInputEvent(new InputEventKey { Keycode = Godot.Key.Enter, PhysicalKeycode = Godot.Key.Enter, Pressed = true, Echo = true }); await Frames(6);
+        if (Game.World.Month != m) throw new Exception("a repeated Enter event ended a turn");
+        shell.DismissModal(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);
+
+        // a budget slider keeps its range while it is dragged
+        shell.Navigate("Budget"); await Frames(8);
+        var sls = new List<EconGame.Ui.AppSlider>(); FindAll(shell.Current!, sls);
+        var bs = sls.FirstOrDefault(x => x.IsVisibleInTree() && x.Size.X > 150) ?? throw new Exception("no visible slider on the Budget page");
+        float tl0 = 8, tw = bs.Size.X - 16 - bs.LabelWidth, cy = bs.GlobalPosition.Y + bs.Size.Y / 2; double max0 = bs.Max;
+        var a = new Vector2(bs.GlobalPosition.X + tl0 + 0.3f * tw, cy); var b2 = new Vector2(bs.GlobalPosition.X + tl0 + 0.9f * tw, cy);
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = a, GlobalPosition = a }); await Frames(2);
+        Input.ParseInputEvent(new InputEventMouseButton { Position = a, GlobalPosition = a, ButtonIndex = MouseButton.Left, Pressed = true, ButtonMask = MouseButtonMask.Left }); await Frames(3);
+        for (int i = 1; i <= 8; i++) { var p = a.Lerp(b2, i / 8f); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p, ButtonMask = MouseButtonMask.Left }); await Frames(3); }
+        double maxDuring = bs.Max;
+        Input.ParseInputEvent(new InputEventMouseButton { Position = b2, GlobalPosition = b2, ButtonIndex = MouseButton.Left, Pressed = false }); await Frames(3);
+        if (Math.Abs(maxDuring - max0) > 1e-9) throw new Exception($"the slider range changed from {max0} to {maxDuring} while it was being dragged");
+        Game.ClearPlan(); await Frames(3);
+
+        // one wheel notch zooms the map once
+        shell.Navigate("World map"); await Frames(12);
+        var mc = Find<EconGame.Map.MapCanvas>(shell) ?? throw new Exception("no map canvas");
+        var mp = mc.GlobalPosition + mc.Size / 2; float z0 = mc.Zoom;
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = mp, GlobalPosition = mp }); await Frames(2);
+        foreach (bool down in new[] { true, false }) { Input.ParseInputEvent(new InputEventMouseButton { Position = mp, GlobalPosition = mp, ButtonIndex = MouseButton.WheelUp, Pressed = down, Factor = 1 }); await Frames(2); }
+        float ratio = mc.Zoom / z0; if (ratio < 1.1f || ratio > 1.25f) throw new Exception($"one wheel notch changed the map zoom by x{ratio:0.00}, expected one step of 1.18");
+
+        Settings.PauseTriggers = savedTriggers;
+        shell.Navigate("Dashboard"); await Frames(3);
+    }
+
     /// <summary>The in-game controls driven only by real events: navigation, speed, menus, chips, the End turn button and a slider drag.</summary>
     async System.Threading.Tasks.Task RealGame(GameShell shell, string shots)
     {
@@ -304,6 +377,7 @@ public partial class SelfTest : Node
         if (!rt.GetPopup().Visible) throw new Exception("a real click on Run to did not open its menu");
         await ClickPopupItem(rt.GetPopup(), 3);   // "One year from now": always a date ahead, unlike the end of a quarter that may be today
         if (Game.Speed == 0) throw new Exception("choosing 'One year from now' did not start the clock");
+        if (FocusedButton() != "") throw new Exception($"'{FocusedButton()}' kept focus after a popup choice, so Space would reopen the menu instead of pausing");
         await Chip("II"); if (Game.Speed != 0) throw new Exception("could not stop a run-to with the pause button");
 
         // the news filter chips

@@ -18,6 +18,12 @@ public partial class Main : Control
         {
             Diagnostics.Startup($"Godot {Engine.GetVersionInfo()["string"]} · {OS.GetName()} · {DisplayServer.GetName()} · {RenderingServer.GetVideoAdapterName()} · {RenderingServer.GetVideoAdapterApiVersion()}");
             Settings.Load(); Diagnostics.Install();
+            // a choice made inside a popup never reaches _Input (the popup is its own window), so drop the button's focus when the popup closes
+            GetTree().NodeAdded += n =>
+            {
+                var pop = n is MenuButton mb ? mb.GetPopup() : n is OptionButton ob ? ob.GetPopup() : null;
+                if (pop != null) pop.PopupHide += () => CallDeferred(MethodName.DropClickFocus);
+            };
             Theme = AppTheme.Build();
             SetAnchorsPreset(LayoutPreset.FullRect);
             _ground = new ColorRect { Color = Pal.Bg };
@@ -50,7 +56,8 @@ public partial class Main : Control
 
     void DropClickFocus()
     {
-        if (GetViewport().GuiGetFocusOwner() is BaseButton b) b.ReleaseFocus();
+        // anything a click focused except a text box: tiles and sliders would otherwise keep Space, Enter and the page keys to themselves
+        if (GetViewport().GuiGetFocusOwner() is { } c && c is not (LineEdit or TextEdit)) c.ReleaseFocus();
     }
 
     /// <summary>Plain-control error page so a startup failure is visible instead of the window silently closing.</summary>

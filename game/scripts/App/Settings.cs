@@ -69,6 +69,11 @@ public static class Settings
         if (Pal.HighContrast != HighContrast) Pal.Use(HighContrast);
         if (Engine.GetMainLoop() is SceneTree tree && DisplayServer.GetName() != "headless") tree.Root.ContentScaleFactor = UiScale;
         AudioServer.SetBusVolumeDb(0, Mathf.LinearToDb(Mathf.Max(0.0001f, Volume)));
-        if (DisplayServer.GetName() != "headless") DisplayServer.WindowSetMode(Fullscreen ? DisplayServer.WindowMode.Fullscreen : DisplayServer.WindowMode.Windowed);
+        if (DisplayServer.GetName() != "headless")
+        {
+            // only when the choice changes: forcing Windowed on every setting would un-maximise a maximised window
+            var cur = DisplayServer.WindowGetMode(); bool isFs = cur is DisplayServer.WindowMode.Fullscreen or DisplayServer.WindowMode.ExclusiveFullscreen;
+            if (isFs != Fullscreen) DisplayServer.WindowSetMode(Fullscreen ? DisplayServer.WindowMode.Fullscreen : DisplayServer.WindowMode.Windowed);
+        }
     }
 }

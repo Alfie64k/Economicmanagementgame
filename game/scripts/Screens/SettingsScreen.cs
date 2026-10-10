@@ -63,7 +63,7 @@ public partial class SettingsScreen : Control
         var crash = new CheckBox { Text = "Keep a local crash log (never sent anywhere)", ButtonPressed = Diagnostics.CrashLog };
         crash.Toggled += on => Diagnostics.CrashLog = on; box.AddChild(crash);
         box.AddChild(UI.HBox(10, UI.Btn("Copy feedback report to clipboard", Diagnostics.CopyReport), UI.Dim("Paste it into an issue or email; contains no personal data.", 12)));
-        root.AddChild(UI.Card(box));
+        var card = UI.Card(UI.Scroll(box)); card.SizeFlagsVertical = SizeFlags.ExpandFill; root.AddChild(card);   // scrolls when the window or interface scale leaves too little height
         root.AddChild(UI.Dim("Keyboard: Space pause · 1-4 speed · Ctrl+Tab or PageUp/PageDown change view · Tab moves focus · Esc menu · F1 help · F2 glossary", 13));
     }
 

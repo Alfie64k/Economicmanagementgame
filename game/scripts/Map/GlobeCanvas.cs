@@ -124,6 +124,7 @@ void fragment(){ float f = pow(1.0 - abs(dot(normalize(NORMAL), normalize(VIEW))
     {
         if (e is InputEventMouseButton mb)
         {
+            if (mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown && !mb.Pressed) return;   // a wheel notch is a press and a release; act once
             if (mb.ButtonIndex == MouseButton.WheelUp) { _dist = Mathf.Clamp(_dist * 0.9f, 1.4f, 6f); ApplyRotation(); AcceptEvent(); }
             else if (mb.ButtonIndex == MouseButton.WheelDown) { _dist = Mathf.Clamp(_dist / 0.9f, 1.4f, 6f); ApplyRotation(); AcceptEvent(); }
             else if (mb.ButtonIndex == MouseButton.Left)

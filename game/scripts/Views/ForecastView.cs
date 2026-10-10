@@ -31,13 +31,18 @@ public partial class ForecastView : View
     public override void Refresh()
     {
         if (!Game.Running) return;
-        foreach (var ch in _chips.GetChildren().ToList()) ch.QueueFree();
-        foreach (var m in new[] { "growth", "inflation", "unemployment", "debt", "deficit", "approval", "policyRate", "yield" })
-        {
-            string mm = m; _chips.AddChild(UI.Chip(m == "policyRate" ? "Policy rate" : m == "yield" ? "10y yield" : char.ToUpper(m[0]) + m[1..], m == _metric, () => { _metric = mm; Draw(); }));
-        }
+        if (_chips.GetChildCount() == 0)
+            foreach (var m in new[] { "growth", "inflation", "unemployment", "debt", "deficit", "approval", "policyRate", "yield" })
+            {
+                string mm = m;
+                var b = UI.Chip(m == "policyRate" ? "Policy rate" : m == "yield" ? "10y yield" : char.ToUpper(m[0]) + m[1..], false, () => { _metric = mm; SyncChips(); Draw(); }); b.Name = "chip_" + m;
+                _chips.AddChild(b);
+            }
+        SyncChips();
         Draw();
     }
+
+    void SyncChips() { foreach (var ch in _chips.GetChildren()) if (ch is Button cb) cb.SetPressedNoSignal(cb.Name == "chip_" + _metric); }
 
     public void RunNow() => Run();
 

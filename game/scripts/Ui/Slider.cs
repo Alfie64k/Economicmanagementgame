@@ -13,6 +13,8 @@ public partial class AppSlider : Control
     public float LabelWidth = 78;
     bool _drag, _hover, _mouseFocus;
 
+    /// <summary>True while the mouse button is held on the track.</summary>
+    public bool Dragging => _drag;
     public AppSlider() { CustomMinimumSize = new Vector2(180, 30); FocusMode = FocusModeEnum.All; MouseFilter = MouseFilterEnum.Stop; }
 
     public void Setup(double min, double max, double step, double value, Func<double, string> fmt)

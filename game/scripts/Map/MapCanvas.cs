@@ -90,6 +90,7 @@ public partial class MapCanvas : Control, IMapSurface
         {
             if (mb.ButtonIndex == MouseButton.WheelUp || mb.ButtonIndex == MouseButton.WheelDown)
             {
+                if (!mb.Pressed) return;   // a wheel notch arrives as a press and a release; zoom once
                 float f = mb.ButtonIndex == MouseButton.WheelUp ? 1.18f : 1 / 1.18f;
                 _userMoved = true; var w = ToWorld(mb.Position); Zoom = Mathf.Clamp(Zoom * f, MinZoom, 120f); Offset = mb.Position - w * Zoom; Apply(); AcceptEvent();
             }

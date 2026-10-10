@@ -36,11 +36,19 @@ public partial class SavesPanel : VBoxContainer
         if (_inGame && e is InputEventKey { Pressed: true, Keycode: Key.Escape }) { GetViewport().SetInputAsHandled(); _close(); }
     }
 
+    /// <summary>The rolling slots, plus names Windows will not accept as file names (compared without regard to case: Windows file names are case-insensitive).</summary>
+    static bool Reserved(string slot)
+    {
+        string l = slot.ToLowerInvariant(), stem = l.Split('.')[0];
+        return l is "auto" or "auto1" or "auto2" or "quick" || stem is "con" or "prn" or "aux" or "nul"
+            || (stem.Length == 4 && (stem.StartsWith("com") || stem.StartsWith("lpt")) && stem[3] is >= '1' and <= '9');
+    }
+
     void SaveNew()
     {
         string slot = SaveStore.Sanitise(_name.Text);
         if (slot.Length == 0) { _msg.Text = "Type a name first (letters, digits, spaces, hyphens)."; return; }
-        if (slot is "auto" or "auto1" or "auto2" or "quick") { _msg.Text = "That name is reserved."; return; }
+        if (Reserved(slot)) { _msg.Text = "That name is reserved."; return; }
         _msg.Text = Game.Save(slot) ? $"Saved as “{slot.Replace('_', ' ')}”." : "The save failed. Check the disk is writable.";
         _name.Text = ""; Rebuild();
     }

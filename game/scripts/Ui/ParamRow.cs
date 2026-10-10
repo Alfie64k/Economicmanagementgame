@@ -112,7 +112,7 @@ public partial class ParamRow : VBoxContainer
             double top = Math.Min(Def.Max, Math.Max(Math.Max(effective, live) * 1.6, Def.Min + Def.Step * 20));
             if (Def.Kind is PKind.Years or PKind.Months or PKind.Factor) top = Def.Max;
             else if (Def.Kind == PKind.Rate) top = Math.Min(Def.Max, Math.Max(top, 0.12));
-            _slider!.Max = Math.Max(_slider.Min + Def.Step, top);
+            if (!_slider!.Dragging) _slider.Max = Math.Max(_slider.Min + Def.Step, top);   // the range must not chase the thumb while it is being dragged
             _slider.Baseline = live;
             _slider.Format = FormatSlider;
             _slider.SetExact(effective);
