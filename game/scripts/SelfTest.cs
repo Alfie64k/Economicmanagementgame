@@ -31,6 +31,7 @@ public partial class SelfTest : Node
 
         try
         {
+            await RealMenu(main);
             await UiFlow(main, shots);
             main.ShowMainMenu(); await Frames(3); Shot(shots, "00_menu");
             main.ShowCountrySelect(); await Frames(4); Shot(shots, "01_select");
@@ -120,6 +121,7 @@ public partial class SelfTest : Node
                 if (page == "Trade") { Game.Sim!.Execute(Sim.Core.Model.Command.Tariff(Game.Player.Id, "DEU", 0.1)); for (int k = 0; k < 12; k++) { Game.Step(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice); } await Frames(6); }
                 Shot(shots, $"{n++:00}_{page.Replace(' ', '_').ToLower()}");
             }
+            await RealGame(shell, shots);
             await Cabinet(shell, shots);
             await RunControls(shell, shots);
             shell = await Polish(main, shell, shots);
@@ -163,18 +165,179 @@ public partial class SelfTest : Node
         GetViewport().PushInput(new InputEventMouseMotion { Position = p, GlobalPosition = p }, true); await Frames(3);
     }
 
+    /// <summary>
+    /// A left click as the operating system delivers it: through <c>Input.ParseInputEvent</c>, which also updates the Input singleton
+    /// (<c>Input.IsMouseButtonPressed</c>), unlike <c>Viewport.PushInput</c>. Press and release are several frames apart, as with a real hand,
+    /// so anything that reacts to the press (focus changes, deferred calls) has run before the release arrives.
+    /// </summary>
     async System.Threading.Tasks.Task Click(Vector2 p)
     {
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); await Frames(1);
         foreach (bool down in new[] { true, false })
         {
-            var e = new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = down, ButtonMask = down ? MouseButtonMask.Left : 0 };
-            GetViewport().PushInput(e, true); await Frames(2);
+            Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = down, ButtonMask = down ? MouseButtonMask.Left : 0 });
+            await Frames(down ? 4 : 2);
         }
     }
 
     async System.Threading.Tasks.Task Key(Key k)
     {
-        foreach (bool down in new[] { true, false }) { GetViewport().PushInput(new InputEventKey { Keycode = k, PhysicalKeycode = k, Pressed = down }, false); await Frames(2); }
+        foreach (bool down in new[] { true, false }) { Input.ParseInputEvent(new InputEventKey { Keycode = k, PhysicalKeycode = k, Pressed = down }); await Frames(2); }
+    }
+
+    /// <summary>Types text into whatever has keyboard focus, one key press at a time.</summary>
+    async System.Threading.Tasks.Task Type(string text)
+    {
+        foreach (char ch in text)
+        {
+            var k = (Key)char.ToUpperInvariant(ch);
+            foreach (bool down in new[] { true, false }) Input.ParseInputEvent(new InputEventKey { Keycode = k, PhysicalKeycode = k, Unicode = ch, Pressed = down });
+            await Frames(2);
+        }
+    }
+
+    /// <summary>A real drag: press, move in steps, release.</summary>
+    async System.Threading.Tasks.Task Drag(Vector2 from, Vector2 to)
+    {
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = from, GlobalPosition = from }); await Frames(2);
+        Input.ParseInputEvent(new InputEventMouseButton { Position = from, GlobalPosition = from, ButtonIndex = MouseButton.Left, Pressed = true, ButtonMask = MouseButtonMask.Left }); await Frames(3);
+        for (int i = 1; i <= 8; i++)
+        {
+            var p = from.Lerp(to, i / 8f);
+            Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p, ButtonMask = MouseButtonMask.Left, Relative = (to - from) / 8f }); await Frames(2);
+        }
+        Input.ParseInputEvent(new InputEventMouseButton { Position = to, GlobalPosition = to, ButtonIndex = MouseButton.Left, Pressed = false }); await Frames(3);
+    }
+
+    /// <summary>Clicks the n-th item of an open popup menu with the mouse (items are laid out evenly down the popup).</summary>
+    async System.Threading.Tasks.Task ClickPopupItem(PopupMenu pop, int index)
+    {
+        if (!pop.Visible) throw new Exception("the popup is not open");
+        float h = pop.Size.Y / Math.Max(1, pop.ItemCount);
+        await Click(new Vector2(pop.Position.X + pop.Size.X / 2, pop.Position.Y + h * (index + 0.5f))); await Frames(4);
+    }
+
+    static string FocusedButton() => Main.Instance!.GetViewport().GuiGetFocusOwner() is BaseButton b ? (b is Button t ? t.Text : b.GetType().Name) : "";
+
+    /// <summary>
+    /// The menus, settings and country list driven only by real events: no signal is emitted and no widget method is called. This is the layer
+    /// that failed for a player on a release build when a focus handler cancelled every button press.
+    /// </summary>
+    async System.Threading.Tasks.Task RealMenu(Main main)
+    {
+        main.ShowMainMenu(); await Frames(4);
+        bool Has(string text) => FindButton(main, x => x.Text.StartsWith(text)) != null;
+        async System.Threading.Tasks.Task ClickText(string text, string what)
+        {
+            var b = FindButton(main, x => x.Text.StartsWith(text) && !x.Disabled && x.IsVisibleInTree()) ?? throw new Exception($"no enabled '{text}' button ({what})");
+            await Click(b.GlobalPosition + b.Size / 2); await Frames(4);
+        }
+        foreach (var (label, what) in new[] { ("Scenarios", "the scenarios screen"), ("Achievements", "achievements"), ("Settings", "settings") })
+        {
+            await ClickText(label, what);
+            if (Has("New game") || !Has("← Back")) throw new Exception($"a real click on '{label}' did not open {what}");
+            if (FocusedButton() != "") throw new Exception($"button '{FocusedButton()}' kept keyboard focus after a mouse click");
+            if (label == "Settings")
+            {
+                var cb = Find<CheckBox>(main) ?? throw new Exception("settings has no check box");
+                bool was = cb.ButtonPressed;
+                await Click(cb.GlobalPosition + new Vector2(14, cb.Size.Y / 2)); await Frames(2);
+                if (cb.ButtonPressed == was) throw new Exception("a real click did not toggle a settings check box");
+                await Click(cb.GlobalPosition + new Vector2(14, cb.Size.Y / 2)); await Frames(2);
+                if (cb.ButtonPressed != was) throw new Exception("a second real click did not restore the check box");
+            }
+            await ClickText("← Back", what);
+            if (!Has("New game")) throw new Exception($"a real click on Back did not return to the main menu from {what}");
+        }
+
+        // country select: search box, region drop-down (popup), row, start
+        await ClickText("New game", "the country list");
+        var search = Find<LineEdit>(main) ?? throw new Exception("country list has no search box");
+        await Click(search.GlobalPosition + search.Size / 2); await Frames(2);
+        await Type("fra");
+        if (search.Text != "fra") throw new Exception($"typing into the search box gave '{search.Text}'");
+        if (FindButton(main, b => HasLabel(b, "France")) == null) throw new Exception("France is not listed after searching for 'fra'");
+        if (FindButton(main, b => HasLabel(b, "Germany")) != null) throw new Exception("Germany is still listed after searching for 'fra'");
+        foreach (var _ in "fra") await Key(Godot.Key.Backspace);
+        if (search.Text != "") throw new Exception("could not clear the search box");
+        var region = Find<OptionButton>(main) ?? throw new Exception("country list has no region drop-down");
+        await Click(region.GlobalPosition + region.Size / 2); await Frames(6);
+        if (!region.GetPopup().Visible) throw new Exception("a real click did not open the region drop-down");
+        await ClickPopupItem(region.GetPopup(), 1);
+        if (region.Selected != 1) throw new Exception($"clicking a region in the drop-down gave item {region.Selected}");
+        await Click(region.GlobalPosition + region.Size / 2); await Frames(6);
+        await ClickPopupItem(region.GetPopup(), 0);
+        if (region.Selected != 0) throw new Exception("could not return the region filter to all regions");
+        await ClickText("← Back", "the country list");
+        if (!Has("New game")) throw new Exception("Back from the country list did not return to the main menu");
+    }
+
+    /// <summary>The in-game controls driven only by real events: navigation, speed, menus, chips, the End turn button and a slider drag.</summary>
+    async System.Threading.Tasks.Task RealGame(GameShell shell, string shots)
+    {
+        shell.DismissModal(); Game.ClearPlan(); await Frames(2);
+        int savedTriggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
+        foreach (var pg in new[] { "Dashboard", "Budget", "Monetary", "Policies", "Investment", "Sectors", "Trade", "Society", "Forecast", "World map", "Cabinet", "Rankings", "Journal", "Report" })
+        {
+            var nb = FindButton(shell, b => b.Text.StartsWith(pg) && b.ThemeTypeVariation == EconGame.Ui.StateStyles.NavItem) ?? throw new Exception($"no navigation item for {pg}");
+            await Click(nb.GlobalPosition + nb.Size / 2); await Frames(4);
+            if (shell.CurrentName != pg) throw new Exception($"a real click on the {pg} navigation item opened '{shell.CurrentName}'");
+            if (FocusedButton() != "") throw new Exception($"after clicking {pg} the button '{FocusedButton()}' still has focus, so Space and Enter would press it");
+        }
+
+        // speed chips and Space
+        async System.Threading.Tasks.Task Chip(string text)
+        {
+            var b = FindButton(shell, x => x.Text == text && x.IsVisibleInTree()) ?? throw new Exception($"no '{text}' button");
+            await Click(b.GlobalPosition + b.Size / 2); await Frames(2);
+        }
+        await Chip("2×"); if (Game.Speed != 2) throw new Exception($"a real click on 2× set the speed to {Game.Speed}");
+        await Chip("II"); if (Game.Speed != 0) throw new Exception("a real click on the pause button did not pause");
+        await Chip("1×"); if (Game.Speed != 1) throw new Exception("a real click on 1× did not set the speed");
+        await Chip("Dashboard"); await Key(Godot.Key.Space);
+        if (Game.Speed != 0) throw new Exception("Space did not pause the clock after a mouse click on a button");
+        shell.Navigate("Dashboard"); await Frames(2);
+
+        // the Run to menu: a popup, chosen with the keyboard
+        var rt = Find<MenuButton>(shell) ?? throw new Exception("no Run to menu");
+        await Click(rt.GlobalPosition + rt.Size / 2); await Frames(6);
+        if (!rt.GetPopup().Visible) throw new Exception("a real click on Run to did not open its menu");
+        await ClickPopupItem(rt.GetPopup(), 3);   // "One year from now": always a date ahead, unlike the end of a quarter that may be today
+        if (Game.Speed == 0) throw new Exception("choosing 'One year from now' did not start the clock");
+        await Chip("II"); if (Game.Speed != 0) throw new Exception("could not stop a run-to with the pause button");
+
+        // the news filter chips
+        var adv = FindButton(shell, b => b.Text == "Advisers" && b.IsVisibleInTree()) ?? throw new Exception("no Advisers chip");
+        await Click(adv.GlobalPosition + adv.Size / 2); await Frames(3);
+        if (!adv.ButtonPressed) throw new Exception("a real click on the Advisers chip did not select it");
+        await Chip("All");
+
+        // End turn
+        shell.DismissModal(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);
+        int m = Game.World.Month;
+        var end = FindButton(shell, b => b.Text.StartsWith("End turn")) ?? throw new Exception("no End turn button");
+        await Click(end.GlobalPosition + end.Size / 2); await Frames(10);
+        if (Game.World.Month != m + 1) throw new Exception($"a real click on End turn moved the month from {m} to {Game.World.Month}");
+        shell.DismissModal(); foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);
+
+        // a slider, dragged with the mouse
+        shell.Navigate("Monetary"); await Frames(6);
+        var sl = Find<EconGame.Ui.AppSlider>(shell) ?? throw new Exception("the Monetary page has no slider");
+        float trackL = 8, trackW = sl.Size.X - 16 - sl.LabelWidth, cy = sl.GlobalPosition.Y + sl.Size.Y / 2;
+        double target = sl.Min + 0.8 * (sl.Max - sl.Min);
+        await Drag(new Vector2(sl.GlobalPosition.X + trackL + 0.2f * trackW, cy), new Vector2(sl.GlobalPosition.X + trackL + 0.8f * trackW, cy));
+        if (Math.Abs(sl.Value - target) > 0.04 * (sl.Max - sl.Min)) throw new Exception($"dragging the slider gave {sl.Value}, expected about {target}");
+        Game.ClearPlan(); await Frames(2);
+
+        // the Menu button opens the game menu and Resume closes it
+        var menu = FindButton(shell, b => b.Text == "Menu") ?? throw new Exception("no Menu button");
+        await Click(menu.GlobalPosition + menu.Size / 2); await Frames(4);
+        if (!HasLabel(shell, "Game menu")) throw new Exception("a real click on Menu did not open the game menu");
+        var resume = FindButton(shell, b => b.Text == "Resume") ?? throw new Exception("no Resume button");
+        await Click(resume.GlobalPosition + resume.Size / 2); await Frames(4);
+        if (HasLabel(shell, "Game menu")) throw new Exception("a real click on Resume did not close the game menu");
+        Settings.PauseTriggers = savedTriggers;
+        shell.Navigate("Dashboard"); await Frames(3);
     }
 
     /// <summary>Drives the real UI with synthetic mouse and keyboard events: menu, country pick, start, shortcuts, map click.</summary>
@@ -225,8 +388,10 @@ public partial class SelfTest : Node
 
         // auto-pause is switched off here: on a slow machine the clock could otherwise run a month and stop itself between the two key presses
         int triggers = Settings.PauseTriggers; Settings.PauseTriggers = 0;
+        foreach (var d in Game.World.Decisions.ToList()) Game.Sim!.Resolve(d.Id, d.DefaultChoice);   // each run has its own seed: a random decision popup would swallow the key
+        shell.DismissModal(); await Frames(2);
         await Key(Godot.Key.Space); await Frames(2);
-        if (Game.Speed == 0) throw new Exception("Space did not start the clock");
+        if (Game.Speed == 0) throw new Exception($"Space did not start the clock (focus: {GetViewport().GuiGetFocusOwner()?.GetType().Name ?? "none"} '{FocusedButton()}', modal: {shell.HasModal}, default speed {Settings.DefaultSpeed})");
         await Key(Godot.Key.Space); await Frames(2);
         if (Game.Speed != 0) throw new Exception("Space did not pause");
         Settings.PauseTriggers = triggers;
@@ -410,7 +575,9 @@ public partial class SelfTest : Node
         if (first.ScreenXOf(mk.X) is not float mx) throw new Exception("a marker month is outside the chart");
         var pr = first.PlotRect; await Hover(new Vector2(mx, pr.Position.Y + pr.Size.Y / 2)); await Frames(4); Shot(shots, "27_chart_marker_hover");
         EconGame.Ui.ChartPrefs.Set(24, true); await Frames(4);
-        if (annotated[0].ScreenXOf(Game.World.Month - 25) != null) throw new Exception("the two-year window still shows older months");
+        int lastRecorded = Game.History(Game.Player.Id).Last().Month;   // history is recorded quarterly, so the current month need not be on it
+        if (annotated[0].ScreenXOf(lastRecorded - 25) != null) throw new Exception($"the two-year window still shows older months (month {Game.World.Month}, last recorded {lastRecorded})");
+        if (annotated[0].ScreenXOf(lastRecorded - 12) == null) throw new Exception("the two-year window dropped months it should still show");
         await Hover(new Vector2(first.PlotRect.Position.X + first.PlotRect.Size.X * 0.6f, first.PlotRect.Position.Y + 40)); await Frames(4); Shot(shots, "27b_chart_two_years_synced");
         await Hover(new Vector2(5, 5)); EconGame.Ui.ChartPrefs.Set(0, true); await Frames(2);
 

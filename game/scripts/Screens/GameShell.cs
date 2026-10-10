@@ -42,6 +42,7 @@ public partial class GameShell : Control
     readonly Dictionary<string, Button> _feedChips = new();
     double _acc, _uiAcc; bool _dirty = true; int _feedCount = -1;
     Control? _modal;
+    public bool HasModal => _modal != null;
     readonly VBoxContainer _toasts = new();
     Label _ticker = new();
     int _lastHintMonth = -1;

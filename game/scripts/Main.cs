@@ -18,11 +18,6 @@ public partial class Main : Control
         {
             Diagnostics.Startup($"Godot {Engine.GetVersionInfo()["string"]} · {OS.GetName()} · {DisplayServer.GetName()} · {RenderingServer.GetVideoAdapterName()} · {RenderingServer.GetVideoAdapterApiVersion()}");
             Settings.Load(); Diagnostics.Install();
-            // keyboard focus ring behaves like :focus-visible: a mouse click never leaves a lingering ring on a button
-            GetViewport().GuiFocusChanged += c =>
-            {
-                if (c is BaseButton && Input.IsMouseButtonPressed(MouseButton.Left)) c.CallDeferred(Control.MethodName.ReleaseFocus);
-            };
             Theme = AppTheme.Build();
             SetAnchorsPreset(LayoutPreset.FullRect);
             _ground = new ColorRect { Color = Pal.Bg };
@@ -40,6 +35,22 @@ public partial class Main : Control
             GD.PrintErr("Startup failed: " + e);
             ShowStartupError(e);
         }
+    }
+
+    /// <summary>
+    /// The keyboard focus ring behaves like :focus-visible: a finished mouse click leaves no lingering ring on a button. This is done after the
+    /// mouse button is released, never on the press: a BaseButton that loses focus while it is being pressed cancels the press, so the click
+    /// would never arrive (the menu highlights but nothing opens). The deferred call runs after the release has been handled and the button has
+    /// emitted its signal.
+    /// </summary>
+    public override void _Input(InputEvent e)
+    {
+        if (e is InputEventMouseButton { Pressed: false, ButtonIndex: MouseButton.Left }) CallDeferred(MethodName.DropClickFocus);
+    }
+
+    void DropClickFocus()
+    {
+        if (GetViewport().GuiGetFocusOwner() is BaseButton b) b.ReleaseFocus();
     }
 
     /// <summary>Plain-control error page so a startup failure is visible instead of the window silently closing.</summary>
